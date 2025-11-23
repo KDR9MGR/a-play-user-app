@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "514266799058",
+    "project_id": "a-play-33c63",
+    "storage_bucket": "a-play-33c63.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514266799058:android:70410243731e2af3e1c60b",
+        "android_client_info": {
+          "package_name": "com.aplay.a_play"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1nE0p0GEHHvu0z4cDuxN_dyVn20uNpeE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514266799058:android:6793caaaddbbe687e1c60b",
+        "android_client_info": {
+          "package_name": "com.example.a_play"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1nE0p0GEHHvu0z4cDuxN_dyVn20uNpeE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

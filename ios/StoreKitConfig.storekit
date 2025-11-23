@@ -1,0 +1,163 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "E5E0DF1D",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6745157402",
+    "_askToBuyEnabled" : true,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : true,
+    "_developerTeamID" : "TUKQ9KBCN8",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 785547492.67748797,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : true,
+    "_storefront" : "GHA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21809726",
+      "localizations" : [
+
+      ],
+      "name" : "Go Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "19.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6754169897",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "3 Months Benefits As premium user",
+              "displayName" : "3 Month's Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "SUB3M",
+          "recurringSubscriptionPeriod" : "P3M",
+          "referenceName" : "3 Months Bundle",
+          "subscriptionGroupID" : "21809726",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "89.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6754815444",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Premium Access to Events",
+              "displayName" : "Annual Ultimate",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "SUBANNU",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual Ultimate",
+          "subscriptionGroupID" : "21809726",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "6754169848",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Early Events Access",
+              "displayName" : "Montly Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "SUB1M",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Premium",
+          "subscriptionGroupID" : "21809726",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "1.99",
+          "familyShareable" : false,
+          "groupNumber" : 4,
+          "internalID" : "6754169882",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Fun Week",
+              "displayName" : "Weekly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "SUB7DAYS",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Weekly Access",
+          "subscriptionGroupID" : "21809726",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

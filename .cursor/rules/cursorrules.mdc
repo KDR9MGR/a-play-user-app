@@ -1,0 +1,71 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+{
+  "rules": [
+    {
+      "name": "Flutter Riverpod Architecture",
+      "description": "Enforce clean architecture using Riverpod and Supabase.",
+      "applyTo": "all",
+      "instructions": [
+        "Use 'Freezed' for all data models and place them in 'lib/features/<feature_name>/model/'.",
+        "Implement API interactions within services located at 'lib/features/<feature_name>/service/'.",
+        "Manage state using 'AsyncNotifier' classes in 'lib/features/<feature_name>/controller/'.",
+        "Expose providers through 'AsyncNotifierProvider' in 'lib/features/<feature_name>/provider/'.",
+        "Design UI components in 'lib/features/<feature_name>/view/' using 'AsyncValue.when' for state handling.",
+        "Utilize 'ref.invalidate()' to refresh providers after data mutations.",
+        "Avoid placing business logic directly in UI components; delegate to controllers."
+      ]
+    },
+    {
+      "name": "Coding Standards",
+      "description": "Maintain consistent coding style across the project.",
+      "applyTo": "all",
+      "instructions": [
+        "Use 2 spaces for indentation.",
+        "Follow Dart's naming conventions: camelCase for variables and methods, PascalCase for classes.",
+        "Write concise and meaningful comments where necessary.",
+        "Organize imports: Dart packages, third-party packages, then project files.",
+        "Avoid using deprecated or experimental APIs without proper justification."
+      ]
+    },
+    {
+      "name": "Supabase Integration",
+      "description": "Standardize Supabase usage within services.",
+      "applyTo": "lib/features/**/service/*.dart",
+      "instructions": [
+        "Initialize Supabase client using 'Supabase.instance.client'.",
+        "Handle exceptions using try-catch blocks and provide meaningful error messages.",
+        "Return strongly typed models from API calls.",
+        "Avoid direct Supabase calls in UI or controller layers."
+      ]
+    },
+    {
+      "name": "State Management",
+      "description": "Best practices for managing state with Riverpod.",
+      "applyTo": "lib/features/**/controller/*.dart",
+      "instructions": [
+        "Extend 'AsyncNotifier<T>' for state classes.",
+        "Implement 'build()' method for initial data fetching.",
+        "Use separate methods for handling data mutations.",
+        "Set state using 'AsyncData', 'AsyncLoading', and 'AsyncError' appropriately.",
+        "Avoid long-running operations in the 'build()' method."
+      ]
+    },
+    {
+      "name": "UI Development",
+      "description": "Guidelines for building UI components.",
+      "applyTo": "lib/features/**/view/*.dart",
+      "instructions": [
+        "Use 'ref.watch(provider)' to access state within widgets.",
+        "Handle different states using 'AsyncValue.when' method.",
+        "Keep widgets small and focused; extract reusable components.",
+        "Avoid embedding business logic within UI components.",
+        "Use shared widgets from 'lib/shared/widgets/' when applicable."
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,245 @@
+import 'package:a_play/features/widgets/squircle_container.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../widgets/section_title.dart';
+import '../providers/home_event_provider.dart';
+
+class FilteredEventsSection extends ConsumerStatefulWidget {
+  final String selectedTimeFilter;
+  
+  const FilteredEventsSection({
+    super.key,
+    required this.selectedTimeFilter,
+  });
+
+  @override
+  ConsumerState<FilteredEventsSection> createState() => _FilteredEventsSectionState();
+}
+
+class _FilteredEventsSectionState extends ConsumerState<FilteredEventsSection> {
+  @override
+  Widget build(BuildContext context) {
+    final eventsAsync = ref.watch(upcomingEventsProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Title
+        const Padding(
+          padding: EdgeInsets.fromLTRB(0, 0, 16, 8),
+          child: SectionTitle(
+            title: 'Upcoming Events',
+          ),
+        ),
+        
+        // Events Grid/List
+        eventsAsync.when(
+          loading: () => const SizedBox(
+            height: 200,
+            child: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          ),
+          error: (error, stackTrace) => Container(
+            height: 200,
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error, color: Colors.red, size: 48),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Failed to load events',
+                    style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    error.toString(),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          data: (events) {
+            final filteredEvents = _filterEventsByTime(events);
+            
+            if (filteredEvents.isEmpty) {
+              return Container(
+                height: 200,
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.event_busy, color: Colors.grey[600], size: 48),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No events found',
+                        style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Try selecting a different time filter',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            // Display events in a responsive grid (iPad Air fix)
+            final screenWidth = MediaQuery.of(context).size.width;
+            final crossAxisCount = screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2);
+
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.70,
+                ),
+                itemCount: filteredEvents.length > 6 ? 6 : filteredEvents.length, // Limit to 6 events
+                itemBuilder: (context, index) {
+                  final event = filteredEvents[index];
+                  return _buildEventCard(event);
+                },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  List<dynamic> _filterEventsByTime(List<dynamic> events) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final nextWeek = today.add(const Duration(days: 7));
+
+    return events.where((event) {
+      try {
+        final eventDate = DateTime.parse(event['start_date']);
+        final eventDateOnly = DateTime(eventDate.year, eventDate.month, eventDate.day);
+
+        switch (widget.selectedTimeFilter) {
+          case 'today':
+            return eventDateOnly == today;
+          case 'tomorrow':
+            return eventDateOnly == tomorrow;
+          case 'this_week':
+            return eventDateOnly.isAfter(today.subtract(const Duration(days: 1))) && 
+                   eventDateOnly.isBefore(nextWeek);
+          default:
+            return true;
+        }
+      } catch (e) {
+        return false;
+      }
+    }).toList();
+  }
+
+  Widget _buildEventCard(Map<String, dynamic> event) {
+    return SquircleContainer(
+      radius: 45,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.grey[900],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Event Image
+            Expanded(
+              flex: 3,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                  image: event['cover_image'] != null
+                      ? DecorationImage(
+                          image: NetworkImage(event['cover_image']),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                  color: event['cover_image'] == null ? Colors.grey[800] : null,
+                ),
+                child: event['cover_image'] == null
+                    ? const Center(
+                        child: Icon(
+                          Icons.event,
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+            
+            // Event Details
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event['title'] ?? 'Event Title',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      event['location'] ?? 'Location',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    Text(
+                      _formatDate(event['start_date']),
+                      style: TextStyle(
+                        color: Colors.grey[300],
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String? dateString) {
+    if (dateString == null) return 'Date TBA';
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return 'Date TBA';
+    }
+  }
+} 
