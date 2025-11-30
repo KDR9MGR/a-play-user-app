@@ -37,7 +37,25 @@ mixin _$FeedModel {
   @JsonKey(name: 'created_at')
   DateTime get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+  DateTime get updatedAt =>
+      throw _privateConstructorUsedError; // New fields for feed improvements
+  @JsonKey(name: 'expires_at')
+  DateTime? get expiresAt =>
+      throw _privateConstructorUsedError; // Post expiration date
+  @JsonKey(name: 'duration_hours')
+  int get durationHours =>
+      throw _privateConstructorUsedError; // Post active duration (24hrs, 168hrs=1week, 720hrs=1month)
+  @JsonKey(name: 'is_following_author')
+  bool get isFollowingAuthor =>
+      throw _privateConstructorUsedError; // User following the blogger
+  @JsonKey(name: 'author_name')
+  String? get authorName =>
+      throw _privateConstructorUsedError; // Blogger's display name
+  @JsonKey(name: 'author_avatar')
+  String? get authorAvatar =>
+      throw _privateConstructorUsedError; // Blogger's profile picture
+  @JsonKey(name: 'follower_count')
+  int get followerCount => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -60,7 +78,13 @@ abstract class $FeedModelCopyWith<$Res> {
       @JsonKey(name: 'event_id') String? eventId,
       @JsonKey(name: 'is_liked') bool isLiked,
       @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'updated_at') DateTime updatedAt,
+      @JsonKey(name: 'expires_at') DateTime? expiresAt,
+      @JsonKey(name: 'duration_hours') int durationHours,
+      @JsonKey(name: 'is_following_author') bool isFollowingAuthor,
+      @JsonKey(name: 'author_name') String? authorName,
+      @JsonKey(name: 'author_avatar') String? authorAvatar,
+      @JsonKey(name: 'follower_count') int followerCount});
 }
 
 /// @nodoc
@@ -86,6 +110,12 @@ class _$FeedModelCopyWithImpl<$Res, $Val extends FeedModel>
     Object? isLiked = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? expiresAt = freezed,
+    Object? durationHours = null,
+    Object? isFollowingAuthor = null,
+    Object? authorName = freezed,
+    Object? authorAvatar = freezed,
+    Object? followerCount = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -128,6 +158,30 @@ class _$FeedModelCopyWithImpl<$Res, $Val extends FeedModel>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      expiresAt: freezed == expiresAt
+          ? _value.expiresAt
+          : expiresAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      durationHours: null == durationHours
+          ? _value.durationHours
+          : durationHours // ignore: cast_nullable_to_non_nullable
+              as int,
+      isFollowingAuthor: null == isFollowingAuthor
+          ? _value.isFollowingAuthor
+          : isFollowingAuthor // ignore: cast_nullable_to_non_nullable
+              as bool,
+      authorName: freezed == authorName
+          ? _value.authorName
+          : authorName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      authorAvatar: freezed == authorAvatar
+          ? _value.authorAvatar
+          : authorAvatar // ignore: cast_nullable_to_non_nullable
+              as String?,
+      followerCount: null == followerCount
+          ? _value.followerCount
+          : followerCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -150,7 +204,13 @@ abstract class _$$FeedModelImplCopyWith<$Res>
       @JsonKey(name: 'event_id') String? eventId,
       @JsonKey(name: 'is_liked') bool isLiked,
       @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'updated_at') DateTime updatedAt,
+      @JsonKey(name: 'expires_at') DateTime? expiresAt,
+      @JsonKey(name: 'duration_hours') int durationHours,
+      @JsonKey(name: 'is_following_author') bool isFollowingAuthor,
+      @JsonKey(name: 'author_name') String? authorName,
+      @JsonKey(name: 'author_avatar') String? authorAvatar,
+      @JsonKey(name: 'follower_count') int followerCount});
 }
 
 /// @nodoc
@@ -174,6 +234,12 @@ class __$$FeedModelImplCopyWithImpl<$Res>
     Object? isLiked = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? expiresAt = freezed,
+    Object? durationHours = null,
+    Object? isFollowingAuthor = null,
+    Object? authorName = freezed,
+    Object? authorAvatar = freezed,
+    Object? followerCount = null,
   }) {
     return _then(_$FeedModelImpl(
       id: null == id
@@ -216,6 +282,30 @@ class __$$FeedModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      expiresAt: freezed == expiresAt
+          ? _value.expiresAt
+          : expiresAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      durationHours: null == durationHours
+          ? _value.durationHours
+          : durationHours // ignore: cast_nullable_to_non_nullable
+              as int,
+      isFollowingAuthor: null == isFollowingAuthor
+          ? _value.isFollowingAuthor
+          : isFollowingAuthor // ignore: cast_nullable_to_non_nullable
+              as bool,
+      authorName: freezed == authorName
+          ? _value.authorName
+          : authorName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      authorAvatar: freezed == authorAvatar
+          ? _value.authorAvatar
+          : authorAvatar // ignore: cast_nullable_to_non_nullable
+              as String?,
+      followerCount: null == followerCount
+          ? _value.followerCount
+          : followerCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -233,7 +323,13 @@ class _$FeedModelImpl extends _FeedModel with DiagnosticableTreeMixin {
       @JsonKey(name: 'event_id') this.eventId,
       @JsonKey(name: 'is_liked') this.isLiked = false,
       @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') required this.updatedAt})
+      @JsonKey(name: 'updated_at') required this.updatedAt,
+      @JsonKey(name: 'expires_at') this.expiresAt,
+      @JsonKey(name: 'duration_hours') this.durationHours = 24,
+      @JsonKey(name: 'is_following_author') this.isFollowingAuthor = false,
+      @JsonKey(name: 'author_name') this.authorName,
+      @JsonKey(name: 'author_avatar') this.authorAvatar,
+      @JsonKey(name: 'follower_count') this.followerCount = 0})
       : super._();
 
   factory _$FeedModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -267,10 +363,34 @@ class _$FeedModelImpl extends _FeedModel with DiagnosticableTreeMixin {
   @override
   @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
+// New fields for feed improvements
+  @override
+  @JsonKey(name: 'expires_at')
+  final DateTime? expiresAt;
+// Post expiration date
+  @override
+  @JsonKey(name: 'duration_hours')
+  final int durationHours;
+// Post active duration (24hrs, 168hrs=1week, 720hrs=1month)
+  @override
+  @JsonKey(name: 'is_following_author')
+  final bool isFollowingAuthor;
+// User following the blogger
+  @override
+  @JsonKey(name: 'author_name')
+  final String? authorName;
+// Blogger's display name
+  @override
+  @JsonKey(name: 'author_avatar')
+  final String? authorAvatar;
+// Blogger's profile picture
+  @override
+  @JsonKey(name: 'follower_count')
+  final int followerCount;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'FeedModel(id: $id, userId: $userId, content: $content, imageUrl: $imageUrl, likeCount: $likeCount, commentCount: $commentCount, eventId: $eventId, isLiked: $isLiked, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'FeedModel(id: $id, userId: $userId, content: $content, imageUrl: $imageUrl, likeCount: $likeCount, commentCount: $commentCount, eventId: $eventId, isLiked: $isLiked, createdAt: $createdAt, updatedAt: $updatedAt, expiresAt: $expiresAt, durationHours: $durationHours, isFollowingAuthor: $isFollowingAuthor, authorName: $authorName, authorAvatar: $authorAvatar, followerCount: $followerCount)';
   }
 
   @override
@@ -287,7 +407,13 @@ class _$FeedModelImpl extends _FeedModel with DiagnosticableTreeMixin {
       ..add(DiagnosticsProperty('eventId', eventId))
       ..add(DiagnosticsProperty('isLiked', isLiked))
       ..add(DiagnosticsProperty('createdAt', createdAt))
-      ..add(DiagnosticsProperty('updatedAt', updatedAt));
+      ..add(DiagnosticsProperty('updatedAt', updatedAt))
+      ..add(DiagnosticsProperty('expiresAt', expiresAt))
+      ..add(DiagnosticsProperty('durationHours', durationHours))
+      ..add(DiagnosticsProperty('isFollowingAuthor', isFollowingAuthor))
+      ..add(DiagnosticsProperty('authorName', authorName))
+      ..add(DiagnosticsProperty('authorAvatar', authorAvatar))
+      ..add(DiagnosticsProperty('followerCount', followerCount));
   }
 
   @override
@@ -309,13 +435,41 @@ class _$FeedModelImpl extends _FeedModel with DiagnosticableTreeMixin {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.expiresAt, expiresAt) ||
+                other.expiresAt == expiresAt) &&
+            (identical(other.durationHours, durationHours) ||
+                other.durationHours == durationHours) &&
+            (identical(other.isFollowingAuthor, isFollowingAuthor) ||
+                other.isFollowingAuthor == isFollowingAuthor) &&
+            (identical(other.authorName, authorName) ||
+                other.authorName == authorName) &&
+            (identical(other.authorAvatar, authorAvatar) ||
+                other.authorAvatar == authorAvatar) &&
+            (identical(other.followerCount, followerCount) ||
+                other.followerCount == followerCount));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, userId, content, imageUrl,
-      likeCount, commentCount, eventId, isLiked, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      userId,
+      content,
+      imageUrl,
+      likeCount,
+      commentCount,
+      eventId,
+      isLiked,
+      createdAt,
+      updatedAt,
+      expiresAt,
+      durationHours,
+      isFollowingAuthor,
+      authorName,
+      authorAvatar,
+      followerCount);
 
   @JsonKey(ignore: true)
   @override
@@ -342,7 +496,13 @@ abstract class _FeedModel extends FeedModel {
           @JsonKey(name: 'event_id') final String? eventId,
           @JsonKey(name: 'is_liked') final bool isLiked,
           @JsonKey(name: 'created_at') required final DateTime createdAt,
-          @JsonKey(name: 'updated_at') required final DateTime updatedAt}) =
+          @JsonKey(name: 'updated_at') required final DateTime updatedAt,
+          @JsonKey(name: 'expires_at') final DateTime? expiresAt,
+          @JsonKey(name: 'duration_hours') final int durationHours,
+          @JsonKey(name: 'is_following_author') final bool isFollowingAuthor,
+          @JsonKey(name: 'author_name') final String? authorName,
+          @JsonKey(name: 'author_avatar') final String? authorAvatar,
+          @JsonKey(name: 'follower_count') final int followerCount}) =
       _$FeedModelImpl;
   const _FeedModel._() : super._();
 
@@ -377,6 +537,24 @@ abstract class _FeedModel extends FeedModel {
   @override
   @JsonKey(name: 'updated_at')
   DateTime get updatedAt;
+  @override // New fields for feed improvements
+  @JsonKey(name: 'expires_at')
+  DateTime? get expiresAt;
+  @override // Post expiration date
+  @JsonKey(name: 'duration_hours')
+  int get durationHours;
+  @override // Post active duration (24hrs, 168hrs=1week, 720hrs=1month)
+  @JsonKey(name: 'is_following_author')
+  bool get isFollowingAuthor;
+  @override // User following the blogger
+  @JsonKey(name: 'author_name')
+  String? get authorName;
+  @override // Blogger's display name
+  @JsonKey(name: 'author_avatar')
+  String? get authorAvatar;
+  @override // Blogger's profile picture
+  @JsonKey(name: 'follower_count')
+  int get followerCount;
   @override
   @JsonKey(ignore: true)
   _$$FeedModelImplCopyWith<_$FeedModelImpl> get copyWith =>

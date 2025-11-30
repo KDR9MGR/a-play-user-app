@@ -34,35 +34,94 @@ class EventSupabaseService {
   final supabase = Supabase.instance.client;
 
   Future<List<ServiceEventModel>> getEvents() async {
-    final now = DateTime.now().toIso8601String();
-    final response = await supabase
-        .from('events')
-        .select('*')
-        .gt('end_date', now)
-        .order('start_date');
-    return response.map((json) => ServiceEventModel.fromJson(json)).toList();
+    try {
+      final now = DateTime.now().toIso8601String();
+      final response = await supabase
+          .from('events')
+          .select('*')
+          .gt('end_date', now)
+          .order('start_date')
+          .limit(50) // Limit results for better performance
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              if (kDebugMode) {
+                print('Timeout fetching events');
+              }
+              throw Exception('NETWORK_TIMEOUT');
+            },
+          );
+      return response.map((json) => ServiceEventModel.fromJson(json)).toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching events: $e');
+      }
+      // Throw specific error types for better UI handling
+      if (e.toString().contains('NETWORK_TIMEOUT') || e.toString().contains('SocketException')) {
+        throw Exception('NETWORK_ERROR');
+      }
+      rethrow;
+    }
   }
 
   Future<List<CategoryModel>> getCategories() async {
-    final response = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-    return response.map((json) => CategoryModel.fromJson(json)).toList();
+    try {
+      final response = await supabase
+          .from('categories')
+          .select('*')
+          .order('name')
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              if (kDebugMode) {
+                print('Timeout fetching categories');
+              }
+              throw Exception('NETWORK_TIMEOUT');
+            },
+          );
+      return response.map((json) => CategoryModel.fromJson(json)).toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching categories: $e');
+      }
+      // Throw specific error types for better UI handling
+      if (e.toString().contains('NETWORK_TIMEOUT') || e.toString().contains('SocketException')) {
+        throw Exception('NETWORK_ERROR');
+      }
+      rethrow;
+    }
   }
 
   Future<List<ServiceEventModel>> getEventsByCategory(String categoryName) async {
     try {
       final now = DateTime.now().toIso8601String();
-      
+
+      if (kDebugMode) {
+        print('Fetching events for category: $categoryName');
+      }
+
       if (categoryName.toLowerCase() == 'all') {
-        // Get all active events
+        // Get all active events - NO authentication required (Apple Guideline 5.1.1)
         final eventsResponse = await supabase
             .from('events')
             .select('*')
             .gt('end_date', now)
-            .order('start_date');
-        
+            .order('start_date')
+            .limit(50) // Limit results to improve performance on iPad
+            .timeout(
+              const Duration(seconds: 10),
+              onTimeout: () {
+                if (kDebugMode) {
+                  print('Timeout fetching events');
+                }
+                throw Exception('NETWORK_TIMEOUT');
+              },
+            );
+
+        if (kDebugMode) {
+          print('Fetched ${eventsResponse.length} events');
+        }
+
         // Convert to ServiceEventModel with category_name as null
         return eventsResponse.map((json) {
           final eventJson = Map<String, dynamic>.from(json);
@@ -70,51 +129,100 @@ class EventSupabaseService {
           return ServiceEventModel.fromJson(eventJson);
         }).toList();
       }
-      
+
       // For specific categories, use a direct SQL approach through RPC or create a view
       // First, get the category ID
       final categoryResponse = await supabase
           .from('categories')
           .select('id')
           .eq('name', categoryName)
-          .single();
-      
+          .maybeSingle() // Use maybeSingle to handle missing categories gracefully
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              if (kDebugMode) {
+                print('Timeout fetching category');
+              }
+              throw Exception('NETWORK_TIMEOUT');
+            },
+          );
+
+      if (categoryResponse == null) {
+        if (kDebugMode) {
+          print('Category not found: $categoryName');
+        }
+        return []; // Empty result is valid for missing categories
+      }
+
       final categoryId = categoryResponse['id'];
-      
+
       // Get event IDs for this category
       final eventCategoryResponse = await supabase
           .from('event_categories')
           .select('event_id')
-          .eq('category_id', categoryId);
-      
+          .eq('category_id', categoryId)
+          .limit(50) // Limit results
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              if (kDebugMode) {
+                print('Timeout fetching event categories');
+              }
+              throw Exception('NETWORK_TIMEOUT');
+            },
+          );
+
       final eventIds = eventCategoryResponse.map((item) => item['event_id']).toList();
-      
+
       if (eventIds.isEmpty) {
-        return [];
+        if (kDebugMode) {
+          print('No events found for category: $categoryName');
+        }
+        return []; // Empty result is valid
       }
-      
+
       // Get active events with these IDs
       final eventsResponse = await supabase
           .from('events')
           .select('*')
           .inFilter('id', eventIds)
           .gt('end_date', now)
-          .order('start_date');
-      
+          .order('start_date')
+          .limit(50) // Limit results
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              if (kDebugMode) {
+                print('Timeout fetching events');
+              }
+              throw Exception('NETWORK_TIMEOUT');
+            },
+          );
+
+      if (kDebugMode) {
+        print('Fetched ${eventsResponse.length} events for category $categoryName');
+      }
+
       // Convert to ServiceEventModel with category_name
       return eventsResponse.map((json) {
         final eventJson = Map<String, dynamic>.from(json);
         eventJson['category_name'] = categoryName;
         return ServiceEventModel.fromJson(eventJson);
       }).toList();
-      
+
     } catch (error) {
-      // Return empty list instead of crashing the UI (fixes iPad Air content loading issue)
-      // This ensures the app remains usable even if one category fails to load
+      // Throw specific errors instead of silently returning empty list
+      // This allows UI to show proper error messages (fixes iPad Air error display)
       if (kDebugMode) {
-        print('Error fetching events by category: $error');
+        print('Error fetching events by category $categoryName: $error');
       }
-      return [];
+      // Check for network-related errors
+      if (error.toString().contains('NETWORK_TIMEOUT') ||
+          error.toString().contains('SocketException') ||
+          error.toString().contains('Connection reset')) {
+        throw Exception('NETWORK_ERROR');
+      }
+      rethrow;
     }
   }
 }

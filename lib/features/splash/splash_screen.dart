@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
+import '../authentication/presentation/providers/auth_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -90,15 +91,26 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       // Add small delay to ensure smooth transition
       await Future.delayed(const Duration(milliseconds: 300));
 
-      // Always navigate to home - guest browsing is allowed (Apple App Store requirement 5.1.1)
-      // The app will show login prompts for account-based features (Bookings, Concierge, Feed)
-      if (mounted) context.go('/home');
+      // Check authentication state
+      final authState = ref.read(authStateProvider);
+      final isAuthenticated = authState.value != null;
+
+      if (!mounted) return;
+
+      // Navigate based on auth state:
+      // - If authenticated: go to home
+      // - If not authenticated: go to sign-in (where user can also choose guest access)
+      if (isAuthenticated) {
+        context.go('/home');
+      } else {
+        context.go('/sign-in');
+      }
     } catch (e) {
       debugPrint('Error in splash screen: $e');
       if (!mounted) return;
 
-      // Navigate to home even on error - guest browsing should work
-      if (mounted) context.go('/home');
+      // On error, navigate to sign-in screen for safety
+      context.go('/sign-in');
     }
   }
 

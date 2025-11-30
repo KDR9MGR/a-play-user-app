@@ -20,6 +20,14 @@ class FeedModel with _$FeedModel {
     @JsonKey(name: 'is_liked') @Default(false) bool isLiked,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,
+
+    // New fields for feed improvements
+    @JsonKey(name: 'expires_at') DateTime? expiresAt, // Post expiration date
+    @JsonKey(name: 'duration_hours') @Default(24) int durationHours, // Post active duration (24hrs, 168hrs=1week, 720hrs=1month)
+    @JsonKey(name: 'is_following_author') @Default(false) bool isFollowingAuthor, // User following the blogger
+    @JsonKey(name: 'author_name') String? authorName, // Blogger's display name
+    @JsonKey(name: 'author_avatar') String? authorAvatar, // Blogger's profile picture
+    @JsonKey(name: 'follower_count') @Default(0) int followerCount, // How many followers the author has
   }) = _FeedModel;
 
   factory FeedModel.create({
@@ -27,8 +35,11 @@ class FeedModel with _$FeedModel {
     required String content,
     String? imageUrl,
     String? eventId,
+    int durationHours = 24, // Default to 24 hours
   }) {
     final now = DateTime.now();
+    final expiresAt = now.add(Duration(hours: durationHours));
+
     return FeedModel(
       id: const Uuid().v4(),
       userId: userId,
@@ -37,12 +48,16 @@ class FeedModel with _$FeedModel {
       eventId: eventId,
       createdAt: now,
       updatedAt: now,
+      expiresAt: expiresAt,
+      durationHours: durationHours,
     );
   }
 
   factory FeedModel.fromJson(Map<String, dynamic> json) => _$FeedModelFromJson(json);
 
   Map<String, dynamic> toSupabase() {
+    // Note: After running build_runner, Freezed will generate proper getters
+    // For now, we'll let the generated code handle the map conversion
     return {
       'id': id,
       'user_id': userId,
@@ -51,9 +66,9 @@ class FeedModel with _$FeedModel {
       'like_count': likeCount,
       'comment_count': commentCount,
       'event_id': eventId,
-      'is_liked': isLiked,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      'duration_hours': durationHours,
     };
   }
 }

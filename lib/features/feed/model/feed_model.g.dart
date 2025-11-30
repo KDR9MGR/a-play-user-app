@@ -18,6 +18,14 @@ _$FeedModelImpl _$$FeedModelImplFromJson(Map<String, dynamic> json) =>
       isLiked: json['is_liked'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      expiresAt: json['expires_at'] == null
+          ? null
+          : DateTime.parse(json['expires_at'] as String),
+      durationHours: (json['duration_hours'] as num?)?.toInt() ?? 24,
+      isFollowingAuthor: json['is_following_author'] as bool? ?? false,
+      authorName: json['author_name'] as String?,
+      authorAvatar: json['author_avatar'] as String?,
+      followerCount: (json['follower_count'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$FeedModelImplToJson(_$FeedModelImpl instance) =>
@@ -32,6 +40,12 @@ Map<String, dynamic> _$$FeedModelImplToJson(_$FeedModelImpl instance) =>
       'is_liked': instance.isLiked,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
+      'expires_at': instance.expiresAt?.toIso8601String(),
+      'duration_hours': instance.durationHours,
+      'is_following_author': instance.isFollowingAuthor,
+      'author_name': instance.authorName,
+      'author_avatar': instance.authorAvatar,
+      'follower_count': instance.followerCount,
     };
 
 _$FeedCommentImpl _$$FeedCommentImplFromJson(Map<String, dynamic> json) =>

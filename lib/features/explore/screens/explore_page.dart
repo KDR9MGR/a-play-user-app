@@ -4,15 +4,11 @@ import 'package:a_play/features/booking/screens/event_details_screen.dart';
 import 'package:a_play/features/explore/model/service_event_model.dart';
 import 'package:a_play/features/explore/provider/explore_event_provider.dart';
 import 'package:a_play/features/explore/provider/category_provider.dart';
-import 'package:a_play/features/subscription/utils/subscription_utils.dart';
-import 'package:a_play/features/subscription/provider/subscription_provider.dart';
-import 'package:a_play/features/subscription/screens/paywall_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:go_router/go_router.dart';
 
 class ExplorePage extends ConsumerStatefulWidget {
   const ExplorePage({super.key});
@@ -304,41 +300,64 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                 if (filteredData.isEmpty) {
                   return SliverFillRemaining(
                     child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _selectedDate != null ? Iconsax.calendar_remove : Iconsax.search_status,
-                            color: AppColors.textTertiary,
-                            size: 48,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _selectedDate != null 
-                                ? 'No events found for ${DateFormat('MMM dd, yyyy').format(_selectedDate!)}'
-                                : _searchQuery.isNotEmpty 
-                                    ? 'No events found for "$_searchQuery"'
-                                    : 'No events found',
-                            style: const TextStyle(color: AppColors.textSecondary),
-                            textAlign: TextAlign.center,
-                          ),
-                          if (_selectedDate != null || _searchQuery.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _selectedDate = null;
-                                  _searchController.clear();
-                                  _searchQuery = '';
-                                });
-                              },
-                              child: const Text(
-                                'Clear filters',
-                                style: TextStyle(color: AppColors.orange),
-                              ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _selectedDate != null ? Iconsax.calendar_remove : Iconsax.search_status,
+                              color: AppColors.textTertiary,
+                              size: 48,
                             ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _selectedDate != null
+                                  ? 'No events found for ${DateFormat('MMM dd, yyyy').format(_selectedDate!)}'
+                                  : _searchQuery.isNotEmpty
+                                      ? 'No events found for "$_searchQuery"'
+                                      : 'No events available',
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _selectedDate != null || _searchQuery.isNotEmpty
+                                  ? 'Try adjusting your filters to see more events'
+                                  : 'Check back soon for upcoming events in Ghana',
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 14,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            if (_selectedDate != null || _searchQuery.isNotEmpty)
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedDate = null;
+                                    _searchController.clear();
+                                    _searchQuery = '';
+                                  });
+                                },
+                                icon: const Icon(Iconsax.refresh),
+                                label: const Text('Clear filters'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.orange,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 16,
+                                  ),
+                                ),
+                              ),
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   );
@@ -367,48 +386,65 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                   ),
                 );
               },
-              error: (error, stack) => SliverFillRemaining(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Iconsax.warning_2,
-                        color: AppColors.error,
-                        size: 48,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Something went wrong',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: AppColors.textPrimary,
-                                ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        error.toString(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
+              error: (error, stack) {
+                // Determine error type for better user feedback
+                final isNetworkError = error.toString().contains('NETWORK_ERROR') ||
+                    error.toString().contains('SocketException') ||
+                    error.toString().contains('Connection reset');
+
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            isNetworkError ? Iconsax.wifi_square : Iconsax.warning_2,
+                            color: AppColors.error,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            isNetworkError ? 'Connection Issue' : 'Unable to load events',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
                             ),
-                        textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            isNetworkError
+                              ? 'Please check your internet connection and try again'
+                              : 'Something went wrong. Please try again later.',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
+                            onPressed: () => ref
+                                .read(eventListProvider.notifier)
+                                .refreshEvents(),
+                            icon: const Icon(Iconsax.refresh),
+                            label: const Text('Retry'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.orange,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32,
+                                vertical: 16,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () => ref
-                            .read(eventListProvider.notifier)
-                            .refreshEvents(),
-                        icon: const Icon(Iconsax.refresh),
-                        label: const Text('Try Again'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.orange,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
               loading: () => const SliverFillRemaining(
                 child: Center(
                   child: CircularProgressIndicator(
@@ -424,251 +460,166 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   }
 
   Widget _buildEventCard(BuildContext context, ServiceEventModel event) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final hasPremiumAccess = SubscriptionUtils.hasPremiumAccess(ref);
-        final isFeaturedEvent = event.title.toLowerCase().contains('featured') || 
-                              event.description.toLowerCase().contains('featured');
-        final canAccess = hasPremiumAccess || isFeaturedEvent;
-        
-        return GestureDetector(
-          onTap: () async {
-            if (!canAccess) {
-              // Show paywall for non-premium content
-              await SubscriptionUtils.requirePremiumAccess(
-                context,
-                ref,
-                featureName: 'Explore Events',
-              );
-              return;
-            }
-            
-            final eventToPass = EventModel(
-              id: event.id,
-              title: event.title,
-              description: event.description,
-              coverImage: event.coverImage,
-              startDate: DateTime.parse(event.startDate),
-              endDate: DateTime.parse(event.endDate),
-              location: event.location,
-              capacity: 0, // Default value, as it's not in ServiceEventModel
-              status: 'active', // Default value
-              clubId: event.clubId ?? '', // Handle nullable clubId
-              price: 0.0, // Default value
-              createdAt: DateTime.now(), // Default value
-              updatedAt: DateTime.now(), // Default value
-            );
+    // Apple App Store Guideline 5.1.1: Allow explore without forcing login or premium
+    // All events should be viewable without requiring authentication or subscription
+    return GestureDetector(
+      onTap: () {
+        // iPad Air crash fix: Add try-catch to prevent app freeze on tap errors
+        try {
+          final eventToPass = EventModel(
+            id: event.id,
+            title: event.title,
+            description: event.description,
+            coverImage: event.coverImage,
+            startDate: DateTime.parse(event.startDate),
+            endDate: DateTime.parse(event.endDate),
+            location: event.location,
+            capacity: 0, // Default value, as it's not in ServiceEventModel
+            status: 'active', // Default value
+            clubId: event.clubId ?? '', // Handle nullable clubId
+            price: 0.0, // Default value
+            createdAt: DateTime.now(), // Default value
+            updatedAt: DateTime.now(), // Default value
+          );
 
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => EventDetailsScreen(event: eventToPass),
-              ),
-            );
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => EventDetailsScreen(event: eventToPass),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Event Image
-                    Expanded(
-                      flex: 3,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          ColorFiltered(
-                            colorFilter: canAccess 
-                                ? const ColorFilter.mode(
-                                    Colors.transparent, 
-                                    BlendMode.multiply,
-                                  )
-                                : ColorFilter.mode(
-                                    Colors.grey.withOpacity(0.6), 
-                                    BlendMode.saturation,
-                                  ),
-                            child: Image.network(
-                              event.coverImage,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: AppColors.surface,
-                                  child: const Center(
-                                    child: Icon(
-                                      Iconsax.gallery,
-                                      color: AppColors.textTertiary,
-                                      size: 32,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
+          );
+        } catch (e) {
+          // Show user-friendly error message instead of crashing
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unable to open event details. Please try again.'),
+              backgroundColor: AppColors.error,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Event Image
+            Expanded(
+              flex: 3,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    event.coverImage,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: AppColors.surface,
+                        child: const Center(
+                          child: Icon(
+                            Iconsax.gallery,
+                            color: AppColors.textTertiary,
+                            size: 32,
                           ),
-                          // Date badge
-                          Positioned(
-                            top: 8,
-                            left: 8,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: canAccess ? AppColors.orange : Colors.grey,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                _formatDate(event.startDate),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ),
-                          ),
-                          
-                          // Premium badge for featured events
-                          if (isFeaturedEvent)
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.orange,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'FEATURED',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 8,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    
-                    // Event Details
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              event.title,
-                              style: TextStyle(
-                                color: canAccess 
-                                    ? AppColors.textPrimary 
-                                    : AppColors.textPrimary.withOpacity(0.5),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              event.description,
-                              style: TextStyle(
-                                color: canAccess 
-                                    ? AppColors.textSecondary 
-                                    : AppColors.textSecondary.withOpacity(0.5),
-                                fontSize: 12,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const Spacer(),
-                            Row(
-                              children: [
-                                Icon(
-                                  Iconsax.location,
-                                  color: canAccess 
-                                      ? AppColors.textTertiary 
-                                      : AppColors.textTertiary.withOpacity(0.5),
-                                  size: 12,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    event.location,
-                                    style: TextStyle(
-                                      color: canAccess 
-                                          ? AppColors.textTertiary 
-                                          : AppColors.textTertiary.withOpacity(0.5),
-                                      fontSize: 10,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                // Lock overlay for non-premium events
-                if (!canAccess)
-                  Positioned.fill(
+                      );
+                    },
+                  ),
+                  // Date badge
+                  Positioned(
+                    top: 8,
+                    left: 8,
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                      child: const Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.lock,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Premium',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
+                      decoration: BoxDecoration(
+                        color: AppColors.orange,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        _formatDate(event.startDate),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
                         ),
                       ),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+
+            // Event Details
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      event.description,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const Icon(
+                          Iconsax.location,
+                          color: AppColors.textTertiary,
+                          size: 12,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            event.location,
+                            style: const TextStyle(
+                              color: AppColors.textTertiary,
+                              fontSize: 10,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

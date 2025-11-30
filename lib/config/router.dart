@@ -44,6 +44,7 @@ class RouterNotifier extends ChangeNotifier {
     final guestAllowedRoutes = [
       '/home',
       '/podcast',
+      '/explore',
     ];
 
     final isGuestAllowedRoute = guestAllowedRoutes.any(

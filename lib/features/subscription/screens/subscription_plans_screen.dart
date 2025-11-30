@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'dart:async';
 import '../provider/subscription_provider.dart';
@@ -160,7 +161,48 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                           (index) => _buildPageIndicator(index == _currentPage),
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 24),
+                      // Apple App Store Guideline 3.1.2: Display Terms of Use for subscriptions
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          children: [
+                            TextButton(
+                              onPressed: () async {
+                                final url = Uri.parse('https://www.aplayworld.com/terms-and-conditions');
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                                }
+                              },
+                              child: Text(
+                                'Terms & Conditions',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: AppTheme.textSecondary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                final url = Uri.parse('https://www.aplayworld.com/privacy-policy');
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                                }
+                              },
+                              child: Text(
+                                'Privacy Policy',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: AppTheme.textSecondary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   );
                 },

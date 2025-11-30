@@ -5,7 +5,9 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import '../model/feed_model.dart';
+import '../model/blogger_follow_model.dart';
 import '../provider/feed_provider.dart';
 import '../../chat/screens/chat_list_screen.dart';
 class FeedPage extends ConsumerStatefulWidget {
@@ -172,7 +174,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                 ),
               )
             : RefreshIndicator(
-                onRefresh: () => ref.read(feedProvider.notifier).fetchFeeds(),
+                onRefresh: () => ref.read(feedProvider.notifier).refreshWithRandomFeeds(),
                 child: ListView.builder(
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -184,7 +186,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                               padding: EdgeInsets.symmetric(vertical: 16.0),
                               child: Center(child: CircularProgressIndicator()),
                             )
-                          : const SizedBox.shrink();
+                          : const SizedBox(height: 60);
                     }
                     final feed = feedList[index];
                     return _buildFeedCard(context, feed, userAvatarUrl);
@@ -404,51 +406,93 @@ class _FeedPageState extends ConsumerState<FeedPage> {
   }
 
   Widget _buildFeedCard(BuildContext context, FeedModel feed, String avatarUrl) {
-    return Consumer (
+    final authorAvatar = feed.authorAvatar ??
+      'https://ui-avatars.com/api/?name=${Uri.encodeComponent(feed.authorName ?? 'User')}';
+    final authorName = feed.authorName ?? 'User';
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    final isOwnPost = currentUserId == feed.userId;
+
+    return Consumer(
       builder: (context, ref, child) {
-        final feedAsyncValue = ref.watch(feedProvider);
-        final commentState = ref.watch(commentProvider);
-        final selectedFeed = ref.watch(selectedFeedProvider);
-        final user = Supabase.instance.client.auth.currentUser;
-        final userAvatarUrl = user?.userMetadata?['avatar_url'] ?? 
-          'https://ui-avatars.com/api/?name=${Uri.encodeComponent(user?.email ?? 'User')}';
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Post Header
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(avatarUrl),
-                    radius: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'User',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                        Text(
-                          timeago.format(feed.createdAt),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Post Header with Follow Button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: CachedNetworkImageProvider(authorAvatar),
+                      radius: 18,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                authorName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              if (feed.followerCount > 0) ...[
+                                const SizedBox(width: 4),
+                                Text(
+                                  '• ${feed.followerCount} followers',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          Text(
+                            timeago.format(feed.createdAt),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Follow/Following Button
+                    if (!isOwnPost)
+                      TextButton(
+                        onPressed: () async {
+                          if (feed.isFollowingAuthor) {
+                            await ref.read(feedProvider.notifier).unfollowBlogger(feed.userId);
+                          } else {
+                            await ref.read(feedProvider.notifier).followBlogger(feed.userId);
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          backgroundColor: feed.isFollowingAuthor ? Colors.grey[800] : Theme.of(context).primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          feed.isFollowingAuthor ? 'Following' : 'Follow',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
             
             // Post Content
             if (feed.content.isNotEmpty)
@@ -462,7 +506,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                 ),
               ),
             
-            // Post Image or Event Image
+            // Post Image with proper aspect ratio (Instagram-style)
             FutureBuilder<String?>(
               future: _getImageUrl(feed),
               builder: (context, snapshot) {
@@ -471,13 +515,14 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                 }
                 final imageUrl = snapshot.data;
                 if (imageUrl == null || imageUrl.isEmpty) {
-                  return _buildImagePlaceholder();
+                  return const SizedBox.shrink();
                 }
-                
-                // Generate a stable cache key
-                final cacheKey = '${feed.id}_${imageUrl.split('?').first}';
-                
+
                 return GestureDetector(
+                  onDoubleTap: () {
+                    // Double tap to like (Instagram-style)
+                    ref.read(feedProvider.notifier).toggleLike(feed.id);
+                  },
                   onTap: () {
                     // Show image in full screen
                     Navigator.of(context).push(
@@ -508,24 +553,13 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                       ),
                     );
                   },
-                  child: RepaintBoundary(
+                  child: AspectRatio(
+                    aspectRatio: 1.0, // Square images like Instagram
                     child: Hero(
                       tag: 'feed_image_${feed.id}',
                       child: CachedNetworkImage(
-                        key: ValueKey(cacheKey),
                         imageUrl: imageUrl,
                         fit: BoxFit.cover,
-                        width: double.infinity,
-                        maxHeightDiskCache: 1000,
-                        fadeInDuration: const Duration(milliseconds: 300),
-                        cacheKey: cacheKey,
-                        memCacheWidth: MediaQuery.of(context).size.width.toInt(),
-                        memCacheHeight: (MediaQuery.of(context).size.width * 9 / 9).toInt(),
-                        placeholderFadeInDuration: const Duration(milliseconds: 300),
-                        httpHeaders: const {
-                          'Accept': 'image/jpeg,image/png,image/gif,image/webp',
-                          'Cache-Control': 'max-age=31536000',
-                        },
                         placeholder: (context, url) => _buildImagePlaceholder(loading: true),
                         errorWidget: (context, url, error) {
                           debugPrint('Error loading image: $error');
@@ -538,125 +572,130 @@ class _FeedPageState extends ConsumerState<FeedPage> {
               },
             ),
             
-            // Post Actions
+            // Post Actions (Instagram-style)
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 children: [
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(24),
-                      onTap: () {
-                        ref.read(feedProvider.notifier).toggleLike(feed.id);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Icon(
-                              feed.isLiked ? Icons.favorite : Icons.favorite_border,
-                              color: feed.isLiked ? Colors.red : Colors.white,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${feed.likeCount}',
-                              style: TextStyle(
-                                fontWeight: feed.isLiked ? FontWeight.bold : FontWeight.normal,
-                                color: feed.isLiked ? Colors.red : Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                  IconButton(
+                    icon: Icon(
+                      feed.isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: feed.isLiked ? Colors.red : null,
+                      size: 28,
                     ),
+                    onPressed: () {
+                      ref.read(feedProvider.notifier).toggleLike(feed.id);
+                    },
                   ),
-                  const SizedBox(width: 16),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-            
-                      borderRadius: BorderRadius.circular(24),
-                      onTap: () {
-                        ref.read(selectedFeedProvider.notifier).state = feed;
-                        ref.read(commentProvider.notifier).fetchComments(feed.id);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.chat_bubble_outline,
-                              color: Colors.white,
-                              size: 20,
+                  IconButton(
+                    icon: const Icon(Icons.chat_bubble_outline, size: 26),
+                    onPressed: () {
+                      ref.read(selectedFeedProvider.notifier).state = feed;
+                      ref.read(commentProvider.notifier).fetchComments(feed.id);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Iconsax.send_2, size: 26),
+                    onPressed: () {
+                      final text = '${authorName} shared: ${feed.content}';
+                      Share.share(text, subject: 'Check out this post on A Play');
+                    },
+                  ),
+                  const Spacer(),
+                  if (feed.expiresAt != null)
+                    IconButton(
+                      icon: const Icon(Icons.access_time, size: 22),
+                      onPressed: () {
+                        final now = DateTime.now();
+                        final remaining = feed.expiresAt!.difference(now);
+                        final expired = remaining.isNegative;
+
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Post Duration'),
+                            content: Text(
+                              expired
+                                  ? 'This post has expired'
+                                  : 'This post expires in ${_formatDuration(remaining)}',
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${feed.commentCount}',
-                              style: const TextStyle(
-                                color: Colors.white,
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('OK'),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                
                 ],
               ),
             ),
+
+            // Like count
+            if (feed.likeCount > 0)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  '${feed.likeCount} ${feed.likeCount == 1 ? 'like' : 'likes'}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+
+            // View comments
+            if (feed.commentCount > 0)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: GestureDetector(
+                  onTap: () {
+                    ref.read(selectedFeedProvider.notifier).state = feed;
+                    ref.read(commentProvider.notifier).fetchComments(feed.id);
+                  },
+                  child: Text(
+                    'View all ${feed.commentCount} comments',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 8),
           ],
-        );
-      },
+        ),
+      );
+      }
     );
   }
 
+  String _formatDuration(Duration duration) {
+    if (duration.inDays > 0) {
+      return '${duration.inDays} day${duration.inDays == 1 ? '' : 's'}';
+    } else if (duration.inHours > 0) {
+      return '${duration.inHours} hour${duration.inHours == 1 ? '' : 's'}';
+    } else {
+      return '${duration.inMinutes} minute${duration.inMinutes == 1 ? '' : 's'}';
+    }
+  }
+
   Widget _buildImagePlaceholder({bool loading = false, bool error = false}) {
-    return RepaintBoundary(
-      child: AspectRatio(
-        aspectRatio: 16 / 12,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Center(
-            child: loading
-                ? const RepaintBoundary(
-                    child: SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                      ),
-                    ),
-                  )
-                : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        error ? Icons.error_outline : Icons.image,
-                        size: 40,
-                        color: error ? Colors.red[400] : Colors.grey[400],
-                      ),
-                      if (error)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            'Failed to load image',
-                            style: TextStyle(
-                              color: Colors.red[400],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-          ),
+    return AspectRatio(
+      aspectRatio: 1.0, // Instagram-style square placeholder
+      child: Container(
+        color: Colors.grey[900],
+        child: Center(
+          child: loading
+              ? const CircularProgressIndicator()
+              : Icon(
+                  error ? Icons.broken_image : Icons.image,
+                  size: 48,
+                  color: Colors.grey[600],
+                ),
         ),
       ),
     );

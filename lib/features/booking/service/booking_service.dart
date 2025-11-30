@@ -96,7 +96,9 @@ class BookingService {
   Future<List<BookingModel>> getUserBookings() async {
     try {
       final user = _supabase.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
+      if (user == null) {
+        throw Exception('AUTH_REQUIRED');
+      }
 
       final response = await _supabase
           .from('bookings')
@@ -117,7 +119,11 @@ class BookingService {
       return (response as List).map((e) => BookingModel.fromJson(e)).toList();
     } catch (e) {
       debugPrint('Error fetching bookings: $e');
-      throw Exception('Failed to fetch bookings');
+      // Preserve auth error message
+      if (e.toString().contains('AUTH_REQUIRED')) {
+        rethrow;
+      }
+      throw Exception('Failed to fetch bookings: $e');
     }
   }
 

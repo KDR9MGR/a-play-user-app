@@ -192,4 +192,212 @@ class FeedService {
       return null;
     }
   }
+
+  // ============================================================================
+  // NEW FEATURES: Dynamic Feed, Post Duration, Blogger Follow
+  // ============================================================================
+
+  /// Get random feeds (fresh content each time)
+  /// Improvement 1: Dynamic feed load for fresh feed all the time
+  Future<List<FeedModel>> getRandomFeeds() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      // Use the updated RPC function that returns random feeds
+      final response = await _supabase
+          .rpc('get_feeds_with_like_status', params: {
+            'current_user_id': userId
+          });
+
+      if (response == null) {
+        return [];
+      }
+
+      return (response as List<dynamic>)
+          .map((feed) => FeedModel.fromJson(feed))
+          .toList();
+    } catch (e) {
+      debugPrint('Error fetching random feeds: $e');
+      throw Exception('Failed to fetch feeds: ${e.toString()}');
+    }
+  }
+
+  /// Create a feed post with custom duration
+  /// Improvement 2: Post active duration (24hrs, 1 week, 1 month)
+  Future<FeedModel> createFeedWithDuration({
+    required String content,
+    String? imageUrl,
+    String? eventId,
+    required int durationHours, // 24, 168 (1 week), 720 (1 month), or 0 (permanent)
+  }) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      final now = DateTime.now();
+      final expiresAt = durationHours > 0
+          ? now.add(Duration(hours: durationHours))
+          : null;
+
+      final feedData = {
+        'user_id': userId,
+        'content': content,
+        'image_url': imageUrl,
+        'event_id': eventId,
+        'created_at': now.toIso8601String(),
+        'updated_at': now.toIso8601String(),
+        'expires_at': expiresAt?.toIso8601String(),
+        'duration_hours': durationHours,
+      };
+
+      final response = await _supabase
+          .from('feeds')
+          .insert(feedData)
+          .select()
+          .single();
+
+      return FeedModel.fromJson(response);
+    } catch (e) {
+      debugPrint('Error creating feed with duration: $e');
+      throw Exception('Failed to create feed: ${e.toString()}');
+    }
+  }
+
+  /// Get feeds from followed bloggers only
+  /// Improvement 3: Blogger profile follow options
+  Future<List<FeedModel>> getFollowedFeeds() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      final response = await _supabase
+          .rpc('get_followed_feeds', params: {
+            'current_user_id': userId
+          });
+
+      if (response == null) {
+        return [];
+      }
+
+      return (response as List<dynamic>)
+          .map((feed) => FeedModel.fromJson(feed))
+          .toList();
+    } catch (e) {
+      debugPrint('Error fetching followed feeds: $e');
+      throw Exception('Failed to fetch followed feeds: ${e.toString()}');
+    }
+  }
+
+  /// Follow a blogger
+  Future<void> followBlogger(String bloggerUserId) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      if (userId == bloggerUserId) {
+        throw Exception('Cannot follow yourself');
+      }
+
+      await _supabase
+          .from('blogger_follows')
+          .insert({
+            'follower_id': userId,
+            'following_id': bloggerUserId,
+          });
+    } catch (e) {
+      debugPrint('Error following blogger: $e');
+      throw Exception('Failed to follow blogger: ${e.toString()}');
+    }
+  }
+
+  /// Unfollow a blogger
+  Future<void> unfollowBlogger(String bloggerUserId) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      await _supabase
+          .from('blogger_follows')
+          .delete()
+          .match({
+            'follower_id': userId,
+            'following_id': bloggerUserId,
+          });
+    } catch (e) {
+      debugPrint('Error unfollowing blogger: $e');
+      throw Exception('Failed to unfollow blogger: ${e.toString()}');
+    }
+  }
+
+  /// Check if current user is following a blogger
+  Future<bool> isFollowingBlogger(String bloggerUserId) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        return false;
+      }
+
+      final response = await _supabase
+          .from('blogger_follows')
+          .select()
+          .match({
+            'follower_id': userId,
+            'following_id': bloggerUserId,
+          })
+          .maybeSingle();
+
+      return response != null;
+    } catch (e) {
+      debugPrint('Error checking follow status: $e');
+      return false;
+    }
+  }
+
+  /// Get blogger's follower count
+  Future<int> getBloggerFollowerCount(String bloggerUserId) async {
+    try {
+      final response = await _supabase
+          .from('blogger_follows')
+          .select()
+          .eq('following_id', bloggerUserId);
+
+      return (response as List).length;
+    } catch (e) {
+      debugPrint('Error getting follower count: $e');
+      return 0;
+    }
+  }
+
+  /// Get list of users the current user is following
+  Future<List<String>> getFollowingList() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        return [];
+      }
+
+      final response = await _supabase
+          .from('blogger_follows')
+          .select('following_id')
+          .eq('follower_id', userId);
+
+      return (response as List<dynamic>)
+          .map((item) => item['following_id'] as String)
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting following list: $e');
+      return [];
+    }
+  }
 } 

@@ -1,8 +1,5 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -20,8 +17,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
-  bool _isGoogleLoading = false;
-  bool _isAppleLoading = false;
 
   @override
   void initState() {
@@ -95,99 +90,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
   }
 
-  Future<void> _signInWithGoogle() async {
-    setState(() => _isGoogleLoading = true);
-
-    try {
-      debugPrint('Attempting to sign in with Google');
-
-      final authController = ref.read(authControllerProvider.notifier);
-      await authController.signInWithGoogle();
-
-      // Check if sign in was successful
-      final authState = ref.read(authControllerProvider);
-      authState.when(
-        data: (user) {
-          if (user == null) {
-            throw 'Failed to sign in with Google';
-          }
-        },
-        error: (error, stackTrace) {
-          throw error.toString();
-        },
-        loading: () {},
-      );
-
-      debugPrint('Google sign in successful');
-    } catch (e) {
-      debugPrint('Google sign in error: $e');
-      if (mounted) {
-        String errorMessage = 'An error occurred during Google sign in';
-        if (e is AuthException) {
-          errorMessage = e.message;
-        } else if (e is String) {
-          errorMessage = e;
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isGoogleLoading = false);
-    }
-  }
-
-  Future<void> _signInWithApple() async {
-    setState(() => _isAppleLoading = true);
-
-    try {
-      debugPrint('Attempting to sign in with Apple');
-
-      final authController = ref.read(authControllerProvider.notifier);
-      await authController.signInWithApple();
-
-      // Check if sign in was successful
-      final authState = ref.read(authControllerProvider);
-      authState.when(
-        data: (user) {
-          if (user == null) {
-            throw 'Failed to sign in with Apple';
-          }
-        },
-        error: (error, stackTrace) {
-          throw error.toString();
-        },
-        loading: () {},
-      );
-
-      debugPrint('Apple sign in successful');
-    } catch (e) {
-      debugPrint('Apple sign in error: $e');
-      if (mounted) {
-        String errorMessage = 'An error occurred during Apple sign in';
-        if (e is AuthException) {
-          errorMessage = e.message;
-        } else if (e is String) {
-          errorMessage = e;
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isAppleLoading = false);
-    }
-  }
-
-  bool get _isIOS => !kIsWeb && Platform.isIOS;
 
   @override
   Widget build(BuildContext context) {
@@ -308,28 +210,25 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Apple Sign In button FIRST (iOS only) - Apple guideline 4.8 requires equal prominence
-                  if (_isIOS) ...[
-                    _CustomSocialButton(
-                      text: 'Sign In with Apple',
-                      onPressed: _signInWithApple,
-                      isLoading: _isAppleLoading,
-                      icon: FontAwesomeIcons.apple,
-                      iconColor: Colors.white,
+                  // Guest Access Option
+                  Center(
+                    child: TextButton(
+                      onPressed: () => context.go('/home'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      child: Text(
+                        'Continue as Guest',
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 16,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // Google Sign In button
-                  _CustomSocialButton(
-                    text: 'Sign In with Google',
-                    onPressed: _signInWithGoogle,
-                    isLoading: _isGoogleLoading,
-                    icon: FontAwesomeIcons.google,
-                    iconColor: Colors.red,
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // Sign Up link
                   Row(
@@ -498,56 +397,3 @@ class _CustomButton extends StatelessWidget {
   }
 }
 
-// Custom Social Button
-class _CustomSocialButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-  final bool isLoading;
-  final IconData icon;
-  final Color iconColor;
-
-  const _CustomSocialButton({
-    required this.text,
-    required this.onPressed,
-    this.isLoading = false,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: isLoading ? null : onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[900],
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-          side: BorderSide(color: Colors.grey[800]!),
-        ),
-        elevation: 0,
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-        ),
-      ),
-      icon: isLoading
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            )
-          : FaIcon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
-      label: Text(text),
-    );
-  }
-}

@@ -43,11 +43,12 @@ class FeedState {
 
 // Feed notifier
 class FeedNotifier extends AsyncNotifier<List<FeedModel>> {
-  late final FeedService _feedService;
+  // Use getter instead of late field to avoid LateInitializationError
+  // This ensures the service is always available without timing issues
+  FeedService get _feedService => ref.read(feedServiceProvider);
 
   @override
   FutureOr<List<FeedModel>> build() async {
-    _feedService = ref.read(feedServiceProvider);
     // Auto-load feeds on first use
     return await _feedService.getFeeds();
   }
@@ -213,6 +214,93 @@ class FeedNotifier extends AsyncNotifier<List<FeedModel>> {
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
+  }
+
+  // ============================================================================
+  // NEW FEED IMPROVEMENTS
+  // ============================================================================
+
+  /// Refresh feed with random posts (Improvement 1: Dynamic feed load)
+  Future<void> refreshWithRandomFeeds() async {
+    state = const AsyncValue.loading();
+    try {
+      final feeds = await _feedService.getRandomFeeds();
+      state = AsyncValue.data(feeds);
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  /// Create a post with custom duration (Improvement 2: Post active duration)
+  /// durationHours: 24 (24hrs), 168 (1 week), 720 (1 month), 0 (permanent)
+  Future<void> createPostWithDuration({
+    required String content,
+    String? imageUrl,
+    String? eventId,
+    required int durationHours,
+  }) async {
+    try {
+      state = const AsyncValue.loading();
+      final newPost = await _feedService.createFeedWithDuration(
+        content: content,
+        imageUrl: imageUrl,
+        eventId: eventId,
+        durationHours: durationHours,
+      );
+      state = AsyncValue.data([newPost, ...state.value ?? []]);
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  /// Get feeds from followed bloggers only (Improvement 3: Blogger follow)
+  Future<void> fetchFollowedFeeds() async {
+    state = const AsyncValue.loading();
+    try {
+      final feeds = await _feedService.getFollowedFeeds();
+      state = AsyncValue.data(feeds);
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  /// Follow a blogger
+  Future<void> followBlogger(String bloggerUserId) async {
+    try {
+      await _feedService.followBlogger(bloggerUserId);
+      // Refresh feeds to update follow status
+      await refreshWithRandomFeeds();
+    } catch (e) {
+      debugPrint('Error following blogger: $e');
+      rethrow;
+    }
+  }
+
+  /// Unfollow a blogger
+  Future<void> unfollowBlogger(String bloggerUserId) async {
+    try {
+      await _feedService.unfollowBlogger(bloggerUserId);
+      // Refresh feeds to update follow status
+      await refreshWithRandomFeeds();
+    } catch (e) {
+      debugPrint('Error unfollowing blogger: $e');
+      rethrow;
+    }
+  }
+
+  /// Check if current user is following a blogger
+  Future<bool> isFollowingBlogger(String bloggerUserId) async {
+    return await _feedService.isFollowingBlogger(bloggerUserId);
+  }
+
+  /// Get blogger's follower count
+  Future<int> getBloggerFollowerCount(String bloggerUserId) async {
+    return await _feedService.getBloggerFollowerCount(bloggerUserId);
+  }
+
+  /// Get list of users the current user is following
+  Future<List<String>> getFollowingList() async {
+    return await _feedService.getFollowingList();
   }
 }
 

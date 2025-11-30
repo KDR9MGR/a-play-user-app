@@ -167,32 +167,65 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
                 itemBuilder: (context, index) => TicketCard(booking: activeTickets[index]),
               );
             },
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Iconsax.warning_2,
-                size: 70,
-                color: Color(0xFFFF3B30),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                    'Failed to Load Tickets',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+        error: (error, stack) {
+          // Check if error is authentication-related
+          final isAuthError = error.toString().contains('AUTH_REQUIRED');
+
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isAuthError ? Iconsax.lock_1 : Iconsax.warning_2,
+                  size: 70,
+                  color: isAuthError ? AppColors.orange : const Color(0xFFFF3B30),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  isAuthError ? 'Sign in Required' : 'Failed to Load Tickets',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () => ref.refresh(bookingHistoryProvider),
-                    icon: const Icon(Iconsax.refresh),
-                    label: const Text('Retry'),
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    isAuthError
+                      ? 'Please sign in to view your tickets and booking history'
+                      : 'Unable to load your tickets. Please try again.',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey.shade400,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: isAuthError
+                    ? () => Navigator.pushNamed(context, '/sign-in')
+                    : () => ref.refresh(bookingHistoryProvider),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.orange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  icon: Icon(isAuthError ? Iconsax.login : Iconsax.refresh),
+                  label: Text(isAuthError ? 'Sign In' : 'Retry'),
+                ),
+              ],
             ),
+          );
+        },
             loading: () => const Center(
               child: CircularProgressIndicator(
                 color: AppColors.orange,
@@ -245,32 +278,65 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
                 itemBuilder: (context, index) => TicketCard(booking: expiredTickets[index]),
               );
             },
-            error: (error, stack) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Iconsax.warning_2,
-                    size: 70,
-                    color: Color(0xFFFF3B30),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Failed to Load Tickets',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+            error: (error, stack) {
+              // Check if error is authentication-related
+              final isAuthError = error.toString().contains('AUTH_REQUIRED');
+
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      isAuthError ? Iconsax.lock_1 : Iconsax.warning_2,
+                      size: 70,
+                      color: isAuthError ? AppColors.orange : const Color(0xFFFF3B30),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      isAuthError ? 'Sign in Required' : 'Failed to Load Tickets',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        isAuthError
+                          ? 'Please sign in to view your tickets and booking history'
+                          : 'Unable to load your tickets. Please try again.',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Colors.grey.shade400,
+                          height: 1.4,
                         ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () => ref.refresh(bookingHistoryProvider),
-                    icon: const Icon(Iconsax.refresh),
-                    label: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: isAuthError
+                        ? () => Navigator.pushNamed(context, '/sign-in')
+                        : () => ref.refresh(bookingHistoryProvider),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      icon: Icon(isAuthError ? Iconsax.login : Iconsax.refresh),
+                      label: Text(isAuthError ? 'Sign In' : 'Retry'),
+                    ),
+                  ],
+                ),
+              );
+            },
             loading: () => const Center(
               child: CircularProgressIndicator(
                 color: AppColors.orange,
