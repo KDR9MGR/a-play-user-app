@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:a_play/core/widgets/sign_in_dialog.dart';
+import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import '../provider/subscription_provider.dart';
+import '../provider/backend_subscription_provider.dart';
 import '../screens/paywall_screen.dart';
 import '../model/subscription_model.dart';
 import '../../profile/providers/profile_provider.dart';
@@ -20,15 +23,25 @@ class SubscriptionUtils {
     return subscription?.isTrial ?? false;
   }
 
-  /// Check if user has premium access (either subscription, trial, or profile is_premium flag)
+  /// Check if user has premium access
+  /// PRIMARY SOURCE: Backend subscription status from Supabase (via get-subscription-status Edge Function)
+  /// FALLBACK: Profile is_premium flag (for users with manually granted premium)
   static bool hasPremiumAccess(WidgetRef ref) {
-    // First check if user has active subscription
-    if (hasActiveSubscription(ref)) {
+    // PRIMARY: Check backend subscription status (this is the source of truth)
+    final backendStatus = ref.watch(backendSubscriptionStatusProvider);
+
+    final hasBackendSub = backendStatus.when(
+      data: (status) => status.isActive,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
+    if (hasBackendSub) {
       return true;
     }
-    
-    // If no subscription, check profile is_premium flag
-    // Use watch instead of read to ensure reactivity
+
+    // FALLBACK: Check profile is_premium flag (for manually granted premium)
+    // This is kept as a fallback for users who were given premium access outside of IAP
     final profileAsync = ref.watch(profileFutureProvider);
     return profileAsync.when(
       data: (profile) => profile.isPremium,
@@ -39,22 +52,50 @@ class SubscriptionUtils {
 
   /// Show paywall if user doesn't have premium access
   /// Returns true if user has access, false if paywall was shown
+  /// IMPORTANT: Now checks authentication FIRST before checking premium status
   static Future<bool> requirePremiumAccess(
     BuildContext context,
     WidgetRef ref, {
     String? featureName,
     VoidCallback? onSkip,
   }) async {
+    // CRITICAL: First check if user is authenticated
+    // This prevents crashes when guest users try to access premium features
+    final user = ref.read(authStateProvider).value;
+
+    if (user == null) {
+      // Show sign-in dialog for guest users
+      final signedIn = await SignInDialog.showBottomSheet(
+        context,
+        featureName: featureName,
+        message: featureName != null
+            ? 'Sign in to access $featureName'
+            : 'Sign in to access premium features',
+      );
+
+      if (!signedIn) {
+        return false; // User dismissed dialog or didn't sign in
+      }
+
+      // Verify user actually signed in
+      final userAfter = ref.read(authStateProvider).value;
+      if (userAfter == null) {
+        return false; // User didn't complete sign-in
+      }
+    }
+
+    // User is authenticated, now check premium access
     if (hasPremiumAccess(ref)) {
       return true;
     }
 
+    // User is authenticated but not premium, show paywall
     await PaywallModal.show(
       context,
       featureName: featureName,
       onSkip: onSkip,
     );
-    
+
     return false;
   }
 
@@ -170,7 +211,17 @@ class SubscriptionUtils {
   }
 
   /// Refresh premium status by invalidating relevant providers
+  /// This forces a new call to get-subscription-status Edge Function
   static void refreshPremiumStatus(WidgetRef ref) {
+    SubscriptionStatusRefresher.refresh(ref);
+    ref.invalidate(profileFutureProvider);
+    ref.invalidate(activeSubscriptionProvider);
+  }
+
+  /// Refresh premium status and wait for completion
+  /// Use this after successful purchase to ensure UI updates
+  static Future<void> refreshPremiumStatusAndWait(WidgetRef ref) async {
+    await SubscriptionStatusRefresher.refreshAndWait(ref);
     ref.invalidate(profileFutureProvider);
     ref.invalidate(activeSubscriptionProvider);
   }

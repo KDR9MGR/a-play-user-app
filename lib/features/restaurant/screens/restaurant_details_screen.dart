@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:a_play/core/widgets/sign_in_dialog.dart';
+import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import '../provider/restaurant_provider.dart';
 import '../provider/cart_provider.dart';
 import 'table_booking_screen.dart';
@@ -303,14 +305,40 @@ class _RestaurantDetailsScreenState extends ConsumerState<RestaurantDetailsScree
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => TableBookingScreen(
-                        restaurant: restaurantData,
+                onPressed: () async {
+                  // CRITICAL: Check if user is authenticated before allowing restaurant booking
+                  // This prevents crashes when guest users try to book tables
+                  final user = ref.read(authStateProvider).value;
+
+                  if (user == null) {
+                    // Show sign-in dialog for guest users
+                    final signedIn = await SignInDialog.showBottomSheet(
+                      context,
+                      featureName: 'Restaurant Booking',
+                      message: 'Sign in to book a table at ${restaurantData.name}',
+                    );
+
+                    if (!signedIn) {
+                      return; // User dismissed dialog or didn't sign in
+                    }
+
+                    // Verify user actually signed in
+                    final userAfter = ref.read(authStateProvider).value;
+                    if (userAfter == null) {
+                      return; // User didn't complete sign-in
+                    }
+                  }
+
+                  // User is authenticated, proceed with booking
+                  if (context.mounted) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => TableBookingScreen(
+                          restaurant: restaurantData,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
                 icon: const Icon(
                   Icons.table_restaurant,

@@ -1,6 +1,8 @@
 import 'package:a_play/core/constants/app_constants.dart';
 import 'package:a_play/core/constants/colors.dart';
+import 'package:a_play/core/widgets/sign_in_dialog.dart';
 import 'package:a_play/data/models/event_model.dart';
+import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:a_play/features/booking/providers/ticket_price_provider.dart';
 import 'package:a_play/features/booking/screens/zone_selection_screen.dart';
 import 'package:a_play/features/subscription/utils/subscription_utils.dart';
@@ -765,12 +767,38 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
     );
   }
 
-  void _onBookTicketsPressed(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ZoneSelectionScreen(event: widget.event),
-      ),
-    );
+  Future<void> _onBookTicketsPressed(BuildContext context) async {
+    // CRITICAL: Check if user is authenticated before allowing event booking
+    // This prevents crashes when guest users try to book events
+    final user = ref.read(authStateProvider).value;
+
+    if (user == null) {
+      // Show sign-in dialog for guest users
+      final signedIn = await SignInDialog.showBottomSheet(
+        context,
+        featureName: 'Event Booking',
+        message: 'Sign in to book tickets for ${widget.event.title}',
+      );
+
+      if (!signedIn) {
+        return; // User dismissed dialog or didn't sign in
+      }
+
+      // Verify user actually signed in
+      final userAfter = ref.read(authStateProvider).value;
+      if (userAfter == null) {
+        return; // User didn't complete sign-in
+      }
+    }
+
+    // User is authenticated, proceed with booking
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ZoneSelectionScreen(event: widget.event),
+        ),
+      );
+    }
   }
 }

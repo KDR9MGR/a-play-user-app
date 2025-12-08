@@ -97,20 +97,20 @@ class AppleIAPService {
   
   // Product IDs that match your App Store Connect configuration
   static const Map<String, String> _productIds = {
-    'trial_plan': 'SUB7DAYS',      // Weekly Access (7 days) - Free trial maps to weekly for Apple
-    'weekly_plan': 'SUB7DAYS',     // Weekly Access 
-    'monthly_plan': 'SUB1M',       // Monthly Premium
-    'quarterly_plan': 'SUB3M',     // 3 Months Bundle
-    'biannual_plan': 'SUB3M',      // Using 3 months as closest option (no 6-month in App Store)
-    'annual_plan': 'SUBANNU',      // Annual Ultimate (matches App Store Connect)
+    'trial_plan': 'SUB7DAY',       // Weekly Access (7 days) - Free trial maps to weekly for Apple
+    'weekly_plan': 'SUB7DAY',      // Weekly Access
+    'monthly_plan': 'SUBM',         // Monthly Premium
+    'quarterly_plan': 'SUBM3',      // 3 Months Bundle
+    'biannual_plan': 'SUBM3',       // Using 3 months as closest option (no 6-month in App Store)
+    'annual_plan': 'SUBAU',         // Annual Ultimate (matches App Store Connect)
   };
 
   // Reverse mapping for converting Apple product IDs back to plan IDs
   static const Map<String, String> _reversePlanMapping = {
-    'SUB7DAYS': 'weekly_plan',     // Default to weekly for 7-day product
-    'SUB1M': 'monthly_plan',
-    'SUB3M': 'quarterly_plan',
-    'SUBANNU': 'annual_plan',
+    'SUB7DAY': 'weekly_plan',       // Default to weekly for 7-day product
+    'SUBM': 'monthly_plan',
+    'SUBM3': 'quarterly_plan',
+    'SUBAU': 'annual_plan',
   };
 
   // Callback functions with enhanced error handling

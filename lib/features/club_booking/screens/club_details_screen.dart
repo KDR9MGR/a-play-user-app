@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:a_play/core/widgets/sign_in_dialog.dart';
+import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:a_play/features/home/model/club_model.dart';
 import 'package:a_play/features/club_booking/provider/club_booking_provider.dart';
 import 'package:go_router/go_router.dart';
@@ -302,24 +304,50 @@ class _ClubDetailsScreenState extends ConsumerState<ClubDetailsScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _selectedTime != null ? () {
+                onPressed: _selectedTime != null ? () async {
+                  // CRITICAL: Check if user is authenticated before allowing club booking
+                  // This prevents crashes when guest users try to book clubs
+                  final user = ref.read(authStateProvider).value;
+
+                  if (user == null) {
+                    // Show sign-in dialog for guest users
+                    final signedIn = await SignInDialog.showBottomSheet(
+                      context,
+                      featureName: 'Club Booking',
+                      message: 'Sign in to book a table at ${widget.club.name}',
+                    );
+
+                    if (!signedIn) {
+                      return; // User dismissed dialog or didn't sign in
+                    }
+
+                    // Verify user actually signed in
+                    final userAfter = ref.read(authStateProvider).value;
+                    if (userAfter == null) {
+                      return; // User didn't complete sign-in
+                    }
+                  }
+
+                  // User is authenticated, proceed with booking
                   // Update state providers with the selected values
                   ref.read(selectedDateProvider.notifier).state = _selectedDate;
-                  
+
                   // Set time range based on selected time
                   if (_selectedTime != null) {
                     final startTime = _parseTimeString(_selectedTime!);
                     final endTime = startTime.add(const Duration(hours: 2)); // Default 2 hour duration
                     ref.read(timeRangeProvider.notifier).state = (startTime, endTime);
                   }
-                  
+
                   // Navigate to booking screen
-                  context.push('/club-booking/${widget.club.id}');
+                  if (mounted) {
+                    context.push('/club-booking/${widget.club.id}');
+                  }
                 } : null,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: _selectedTime != null 
-                    ? AppColors.primaryGradient[0] 
+                  backgroundColor: _selectedTime != null
+                    ? AppColors.primaryGradient[0]
                     : Colors.grey,
                   disabledBackgroundColor: Colors.grey,
                   shape: RoundedRectangleBorder(

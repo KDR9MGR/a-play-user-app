@@ -47,6 +47,8 @@
 	<string>1093191311629-fhr1ijlmcone2lr81i8rajqhiu0rhgbn.apps.googleusercontent.com</string>
 	<key>GIDServerClientID</key>
 	<string>1093191311629-7m6v6go5470bt70t8cjsj0v27o2gnr9g.apps.googleusercontent.com</string>
+	<key>GOOGLE_MAPS_API_KEY</key>
+	<string>AIzaSyCgWaCUMUltw9fP0uD9e0RBEyVMdAW1nlA</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>

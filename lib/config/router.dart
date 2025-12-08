@@ -45,6 +45,7 @@ class RouterNotifier extends ChangeNotifier {
       '/home',
       '/podcast',
       '/explore',
+      '/subscription', // Allow guests to view subscription plans (auth required to purchase)
     ];
 
     final isGuestAllowedRoute = guestAllowedRoutes.any(

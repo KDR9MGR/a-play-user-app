@@ -6,13 +6,18 @@ import 'package:iconsax/iconsax.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'dart:async';
+import 'package:a_play/core/widgets/sign_in_dialog.dart';
+import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import '../provider/subscription_provider.dart';
+import '../provider/backend_subscription_provider.dart';
 import '../model/subscription_model.dart';
 import '../widgets/paystack_webview.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../service/platform_subscription_service.dart';
 import '../service/apple_iap_service.dart';
+import '../utils/subscription_utils.dart';
+import 'subscription_success_screen.dart';
 
 class SubscriptionPlansScreen extends ConsumerStatefulWidget {
   const SubscriptionPlansScreen({super.key});
@@ -274,12 +279,18 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
     final formatter = DateFormat('MMM dd, yyyy');
     final endDate = formatter.format(subscription.endDate);
 
+    // Check days until expiry
+    final daysUntilExpiry = subscription.endDate.difference(DateTime.now()).inDays;
+    final isExpiringSoon = daysUntilExpiry <= 7 && daysUntilExpiry > 0;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFF4707), Color(0xFFFF6B35)],
+        gradient: LinearGradient(
+          colors: isExpiringSoon
+              ? [const Color(0xFFFF9800), const Color(0xFFFFC107)]
+              : [const Color(0xFFFF4707), const Color(0xFFFF6B35)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -296,23 +307,67 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Iconsax.crown_15, color: Colors.white, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Active Plan',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withOpacity(0.9),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      if (isExpiringSoon)
+                        Text(
+                          'Expires in $daysUntilExpiry ${daysUntilExpiry == 1 ? 'day' : 'days'}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(Iconsax.crown_1, color: Colors.white, size: 24),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Active Plan',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Iconsax.verify5,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Premium',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -326,63 +381,105 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Iconsax.calendar_1, color: Colors.white, size: 16),
-              const SizedBox(width: 8),
-              Text(
-                'Valid until $endDate',
-                style: GoogleFonts.poppins(fontSize: 14, color: Colors.white),
-              ),
-            ],
+          const SizedBox(height: 12),
+
+          // Subscription info rows
+          _buildSubscriptionInfoRow(
+            icon: Iconsax.calendar_1,
+            label: 'Valid until',
+            value: endDate,
           ),
+          const SizedBox(height: 8),
+          _buildSubscriptionInfoRow(
+            icon: Iconsax.wallet_3,
+            label: 'Amount paid',
+            value: '${subscription.currency} ${subscription.amount.toStringAsFixed(2)}',
+          ),
+
           const SizedBox(height: 20),
+
+          // Action buttons
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Amount',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    // Navigate to subscription history or details
+                    Navigator.of(context).pushNamed('/subscription-history');
+                  },
+                  icon: const Icon(Iconsax.document_text, size: 18),
+                  label: Text(
+                    'View History',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${subscription.currency} ${subscription.amount.toStringAsFixed(2)}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1.5),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
-              Flexible(
-                child: ElevatedButton(
+              Expanded(
+                child: ElevatedButton.icon(
                   onPressed: () => _showCancelDialog(subscription.id),
+                  icon: const Icon(Iconsax.close_circle, size: 18),
+                  label: Text(
+                    'Cancel Plan',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
                   ),
-                  child: Text('Cancel Plan', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14)),
                 ),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSubscriptionInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white.withOpacity(0.9), size: 16),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            color: Colors.white.withOpacity(0.8),
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ],
     );
   }
 
@@ -734,6 +831,37 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
 
   Future<void> _handleSubscription(SubscriptionPlan plan) async {
     try {
+      // CRITICAL: Check if user is authenticated before allowing subscription
+      // This prevents crashes and shows dialog for guest users
+      final user = ref.read(authStateProvider).value;
+
+      if (user == null) {
+        // Show sign-in dialog for guest users
+        final signedIn = await SignInDialog.showBottomSheet(
+          context,
+          featureName: 'Premium Subscription',
+          message: 'Sign in to subscribe to ${plan.name} and unlock exclusive features',
+        );
+
+        if (!signedIn) {
+          return; // User dismissed dialog or didn't sign in
+        }
+
+        // Verify user actually signed in
+        final userAfter = ref.read(authStateProvider).value;
+        if (userAfter == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Please sign in to continue', style: GoogleFonts.poppins()),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+          return; // User didn't complete sign-in
+        }
+      }
+
       setState(() => _isProcessingPayment = true);
 
       // Debug logging
@@ -798,22 +926,28 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           try {
             // Handle the backend verification and subscription creation
             await _platformService.handleSuccessfulPurchase(planId, transactionId, 'apple_iap', receiptData);
-            
+
+            // Refresh subscription data from backend
+            await SubscriptionUtils.refreshPremiumStatusAndWait(ref);
+
+            // Get updated subscription status
+            final subscriptionStatus = await ref.read(backendSubscriptionStatusProvider.future);
+
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Subscription activated successfully!', style: GoogleFonts.poppins()),
-                  backgroundColor: Colors.green,
+              // Navigate to success screen
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => SubscriptionSuccessScreen(
+                    planName: plan.name,
+                    transactionId: transactionId,
+                    expiryDate: subscriptionStatus.expiry,
+                  ),
                 ),
               );
-              
-              // Refresh subscription data
-              ref.invalidate(activeSubscriptionProvider);
-              ref.invalidate(subscriptionPlansProvider);
             }
           } catch (e) {
             print('Backend verification failed: $e');
-            
+
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

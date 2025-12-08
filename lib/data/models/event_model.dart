@@ -91,20 +91,32 @@ class EventModel extends Equatable {
 
   //From Json
   factory EventModel.fromJson(Map<String, dynamic> json) {
+    // Helper function to safely parse dates
+    DateTime parseDate(dynamic value, DateTime fallback) {
+      if (value == null) return fallback;
+      try {
+        if (value is String) {
+          return DateTime.parse(value);
+        }
+        return fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    final now = DateTime.now();
+
     return EventModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? 'Untitled Event',
       description: json['description'] as String? ?? '',
       location: json['location'] as String? ?? '',
-      startDate: DateTime.parse(json['start_date'] as String),
-      endDate: DateTime.parse(json['end_date'] as String),
+      startDate: parseDate(json['start_date'], now),
+      endDate: parseDate(json['end_date'], now.add(const Duration(hours: 3))),
       clubId: json['club_id'] as String? ?? '',
       coverImage: json['cover_image'] as String? ?? '',
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] == null
-          ? DateTime.parse(json['created_at']
-              as String) // Default to createdAt if updatedAt is null
-          : DateTime.parse(json['updated_at'] as String),
+      createdAt: parseDate(json['created_at'], now),
+      updatedAt: parseDate(json['updated_at'], parseDate(json['created_at'], now)),
       price: (json['price'] as num? ?? 0).toDouble(),
       capacity: json['capacity'] as int? ?? 100, // Default capacity
       status: json['status'] as String? ?? 'active', // Default to active

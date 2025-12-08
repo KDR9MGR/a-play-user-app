@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Class to represent a restored purchase
 class RestoredPurchase {
@@ -22,13 +24,31 @@ class RestoredPurchase {
   });
 
   factory RestoredPurchase.fromPurchaseDetails(PurchaseDetails details) {
+    // Helper to safely parse transaction date
+    DateTime? parseTransactionDate(String? dateString) {
+      if (dateString == null) return null;
+      try {
+        // Try parsing as ISO8601 date string first (e.g., "2025-12-08 15:13:32")
+        return DateTime.tryParse(dateString);
+      } catch (e) {
+        try {
+          // Fallback: try parsing as milliseconds
+          final milliseconds = int.tryParse(dateString);
+          if (milliseconds != null) {
+            return DateTime.fromMillisecondsSinceEpoch(milliseconds);
+          }
+        } catch (e) {
+          // If both fail, return null
+        }
+        return null;
+      }
+    }
+
     return RestoredPurchase(
       productId: details.productID,
       transactionId: details.purchaseID ?? '',
       receiptData: details.verificationData.serverVerificationData,
-      transactionDate: details.transactionDate != null 
-          ? DateTime.fromMillisecondsSinceEpoch(int.parse(details.transactionDate!))
-          : null,
+      transactionDate: parseTransactionDate(details.transactionDate),
       status: details.status,
     );
   }
@@ -40,10 +60,10 @@ class PurchaseManager extends ChangeNotifier {
   
   // Product IDs that match your App Store Connect configuration
   List<String> kProductIds = <String>[
-    'SUB7DAYS',      // Weekly Access (trial/weekly)
-    'SUB1M',         // Monthly Premium
-    'SUB3M',         // 3 Months Bundle (quarterly/biannual)
-    'SUBANNU',      // Annual Ultimate
+    'SUB7DAY',       // Weekly Access (trial/weekly)
+    'SUBM',          // Monthly Premium
+    'SUBM3',         // 3 Months Bundle (quarterly/biannual)
+    'SUBAU',         // Annual Ultimate
   ];
   
   List<ProductDetails> products = [];
@@ -59,6 +79,7 @@ class PurchaseManager extends ChangeNotifier {
   Function(List<RestoredPurchase> restoredPurchases)? onPurchasesRestored;
   Function()? onRestoreStarted;
   Function()? onRestoreCompleted;
+  Function()? onBackendVerificationSuccess; // Called after backend verification succeeds
 
   PurchaseManager() {
     final Stream<List<PurchaseDetails>> purchaseUpdated = _inAppPurchase.purchaseStream;
@@ -244,10 +265,10 @@ class PurchaseManager extends ChangeNotifier {
   void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
     if (kDebugMode) print('=== PurchaseManager: PURCHASE UPDATE RECEIVED ===');
     if (kDebugMode) print('Number of purchase updates: ${purchaseDetailsList.length}');
-    
+
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
       if (kDebugMode) print('Processing purchase update - Status: ${purchaseDetails.status}, Product: ${purchaseDetails.productID}');
-      
+
       switch (purchaseDetails.status) {
         case PurchaseStatus.pending:
           if (kDebugMode) print('PurchaseManager: Purchase pending: ${purchaseDetails.productID}');
@@ -270,7 +291,7 @@ class PurchaseManager extends ChangeNotifier {
           break;
       }
 
-      // Complete the purchase
+      // Complete the purchase AFTER backend verification attempt
       if (purchaseDetails.pendingCompletePurchase) {
         if (kDebugMode) print('PurchaseManager: Completing purchase transaction...');
         try {
@@ -283,28 +304,32 @@ class PurchaseManager extends ChangeNotifier {
         if (kDebugMode) print('PurchaseManager: No pending completion required');
       }
     }
-    
+
     if (kDebugMode) print('=== PurchaseManager: PURCHASE UPDATE PROCESSING COMPLETE ===');
   }
 
-  void _handleSuccessfulPurchase(PurchaseDetails purchaseDetails) {
+  Future<void> _handleSuccessfulPurchase(PurchaseDetails purchaseDetails) async {
     if (kDebugMode) print('=== PurchaseManager: SUCCESSFUL PURCHASE ===');
     if (kDebugMode) print('Product ID: ${purchaseDetails.productID}');
     if (kDebugMode) print('Purchase ID: ${purchaseDetails.purchaseID}');
     if (kDebugMode) print('Transaction Date: ${purchaseDetails.transactionDate}');
     if (kDebugMode) print('Status: ${purchaseDetails.status}');
-    
+
     try {
       purchasedIds.add(purchaseDetails.productID);
       notifyListeners();
-      
+
       // Pass server verification data (base64) for backend validation
       final String receiptData = purchaseDetails.verificationData.serverVerificationData;
       if (kDebugMode) print('Receipt data length: ${receiptData.length}');
-      
+
+      // CRITICAL: Verify purchase with Supabase backend BEFORE calling success callback
+      // This ensures the subscription is stored in the database
+      await _verifyPurchaseWithBackend(purchaseDetails, receiptData);
+
       if (kDebugMode) print('Calling onPurchaseSuccess callback...');
       onPurchaseSuccess?.call(
-        purchaseDetails.productID, 
+        purchaseDetails.productID,
         purchaseDetails.purchaseID ?? '',
         receiptData,
       );
@@ -313,8 +338,115 @@ class PurchaseManager extends ChangeNotifier {
       if (kDebugMode) print('Error in _handleSuccessfulPurchase: $e');
       _handlePurchaseError('Failed to process successful purchase: $e');
     }
-    
+
     if (kDebugMode) print('=== PurchaseManager: SUCCESSFUL PURCHASE COMPLETE ===');
+  }
+
+  /// Get the full App Store receipt from the app bundle (iOS only)
+  /// This is required for subscription verification with Apple
+  Future<String?> _getAppStoreReceipt() async {
+    if (!Platform.isIOS) return null;
+
+    try {
+      const platform = MethodChannel('app.aplay/receipt');
+      final String receipt = await platform.invokeMethod('getAppStoreReceipt');
+
+      if (kDebugMode) print('PurchaseManager: Retrieved full App Store receipt (${receipt.length} chars)');
+      return receipt;
+    } on PlatformException catch (e) {
+      if (kDebugMode) print('PurchaseManager: Platform exception getting receipt: ${e.code} - ${e.message}');
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('PurchaseManager: Error getting App Store receipt: $e');
+      return null;
+    }
+  }
+
+  /// Verify purchase with Supabase Edge Function
+  /// Calls verify-apple-sub to validate receipt with Apple and store in database
+  Future<void> _verifyPurchaseWithBackend(PurchaseDetails purchase, String receiptData) async {
+    if (kDebugMode) print('PurchaseManager: Starting backend verification...');
+
+    try {
+      // Get current Supabase user
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+
+      if (user == null) {
+        throw Exception('User not authenticated - cannot verify purchase');
+      }
+
+      if (kDebugMode) print('PurchaseManager: User ID: ${user.id}');
+
+      // CRITICAL: For iOS, we need the FULL App Store receipt from the app bundle
+      // The purchase details receipt is not sufficient for subscription verification
+      String finalReceiptData = receiptData;
+
+      if (Platform.isIOS) {
+        final appStoreReceipt = await _getAppStoreReceipt();
+
+        if (appStoreReceipt != null) {
+          finalReceiptData = appStoreReceipt;
+          if (kDebugMode) {
+            print('PurchaseManager: Using full App Store receipt');
+            print('PurchaseManager: Receipt length: ${finalReceiptData.length} characters');
+          }
+        } else {
+          if (kDebugMode) print('⚠️ PurchaseManager: Could not get full receipt, using purchase receipt (may fail)');
+        }
+      }
+
+      // Determine if this is a sandbox environment
+      // In production builds, this should be false
+      const isSandbox = bool.fromEnvironment('SANDBOX_MODE', defaultValue: kDebugMode);
+
+      if (kDebugMode) print('PurchaseManager: Sandbox mode: $isSandbox');
+      if (kDebugMode) print('PurchaseManager: Calling verify-apple-sub Edge Function...');
+
+      // Call Supabase Edge Function to verify with Apple
+      final response = await supabase.functions.invoke(
+        'verify-apple-sub',
+        body: {
+          'receiptData': finalReceiptData,
+          'userId': user.id,
+          'sandbox': isSandbox,
+        },
+      );
+
+      if (kDebugMode) print('PurchaseManager: Edge Function response status: ${response.status}');
+
+      if (response.status != 200) {
+        throw Exception('Edge Function returned status ${response.status}');
+      }
+
+      final data = response.data as Map<String, dynamic>;
+      if (kDebugMode) print('PurchaseManager: Response data: $data');
+
+      // Check if verification succeeded
+      if (data['success'] != true || data['isSubscribed'] != true) {
+        final errorCode = data['errorCode'] ?? 'unknown_error';
+        final appleStatus = data['appleStatus'];
+        throw Exception('Verification failed: $errorCode (Apple status: $appleStatus)');
+      }
+
+      if (kDebugMode) {
+        print('✅ PurchaseManager: Backend verification SUCCESS');
+        print('   Product: ${data['productId']}');
+        print('   Expires: ${data['expiry']}');
+        print('   Status: ${data['status']}');
+      }
+
+      // Notify that backend verification succeeded
+      // This allows the app to refresh subscription status
+      onBackendVerificationSuccess?.call();
+
+    } catch (e) {
+      if (kDebugMode) print('❌ PurchaseManager: Backend verification FAILED: $e');
+      // Note: We log the error but don't prevent purchase completion
+      // The purchase was successful with Apple, backend verification is for our records
+      // User support can manually verify if needed
+      rethrow;
+    }
   }
 
   void _handlePurchaseError(String error) {
