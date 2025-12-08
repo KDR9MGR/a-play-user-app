@@ -323,10 +323,8 @@ class PurchaseManager extends ChangeNotifier {
       final String receiptData = purchaseDetails.verificationData.serverVerificationData;
       if (kDebugMode) print('Receipt data length: ${receiptData.length}');
 
-      // CRITICAL: Verify purchase with Supabase backend BEFORE calling success callback
-      // This ensures the subscription is stored in the database
-      await _verifyPurchaseWithBackend(purchaseDetails, receiptData);
-
+      // CRITICAL: Always call success callback first to ensure UI updates
+      // Backend verification can fail due to network issues, but purchase is already successful
       if (kDebugMode) print('Calling onPurchaseSuccess callback...');
       onPurchaseSuccess?.call(
         purchaseDetails.productID,
@@ -334,6 +332,16 @@ class PurchaseManager extends ChangeNotifier {
         receiptData,
       );
       if (kDebugMode) print('onPurchaseSuccess callback completed');
+
+      // Verify purchase with Supabase backend (best effort)
+      // If this fails, the purchase is still valid - backend can be updated later
+      try {
+        await _verifyPurchaseWithBackend(purchaseDetails, receiptData);
+      } catch (e) {
+        if (kDebugMode) print('⚠️ Backend verification failed (non-fatal): $e');
+        // Note: Purchase is still successful. Backend verification can be retried later.
+        // The success callback already executed, so UI will update correctly.
+      }
     } catch (e) {
       if (kDebugMode) print('Error in _handleSuccessfulPurchase: $e');
       _handlePurchaseError('Failed to process successful purchase: $e');
@@ -442,8 +450,8 @@ class PurchaseManager extends ChangeNotifier {
 
     } catch (e) {
       if (kDebugMode) print('❌ PurchaseManager: Backend verification FAILED: $e');
-      // Note: We log the error but don't prevent purchase completion
-      // The purchase was successful with Apple, backend verification is for our records
+      // Rethrow to caller - will be caught and logged in _handleSuccessfulPurchase
+      // Purchase is still successful, this is just for our records
       // User support can manually verify if needed
       rethrow;
     }

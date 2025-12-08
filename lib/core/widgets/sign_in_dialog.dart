@@ -318,7 +318,7 @@ class _SignInBottomSheetContent extends StatelessWidget {
             child: OutlinedButton(
               onPressed: () {
                 Navigator.pop(context);
-                context.push('/register');
+                context.push('/sign-up');
               },
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
