@@ -650,7 +650,7 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
       // Initialize payment with Paystack
       final paymentData = await ref.read(paymentProvider.notifier).initializePayment(
             email,
-            plan.price,
+            plan.price ?? 0.0,
             plan.id,
           );
 

@@ -137,6 +137,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
   Widget _buildActiveSubscriptionCard(UserSubscription subscription) {
     final formatter = DateFormat('MMM dd, yyyy');
     final endDate = formatter.format(subscription.endDate);
+    final planName = subscription.subscriptionType ?? 'Premium Plan';
+    final currency = subscription.currency ?? 'GHS';
+    final amount = subscription.amount ?? 0;
     
     return Container(
       margin: const EdgeInsets.all(16),
@@ -174,7 +177,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           ),
           const SizedBox(height: 12),
           Text(
-            subscription.subscriptionType,
+            planName,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -192,7 +195,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${subscription.currency} ${subscription.amount.toStringAsFixed(2)}',
+                '$currency ${amount.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.white,
                     ),
@@ -294,7 +297,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${plan.currency} ${plan.price.toStringAsFixed(2)}',
+                  '${plan.currency} ${_getPlanPrice(plan).toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -371,6 +374,19 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
     }
   }
 
+  double _getPlanPrice(SubscriptionPlan plan) {
+    if (plan.price != null) {
+      return plan.price!;
+    }
+    if (plan.priceMonthly != null) {
+      return plan.priceMonthly!;
+    }
+    if (plan.priceYearly != null) {
+      return plan.priceYearly!;
+    }
+    return 0;
+  }
+
   Future<void> _handleSubscription(SubscriptionPlan plan) async {
     try {
       setState(() {
@@ -397,7 +413,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
       // Initialize payment with Paystack
       final paymentData = await ref.read(paymentProvider.notifier).initializePayment(
             email,
-            plan.price,
+            _getPlanPrice(plan),
             plan.id,
           );
 

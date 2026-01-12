@@ -9,6 +9,7 @@ import 'package:a_play/core/widgets/connectivity_overlay.dart';
 import 'package:a_play/core/widgets/auth_error_handler.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:a_play/features/subscription/service/platform_subscription_service.dart';
+import 'package:a_play/core/services/realtime_sync_service.dart';
 
 // Initialize app state provider
 final appInitializationProvider = StateProvider<bool>((ref) => false);
@@ -63,6 +64,12 @@ Future<void> main() async {
     final platformService = PlatformSubscriptionService();
     await platformService.initialize();
     debugPrint('=== EARLY PLATFORM SUBSCRIPTION SERVICE INIT COMPLETE ===');
+
+    // Initialize Real-time Sync Service for live data updates
+    debugPrint('=== INITIALIZING REAL-TIME SYNC SERVICE ===');
+    final realtimeService = RealtimeSyncService();
+    await realtimeService.initialize();
+    debugPrint('✅ Real-time sync initialized - User app will receive live updates from admin/org apps');
 
     // Run the app only after Supabase is initialized
     runApp(

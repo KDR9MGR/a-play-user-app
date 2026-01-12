@@ -239,6 +239,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
   Widget _buildActiveSubscriptionCard(UserSubscription subscription) {
     final formatter = DateFormat('MMM dd, yyyy');
     final endDate = formatter.format(subscription.endDate);
+    final planName = subscription.subscriptionType ?? 'Premium Plan';
+    final currency = subscription.currency ?? 'GHS';
+    final amount = subscription.amount ?? 0;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -285,7 +288,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           ),
           const SizedBox(height: 20),
           Text(
-            subscription.subscriptionType,
+            planName,
             style: GoogleFonts.poppins(
               fontSize: 28,
               fontWeight: FontWeight.w700,
@@ -320,7 +323,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${subscription.currency} ${subscription.amount.toStringAsFixed(2)}',
+                      '$currency ${amount.toStringAsFixed(2)}',
                       style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -512,7 +515,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
-                              plan.price.toStringAsFixed(0),
+                              _getPlanPrice(plan).toStringAsFixed(0),
                               style: GoogleFonts.poppins(
                                 fontSize: 56,
                                 fontWeight: FontWeight.w800,
@@ -524,11 +527,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (plan.price % 1 != 0)
+                          if (_getPlanPrice(plan) % 1 != 0)
                             Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
-                                '.${(plan.price % 1 * 100).toStringAsFixed(0)}',
+                                '.${(_getPlanPrice(plan) % 1 * 100).toStringAsFixed(0)}',
                                 style: GoogleFonts.poppins(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
@@ -642,6 +645,19 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
     return Iconsax.award;
   }
 
+  double _getPlanPrice(SubscriptionPlan plan) {
+    if (plan.price != null) {
+      return plan.price!;
+    }
+    if (plan.priceMonthly != null) {
+      return plan.priceMonthly!;
+    }
+    if (plan.priceYearly != null) {
+      return plan.priceYearly!;
+    }
+    return 0;
+  }
+
   void _showCancelDialog(String subscriptionId) {
     showDialog(
       context: context,
@@ -728,7 +744,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
       }
 
       final email = ref.read(subscriptionServiceProvider).getUserEmail() ?? 'user@example.com';
-      final paymentData = await ref.read(paymentProvider.notifier).initializePayment(email, plan.price, plan.id);
+      final paymentData = await ref
+          .read(paymentProvider.notifier)
+          .initializePayment(email, _getPlanPrice(plan), plan.id);
 
       if (!mounted) return;
 

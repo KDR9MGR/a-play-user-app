@@ -9,7 +9,7 @@ import 'package:a_play/features/home/providers/event_category_provider.dart';
 import 'package:a_play/features/home/widgets/home_app_bar.dart';
 import 'package:a_play/features/home/widgets/event_carousel2.dart';
 import 'package:a_play/features/home/widgets/clubs_horizontal_list.dart';
-import 'package:a_play/features/home/widgets/featured_shimmer.dart'; 
+import 'package:a_play/features/home/widgets/featured_shimmer.dart';
 import 'package:a_play/features/home/widgets/filtered_events_section.dart';
 import 'package:a_play/features/home/widgets/filter_delegate.dart';
 import 'package:a_play/features/restaurant/provider/restaurant_provider.dart';
@@ -17,6 +17,16 @@ import 'package:a_play/features/restaurant/widgets/restaurants_grid.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:a_play/features/home/providers/welcome_provider.dart';
+import 'package:a_play/features/home/providers/lounge_provider.dart';
+import 'package:a_play/features/home/providers/pub_provider.dart';
+import 'package:a_play/features/home/providers/arcade_center_provider.dart';
+import 'package:a_play/features/home/providers/beach_provider.dart';
+import 'package:a_play/features/home/providers/live_show_provider.dart';
+import 'package:a_play/features/home/widgets/lounges_horizontal_list.dart';
+import 'package:a_play/features/home/widgets/pubs_horizontal_list.dart';
+import 'package:a_play/features/home/widgets/arcade_centers_horizontal_list.dart';
+import 'package:a_play/features/home/widgets/beaches_horizontal_list.dart';
+import 'package:a_play/features/home/widgets/live_shows_horizontal_list.dart';
 
 class HomeScreen2 extends ConsumerStatefulWidget {
   const HomeScreen2({super.key});
@@ -266,6 +276,11 @@ class _HomeScreen2State extends ConsumerState<HomeScreen2> {
     final popularClubs = ref.watch(popularClubsProvider);
     final featuredClubs = ref.watch(featuredClubsProvider);
     final featuredRestaurants = ref.watch(featuredRestaurantsProvider);
+    final featuredLounges = ref.watch(featuredLoungesProvider);
+    final featuredPubs = ref.watch(featuredPubsProvider);
+    final featuredArcadeCenters = ref.watch(featuredArcadeCentersProvider);
+    final featuredBeaches = ref.watch(featuredBeachesProvider);
+    final featuredLiveShows = ref.watch(featuredLiveShowsProvider);
     
     
     // Listen for welcome overlay dismissal to trigger tutorial
@@ -289,13 +304,18 @@ class _HomeScreen2State extends ConsumerState<HomeScreen2> {
               ref.invalidate(popularClubsProvider);
               ref.invalidate(featuredClubsProvider);
               ref.invalidate(featuredRestaurantsProvider);
-              
+              ref.invalidate(featuredLoungesProvider);
+              ref.invalidate(featuredPubsProvider);
+              ref.invalidate(featuredArcadeCentersProvider);
+              ref.invalidate(featuredBeachesProvider);
+              ref.invalidate(featuredLiveShowsProvider);
+
               ref.invalidate(eventCategoriesProvider);
               ref.invalidate(eventsByCategoryProvider);
-              
+
               // Add a small delay to ensure loading states are triggered
               await Future.delayed(const Duration(milliseconds: 100));
-              
+
               // Wait for key providers to load but don't block UI updates
               try {
                 await Future.wait([
@@ -304,7 +324,12 @@ class _HomeScreen2State extends ConsumerState<HomeScreen2> {
                   ref.read(popularClubsProvider.future),
                   ref.read(featuredClubsProvider.future),
                   ref.read(featuredRestaurantsProvider.future),
-                  
+                  ref.read(featuredLoungesProvider.future),
+                  ref.read(featuredPubsProvider.future),
+                  ref.read(featuredArcadeCentersProvider.future),
+                  ref.read(featuredBeachesProvider.future),
+                  ref.read(featuredLiveShowsProvider.future),
+
                 ], eagerError: false);
               } catch (e) {
                 // Continue even if some providers fail
@@ -392,13 +417,108 @@ class _HomeScreen2State extends ConsumerState<HomeScreen2> {
                       ),
                     ),
                   ),
-                 
-                  
-                  
-                  
-                  
 
-                   // 3. Restaurants Section Title
+                  // 2. Lounges Section
+                  SliverToBoxAdapter(
+                    child: featuredLounges.when(
+                      data: (loungesList) => LoungesHorizontalList(
+                        lounges: loungesList,
+                        title: 'Lounges',
+                      ),
+                      error: (error, stack) => const LoungesHorizontalList(
+                        lounges: [],
+                        title: 'Lounges',
+                        isLoading: false,
+                      ),
+                      loading: () => const LoungesHorizontalList(
+                        lounges: [],
+                        title: 'Lounges',
+                        isLoading: true,
+                      ),
+                    ),
+                  ),
+
+                  // 3. Pubs Section
+                  SliverToBoxAdapter(
+                    child: featuredPubs.when(
+                      data: (pubsList) => PubsHorizontalList(
+                        pubs: pubsList,
+                        title: 'Pubs',
+                      ),
+                      error: (error, stack) => const PubsHorizontalList(
+                        pubs: [],
+                        title: 'Pubs',
+                        isLoading: false,
+                      ),
+                      loading: () => const PubsHorizontalList(
+                        pubs: [],
+                        title: 'Pubs',
+                        isLoading: true,
+                      ),
+                    ),
+                  ),
+
+                  // 4. Arcade Centers Section
+                  SliverToBoxAdapter(
+                    child: featuredArcadeCenters.when(
+                      data: (arcadeCentersList) => ArcadeCentersHorizontalList(
+                        arcadeCenters: arcadeCentersList,
+                        title: 'Arcade Centers',
+                      ),
+                      error: (error, stack) => const ArcadeCentersHorizontalList(
+                        arcadeCenters: [],
+                        title: 'Arcade Centers',
+                        isLoading: false,
+                      ),
+                      loading: () => const ArcadeCentersHorizontalList(
+                        arcadeCenters: [],
+                        title: 'Arcade Centers',
+                        isLoading: true,
+                      ),
+                    ),
+                  ),
+
+                  // 5. Beaches Section
+                  SliverToBoxAdapter(
+                    child: featuredBeaches.when(
+                      data: (beachesList) => BeachesHorizontalList(
+                        beaches: beachesList,
+                        title: 'Beaches',
+                      ),
+                      error: (error, stack) => const BeachesHorizontalList(
+                        beaches: [],
+                        title: 'Beaches',
+                        isLoading: false,
+                      ),
+                      loading: () => const BeachesHorizontalList(
+                        beaches: [],
+                        title: 'Beaches',
+                        isLoading: true,
+                      ),
+                    ),
+                  ),
+
+                  // 6. Live Shows Section
+                  SliverToBoxAdapter(
+                    child: featuredLiveShows.when(
+                      data: (liveShowsList) => LiveShowsHorizontalList(
+                        liveShows: liveShowsList,
+                        title: 'Live Shows',
+                      ),
+                      error: (error, stack) => const LiveShowsHorizontalList(
+                        liveShows: [],
+                        title: 'Live Shows',
+                        isLoading: false,
+                      ),
+                      loading: () => const LiveShowsHorizontalList(
+                        liveShows: [],
+                        title: 'Live Shows',
+                        isLoading: true,
+                      ),
+                    ),
+                  ),
+
+                   // 7. Restaurants Section Title
                   SliverToBoxAdapter(
                     child: Container(
                       key: restaurantsKey,

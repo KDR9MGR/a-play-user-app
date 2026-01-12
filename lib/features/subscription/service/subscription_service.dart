@@ -37,7 +37,7 @@ class SubscriptionService {
           .from('subscription_plans')
           .select()
           .eq('is_active', true)
-          .order('price');
+          .order('tier_level', ascending: true);
 
       return (response as List)
           .map((json) => SubscriptionPlan.fromJson(json))
@@ -57,7 +57,10 @@ class SubscriptionService {
 
       final response = await _client
           .from('user_subscriptions')
-          .select()
+          .select('''
+            *,
+            subscription_plans (*)
+          ''')
           .eq('user_id', userId)
           .eq('status', 'active')
           .maybeSingle();
@@ -305,10 +308,16 @@ class SubscriptionService {
           .single();
 
       final plan = SubscriptionPlan.fromJson(planResponse);
-
-      // Calculate end date based on plan duration
+      final price =
+          plan.price ?? plan.priceMonthly ?? plan.priceYearly ?? 0.0;
+      final durationDays = plan.durationDays ?? 30;
       final startDate = DateTime.now().toUtc();
-      final endDate = startDate.add(Duration(days: plan.durationDays));
+      final endDate = startDate.add(Duration(days: durationDays));
+      final billingCycle =
+          plan.priceMonthly != null || plan.priceYearly == null ? 'monthly' : 'annual';
+      final tier =
+          (plan.features != null ? plan.features!['tier'] as String? : null) ??
+              plan.name;
 
       // Create a new subscription
       final subscriptionId = const Uuid().v4();
@@ -324,8 +333,11 @@ class SubscriptionService {
       final response = await _client.from('user_subscriptions').insert({
         'id': subscriptionId,
         'user_id': userId,
+        'plan_id': plan.id,
+        'tier': tier,
+        'billing_cycle': billingCycle,
         'subscription_type': plan.name,
-        'amount': plan.price,
+        'amount': price,
         'currency': plan.currency,
         'status': 'active',
         'payment_reference': paymentReference,
@@ -340,7 +352,7 @@ class SubscriptionService {
         'id': const Uuid().v4(),
         'user_id': userId,
         'subscription_id': subscriptionId,
-        'amount': plan.price,
+        'amount': price,
         'currency': plan.currency,
         'payment_reference': paymentReference,
         'payment_method': 'paystack',
@@ -349,7 +361,7 @@ class SubscriptionService {
         'metadata': {
           'plan_id': planId,
           'plan_name': plan.name,
-          'duration_days': plan.durationDays,
+          'duration_days': durationDays,
         },
       });
 
@@ -429,11 +441,13 @@ class SubscriptionService {
           .single();
 
       final plan = SubscriptionPlan.fromJson(planResponse);
-      debugPrint('Plan found: ${plan.name}, Duration: ${plan.durationDays} days');
+      final price =
+          plan.price ?? plan.priceMonthly ?? plan.priceYearly ?? 0.0;
+      final durationDays = plan.durationDays ?? 30;
+      debugPrint('Plan found: ${plan.name}, Duration: $durationDays days');
 
-      // Calculate end date based on plan duration
       final startDate = DateTime.now().toUtc();
-      final endDate = startDate.add(Duration(days: plan.durationDays));
+      final endDate = startDate.add(Duration(days: durationDays));
       debugPrint('Subscription period: $startDate to $endDate');
 
       debugPrint('Expiring existing active subscriptions...');
@@ -454,8 +468,9 @@ class SubscriptionService {
       final response = await _client.from('user_subscriptions').insert({
         'id': subscriptionId,
         'user_id': userId,
+        'plan_id': plan.id,
         'subscription_type': plan.name,
-        'amount': plan.price,
+        'amount': price,
         'currency': plan.currency,
         'status': 'active',
         'payment_reference': transactionId,
@@ -473,7 +488,7 @@ class SubscriptionService {
         'id': const Uuid().v4(),
         'user_id': userId,
         'subscription_id': subscriptionId,
-        'amount': plan.price,
+        'amount': price,
         'currency': plan.currency,
         'payment_reference': transactionId,
         'payment_method': 'apple_iap',
@@ -482,7 +497,7 @@ class SubscriptionService {
         'metadata': {
           'plan_id': planId,
           'plan_name': plan.name,
-          'duration_days': plan.durationDays,
+          'duration_days': durationDays,
           'verified': true,
           'source': 'app_store',
           'receipt_info': receiptInfo,
@@ -950,7 +965,9 @@ class SubscriptionService {
         // Calculate subscription end date from receipt
         final subscriptionEndDate = receiptInfo['expires_date'] != null
             ? DateTime.parse(receiptInfo['expires_date'])
-            : DateTime.now().toUtc().add(Duration(days: plan.durationDays));
+            : DateTime.now()
+                .toUtc()
+                .add(Duration(days: plan.durationDays ?? 30));
 
         final now = DateTime.now().toUtc();
         final status = subscriptionEndDate.isAfter(now) ? 'active' : 'expired';
@@ -970,8 +987,8 @@ class SubscriptionService {
         final subscriptionData = {
           'user_id': userId,
           'plan_name': plan.name,
-          'plan_price': plan.price,
-          'plan_duration_days': plan.durationDays,
+          'plan_price': plan.price ?? 0.0,
+          'plan_duration_days': plan.durationDays ?? 30,
           'start_date': restoredPurchase.transactionDate?.toUtc().toIso8601String() ?? now.toIso8601String(),
           'end_date': subscriptionEndDate.toIso8601String(),
           'status': status,

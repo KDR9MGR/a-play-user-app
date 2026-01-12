@@ -344,6 +344,7 @@ class PurchaseManager extends ChangeNotifier {
       }
     } catch (e) {
       if (kDebugMode) print('Error in _handleSuccessfulPurchase: $e');
+      // Only call error if success callback itself failed (not backend verification)
       _handlePurchaseError('Failed to process successful purchase: $e');
     }
 

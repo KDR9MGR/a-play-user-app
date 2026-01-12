@@ -35,8 +35,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
       vsync: this,
     )..repeat(reverse: true);
     
-    // Set default selected plan
-    _selectedPlan = SubscriptionPlan.defaultPlans[_currentPlanIndex];
+    // Selected plan will be set from real-time data when available
   }
 
   @override
@@ -293,48 +292,67 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
   }
 
   Widget _buildSubscriptionPlans() {
-    final plans = SubscriptionPlan.defaultPlans;
+    final plansAsync = ref.watch(subscriptionPlansProvider);
     
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Text(
-            'Choose Your Plan',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        
-        SizedBox(
-          height: 380,
-          child: PageView.builder(
-            onPageChanged: (index) {
-              setState(() {
-                _currentPlanIndex = index;
-                _selectedPlan = plans[index];
-              });
-            },
-            itemCount: plans.length,
-            itemBuilder: (context, index) {
-              final plan = plans[index];
-              final isSelected = index == _currentPlanIndex;
-              
-              return Container(
-                margin: EdgeInsets.symmetric(
-                  horizontal: isSelected ? 16 : 32,
-                  vertical: isSelected ? 0 : 20,
+    return plansAsync.when(
+      data: (plans) {
+        if (plans.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        if (_selectedPlan == null || _currentPlanIndex >= plans.length) {
+          _currentPlanIndex = 0;
+          _selectedPlan = plans[0];
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Text(
+                'Choose Your Plan',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                child: _buildPlanCard(plan, isSelected),
-              );
-            },
-          ),
+              ),
+            ),
+            SizedBox(
+              height: 380,
+              child: PageView.builder(
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPlanIndex = index;
+                    _selectedPlan = plans[index];
+                  });
+                },
+                itemCount: plans.length,
+                itemBuilder: (context, index) {
+                  final plan = plans[index];
+                  final isSelected = index == _currentPlanIndex;
+
+                  return Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: isSelected ? 16 : 32,
+                      vertical: isSelected ? 0 : 20,
+                    ),
+                    child: _buildPlanCard(plan, isSelected),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox(
+        height: 380,
+        child: Center(
+          child: CircularProgressIndicator(),
         ),
-      ],
+      ),
+      error: (error, stack) => const SizedBox.shrink(),
     );
   }
 
@@ -427,8 +445,8 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  plan.price.toStringAsFixed(2),
+                      Text(
+                  (plan.price ?? 0).toStringAsFixed(2),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 36,
@@ -553,7 +571,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
     );
   }
 
-  String _getPlanDuration(SubscriptionPlanType planType) {
+  String _getPlanDuration(SubscriptionPlanType? planType) {
     switch (planType) {
       case SubscriptionPlanType.trial:
         return 'Free Trial';
@@ -567,6 +585,8 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
         return 'Per 6 Months';
       case SubscriptionPlanType.annual:
         return 'Per Year';
+      default:
+        return 'Subscription';
     }
   }
 
@@ -670,7 +690,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
                 borderRadius: BorderRadius.circular(16),
                 child: Center(
                   child: Text(
-                    'Subscribe to ${_selectedPlan?.name} - ${_selectedPlan?.price.toStringAsFixed(2)} ${_selectedPlan?.currency}',
+                    'Subscribe to ${_selectedPlan?.name} - ${( _selectedPlan?.price ?? 0).toStringAsFixed(2)} ${_selectedPlan?.currency}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -763,7 +783,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
             ),
             const SizedBox(height: 8),
             Text(
-              'Price: ${_selectedPlan!.price.toStringAsFixed(2)} ${_selectedPlan!.currency}',
+              'Price: ${((_selectedPlan!.price) ?? 0).toStringAsFixed(2)} ${_selectedPlan!.currency}',
               style: const TextStyle(color: Colors.white),
             ),
             const SizedBox(height: 8),

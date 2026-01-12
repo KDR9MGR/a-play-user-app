@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'package:a_play/core/config/paystack_config.dart';
+import 'package:a_play/features/booking/model/booking_model.dart';
 import 'package:a_play/features/booking/model/zoneModel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:a_play/core/constants/colors.dart';
 import 'package:a_play/features/home/model/event_model.dart';
@@ -94,11 +95,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     setState(() => isLoading = true);
     try {
-      final secretKey = dotenv.env['PAYSTACK_SECRET_KEY'];
-      final publicKey = dotenv.env['PAYSTACK_PUBLIC_KEY'];
-      if (secretKey == null || publicKey == null) {
-        throw Exception('Paystack keys not found in environment variables');
-      }
+      final secretKey = PaystackConfig.secretKey;
+      final publicKey = PaystackConfig.publicKey;
 
       final email = user.email;
       final reference = 'aplay_${DateTime.now().millisecondsSinceEpoch}';

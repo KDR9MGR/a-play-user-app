@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../model/feed_model.dart';
 import '../model/blogger_follow_model.dart';
 import '../provider/feed_provider.dart';
+import '../widgets/gift_button_widget.dart';
 import '../../chat/screens/chat_list_screen.dart';
 
 class InstagramFeedPage extends ConsumerStatefulWidget {
@@ -426,18 +427,30 @@ class _InstagramFeedPageState extends ConsumerState<InstagramFeedPage> {
             ),
           ),
 
-          // Like count
-          if (feed.likeCount > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                '${feed.likeCount} ${feed.likeCount == 1 ? 'like' : 'likes'}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+          // Like count and Gift button
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              children: [
+                if (feed.likeCount > 0)
+                  Text(
+                    '${feed.likeCount} ${feed.likeCount == 1 ? 'like' : 'likes'}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                const Spacer(),
+                GiftButtonWidget(
+                  feed: feed,
+                  onGiftSuccess: () {
+                    // Refresh feed to show updated gift count
+                    ref.read(feedProvider.notifier).refreshWithRandomFeeds();
+                  },
                 ),
-              ),
+              ],
             ),
+          ),
 
           // Post content
           if (feed.content.isNotEmpty)

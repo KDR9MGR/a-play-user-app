@@ -108,7 +108,7 @@ class HomeAppBar extends ConsumerWidget {
           data: (hasSubscription) => Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              gradient: hasSubscription 
+              gradient: hasSubscription
                 ? LinearGradient(
                     colors: [Colors.amber.shade600, Colors.orange.shade600],
                   )

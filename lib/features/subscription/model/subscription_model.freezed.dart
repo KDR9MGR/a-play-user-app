@@ -392,14 +392,22 @@ mixin _$SubscriptionPlan {
   String get name => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
   @JsonKey(name: 'duration_days')
-  int get durationDays => throw _privateConstructorUsedError;
-  double get price => throw _privateConstructorUsedError;
+  int? get durationDays => throw _privateConstructorUsedError;
+  @JsonKey(name: 'price')
+  double? get price => throw _privateConstructorUsedError;
+  @JsonKey(name: 'price_monthly')
+  double? get priceMonthly => throw _privateConstructorUsedError;
+  @JsonKey(name: 'price_yearly')
+  double? get priceYearly => throw _privateConstructorUsedError;
   String get currency => throw _privateConstructorUsedError;
   @JsonKey(name: 'plan_type')
-  SubscriptionPlanType get planType => throw _privateConstructorUsedError;
+  SubscriptionPlanType? get planType => throw _privateConstructorUsedError;
   @JsonKey(name: 'tier_points_bonus')
   int get tierPointsBonus => throw _privateConstructorUsedError;
   Map<String, dynamic>? get features => throw _privateConstructorUsedError;
+  List<String> get benefits => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tier_level')
+  int? get tierLevel => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_popular')
@@ -409,7 +417,7 @@ mixin _$SubscriptionPlan {
   @JsonKey(name: 'original_price')
   double? get originalPrice => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
-  DateTime get createdAt => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -429,17 +437,21 @@ abstract class $SubscriptionPlanCopyWith<$Res> {
       {String id,
       String name,
       String? description,
-      @JsonKey(name: 'duration_days') int durationDays,
-      double price,
+      @JsonKey(name: 'duration_days') int? durationDays,
+      @JsonKey(name: 'price') double? price,
+      @JsonKey(name: 'price_monthly') double? priceMonthly,
+      @JsonKey(name: 'price_yearly') double? priceYearly,
       String currency,
-      @JsonKey(name: 'plan_type') SubscriptionPlanType planType,
+      @JsonKey(name: 'plan_type') SubscriptionPlanType? planType,
       @JsonKey(name: 'tier_points_bonus') int tierPointsBonus,
       Map<String, dynamic>? features,
+      List<String> benefits,
+      @JsonKey(name: 'tier_level') int? tierLevel,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'is_popular') bool isPopular,
       @JsonKey(name: 'discount_percentage') double? discountPercentage,
       @JsonKey(name: 'original_price') double? originalPrice,
-      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
 
@@ -459,17 +471,21 @@ class _$SubscriptionPlanCopyWithImpl<$Res, $Val extends SubscriptionPlan>
     Object? id = null,
     Object? name = null,
     Object? description = freezed,
-    Object? durationDays = null,
-    Object? price = null,
+    Object? durationDays = freezed,
+    Object? price = freezed,
+    Object? priceMonthly = freezed,
+    Object? priceYearly = freezed,
     Object? currency = null,
-    Object? planType = null,
+    Object? planType = freezed,
     Object? tierPointsBonus = null,
     Object? features = freezed,
+    Object? benefits = null,
+    Object? tierLevel = freezed,
     Object? isActive = null,
     Object? isPopular = null,
     Object? discountPercentage = freezed,
     Object? originalPrice = freezed,
-    Object? createdAt = null,
+    Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
     return _then(_value.copyWith(
@@ -485,22 +501,30 @@ class _$SubscriptionPlanCopyWithImpl<$Res, $Val extends SubscriptionPlan>
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
               as String?,
-      durationDays: null == durationDays
+      durationDays: freezed == durationDays
           ? _value.durationDays
           : durationDays // ignore: cast_nullable_to_non_nullable
-              as int,
-      price: null == price
+              as int?,
+      price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
+      priceMonthly: freezed == priceMonthly
+          ? _value.priceMonthly
+          : priceMonthly // ignore: cast_nullable_to_non_nullable
+              as double?,
+      priceYearly: freezed == priceYearly
+          ? _value.priceYearly
+          : priceYearly // ignore: cast_nullable_to_non_nullable
+              as double?,
       currency: null == currency
           ? _value.currency
           : currency // ignore: cast_nullable_to_non_nullable
               as String,
-      planType: null == planType
+      planType: freezed == planType
           ? _value.planType
           : planType // ignore: cast_nullable_to_non_nullable
-              as SubscriptionPlanType,
+              as SubscriptionPlanType?,
       tierPointsBonus: null == tierPointsBonus
           ? _value.tierPointsBonus
           : tierPointsBonus // ignore: cast_nullable_to_non_nullable
@@ -509,6 +533,14 @@ class _$SubscriptionPlanCopyWithImpl<$Res, $Val extends SubscriptionPlan>
           ? _value.features
           : features // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>?,
+      benefits: null == benefits
+          ? _value.benefits
+          : benefits // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      tierLevel: freezed == tierLevel
+          ? _value.tierLevel
+          : tierLevel // ignore: cast_nullable_to_non_nullable
+              as int?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -525,10 +557,10 @@ class _$SubscriptionPlanCopyWithImpl<$Res, $Val extends SubscriptionPlan>
           ? _value.originalPrice
           : originalPrice // ignore: cast_nullable_to_non_nullable
               as double?,
-      createdAt: null == createdAt
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -549,17 +581,21 @@ abstract class _$$SubscriptionPlanImplCopyWith<$Res>
       {String id,
       String name,
       String? description,
-      @JsonKey(name: 'duration_days') int durationDays,
-      double price,
+      @JsonKey(name: 'duration_days') int? durationDays,
+      @JsonKey(name: 'price') double? price,
+      @JsonKey(name: 'price_monthly') double? priceMonthly,
+      @JsonKey(name: 'price_yearly') double? priceYearly,
       String currency,
-      @JsonKey(name: 'plan_type') SubscriptionPlanType planType,
+      @JsonKey(name: 'plan_type') SubscriptionPlanType? planType,
       @JsonKey(name: 'tier_points_bonus') int tierPointsBonus,
       Map<String, dynamic>? features,
+      List<String> benefits,
+      @JsonKey(name: 'tier_level') int? tierLevel,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'is_popular') bool isPopular,
       @JsonKey(name: 'discount_percentage') double? discountPercentage,
       @JsonKey(name: 'original_price') double? originalPrice,
-      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
 
@@ -577,17 +613,21 @@ class __$$SubscriptionPlanImplCopyWithImpl<$Res>
     Object? id = null,
     Object? name = null,
     Object? description = freezed,
-    Object? durationDays = null,
-    Object? price = null,
+    Object? durationDays = freezed,
+    Object? price = freezed,
+    Object? priceMonthly = freezed,
+    Object? priceYearly = freezed,
     Object? currency = null,
-    Object? planType = null,
+    Object? planType = freezed,
     Object? tierPointsBonus = null,
     Object? features = freezed,
+    Object? benefits = null,
+    Object? tierLevel = freezed,
     Object? isActive = null,
     Object? isPopular = null,
     Object? discountPercentage = freezed,
     Object? originalPrice = freezed,
-    Object? createdAt = null,
+    Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
     return _then(_$SubscriptionPlanImpl(
@@ -603,22 +643,30 @@ class __$$SubscriptionPlanImplCopyWithImpl<$Res>
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
               as String?,
-      durationDays: null == durationDays
+      durationDays: freezed == durationDays
           ? _value.durationDays
           : durationDays // ignore: cast_nullable_to_non_nullable
-              as int,
-      price: null == price
+              as int?,
+      price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
+      priceMonthly: freezed == priceMonthly
+          ? _value.priceMonthly
+          : priceMonthly // ignore: cast_nullable_to_non_nullable
+              as double?,
+      priceYearly: freezed == priceYearly
+          ? _value.priceYearly
+          : priceYearly // ignore: cast_nullable_to_non_nullable
+              as double?,
       currency: null == currency
           ? _value.currency
           : currency // ignore: cast_nullable_to_non_nullable
               as String,
-      planType: null == planType
+      planType: freezed == planType
           ? _value.planType
           : planType // ignore: cast_nullable_to_non_nullable
-              as SubscriptionPlanType,
+              as SubscriptionPlanType?,
       tierPointsBonus: null == tierPointsBonus
           ? _value.tierPointsBonus
           : tierPointsBonus // ignore: cast_nullable_to_non_nullable
@@ -627,6 +675,14 @@ class __$$SubscriptionPlanImplCopyWithImpl<$Res>
           ? _value._features
           : features // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>?,
+      benefits: null == benefits
+          ? _value._benefits
+          : benefits // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      tierLevel: freezed == tierLevel
+          ? _value.tierLevel
+          : tierLevel // ignore: cast_nullable_to_non_nullable
+              as int?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -643,10 +699,10 @@ class __$$SubscriptionPlanImplCopyWithImpl<$Res>
           ? _value.originalPrice
           : originalPrice // ignore: cast_nullable_to_non_nullable
               as double?,
-      createdAt: null == createdAt
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -664,19 +720,24 @@ class _$SubscriptionPlanImpl
       {required this.id,
       required this.name,
       this.description,
-      @JsonKey(name: 'duration_days') required this.durationDays,
-      required this.price,
+      @JsonKey(name: 'duration_days') this.durationDays,
+      @JsonKey(name: 'price') this.price,
+      @JsonKey(name: 'price_monthly') this.priceMonthly,
+      @JsonKey(name: 'price_yearly') this.priceYearly,
       this.currency = 'GHS',
-      @JsonKey(name: 'plan_type') required this.planType,
+      @JsonKey(name: 'plan_type') this.planType,
       @JsonKey(name: 'tier_points_bonus') this.tierPointsBonus = 0,
       final Map<String, dynamic>? features,
-      @JsonKey(name: 'is_active') required this.isActive,
+      final List<String> benefits = const <String>[],
+      @JsonKey(name: 'tier_level') this.tierLevel,
+      @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'is_popular') this.isPopular = false,
       @JsonKey(name: 'discount_percentage') this.discountPercentage,
       @JsonKey(name: 'original_price') this.originalPrice,
-      @JsonKey(name: 'created_at') required this.createdAt,
+      @JsonKey(name: 'created_at') this.createdAt,
       @JsonKey(name: 'updated_at') this.updatedAt})
-      : _features = features;
+      : _features = features,
+        _benefits = benefits;
 
   factory _$SubscriptionPlanImpl.fromJson(Map<String, dynamic> json) =>
       _$$SubscriptionPlanImplFromJson(json);
@@ -689,15 +750,22 @@ class _$SubscriptionPlanImpl
   final String? description;
   @override
   @JsonKey(name: 'duration_days')
-  final int durationDays;
+  final int? durationDays;
   @override
-  final double price;
+  @JsonKey(name: 'price')
+  final double? price;
+  @override
+  @JsonKey(name: 'price_monthly')
+  final double? priceMonthly;
+  @override
+  @JsonKey(name: 'price_yearly')
+  final double? priceYearly;
   @override
   @JsonKey()
   final String currency;
   @override
   @JsonKey(name: 'plan_type')
-  final SubscriptionPlanType planType;
+  final SubscriptionPlanType? planType;
   @override
   @JsonKey(name: 'tier_points_bonus')
   final int tierPointsBonus;
@@ -711,6 +779,18 @@ class _$SubscriptionPlanImpl
     return EqualUnmodifiableMapView(value);
   }
 
+  final List<String> _benefits;
+  @override
+  @JsonKey()
+  List<String> get benefits {
+    if (_benefits is EqualUnmodifiableListView) return _benefits;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_benefits);
+  }
+
+  @override
+  @JsonKey(name: 'tier_level')
+  final int? tierLevel;
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
@@ -725,14 +805,14 @@ class _$SubscriptionPlanImpl
   final double? originalPrice;
   @override
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
   @override
   @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'SubscriptionPlan(id: $id, name: $name, description: $description, durationDays: $durationDays, price: $price, currency: $currency, planType: $planType, tierPointsBonus: $tierPointsBonus, features: $features, isActive: $isActive, isPopular: $isPopular, discountPercentage: $discountPercentage, originalPrice: $originalPrice, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'SubscriptionPlan(id: $id, name: $name, description: $description, durationDays: $durationDays, price: $price, priceMonthly: $priceMonthly, priceYearly: $priceYearly, currency: $currency, planType: $planType, tierPointsBonus: $tierPointsBonus, features: $features, benefits: $benefits, tierLevel: $tierLevel, isActive: $isActive, isPopular: $isPopular, discountPercentage: $discountPercentage, originalPrice: $originalPrice, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -745,10 +825,14 @@ class _$SubscriptionPlanImpl
       ..add(DiagnosticsProperty('description', description))
       ..add(DiagnosticsProperty('durationDays', durationDays))
       ..add(DiagnosticsProperty('price', price))
+      ..add(DiagnosticsProperty('priceMonthly', priceMonthly))
+      ..add(DiagnosticsProperty('priceYearly', priceYearly))
       ..add(DiagnosticsProperty('currency', currency))
       ..add(DiagnosticsProperty('planType', planType))
       ..add(DiagnosticsProperty('tierPointsBonus', tierPointsBonus))
       ..add(DiagnosticsProperty('features', features))
+      ..add(DiagnosticsProperty('benefits', benefits))
+      ..add(DiagnosticsProperty('tierLevel', tierLevel))
       ..add(DiagnosticsProperty('isActive', isActive))
       ..add(DiagnosticsProperty('isPopular', isPopular))
       ..add(DiagnosticsProperty('discountPercentage', discountPercentage))
@@ -769,6 +853,10 @@ class _$SubscriptionPlanImpl
             (identical(other.durationDays, durationDays) ||
                 other.durationDays == durationDays) &&
             (identical(other.price, price) || other.price == price) &&
+            (identical(other.priceMonthly, priceMonthly) ||
+                other.priceMonthly == priceMonthly) &&
+            (identical(other.priceYearly, priceYearly) ||
+                other.priceYearly == priceYearly) &&
             (identical(other.currency, currency) ||
                 other.currency == currency) &&
             (identical(other.planType, planType) ||
@@ -776,6 +864,9 @@ class _$SubscriptionPlanImpl
             (identical(other.tierPointsBonus, tierPointsBonus) ||
                 other.tierPointsBonus == tierPointsBonus) &&
             const DeepCollectionEquality().equals(other._features, _features) &&
+            const DeepCollectionEquality().equals(other._benefits, _benefits) &&
+            (identical(other.tierLevel, tierLevel) ||
+                other.tierLevel == tierLevel) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.isPopular, isPopular) ||
@@ -792,23 +883,28 @@ class _$SubscriptionPlanImpl
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      name,
-      description,
-      durationDays,
-      price,
-      currency,
-      planType,
-      tierPointsBonus,
-      const DeepCollectionEquality().hash(_features),
-      isActive,
-      isPopular,
-      discountPercentage,
-      originalPrice,
-      createdAt,
-      updatedAt);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        name,
+        description,
+        durationDays,
+        price,
+        priceMonthly,
+        priceYearly,
+        currency,
+        planType,
+        tierPointsBonus,
+        const DeepCollectionEquality().hash(_features),
+        const DeepCollectionEquality().hash(_benefits),
+        tierLevel,
+        isActive,
+        isPopular,
+        discountPercentage,
+        originalPrice,
+        createdAt,
+        updatedAt
+      ]);
 
   @JsonKey(ignore: true)
   @override
@@ -830,17 +926,21 @@ abstract class _SubscriptionPlan implements SubscriptionPlan {
       {required final String id,
       required final String name,
       final String? description,
-      @JsonKey(name: 'duration_days') required final int durationDays,
-      required final double price,
+      @JsonKey(name: 'duration_days') final int? durationDays,
+      @JsonKey(name: 'price') final double? price,
+      @JsonKey(name: 'price_monthly') final double? priceMonthly,
+      @JsonKey(name: 'price_yearly') final double? priceYearly,
       final String currency,
-      @JsonKey(name: 'plan_type') required final SubscriptionPlanType planType,
+      @JsonKey(name: 'plan_type') final SubscriptionPlanType? planType,
       @JsonKey(name: 'tier_points_bonus') final int tierPointsBonus,
       final Map<String, dynamic>? features,
-      @JsonKey(name: 'is_active') required final bool isActive,
+      final List<String> benefits,
+      @JsonKey(name: 'tier_level') final int? tierLevel,
+      @JsonKey(name: 'is_active') final bool isActive,
       @JsonKey(name: 'is_popular') final bool isPopular,
       @JsonKey(name: 'discount_percentage') final double? discountPercentage,
       @JsonKey(name: 'original_price') final double? originalPrice,
-      @JsonKey(name: 'created_at') required final DateTime createdAt,
+      @JsonKey(name: 'created_at') final DateTime? createdAt,
       @JsonKey(name: 'updated_at')
       final DateTime? updatedAt}) = _$SubscriptionPlanImpl;
 
@@ -855,19 +955,31 @@ abstract class _SubscriptionPlan implements SubscriptionPlan {
   String? get description;
   @override
   @JsonKey(name: 'duration_days')
-  int get durationDays;
+  int? get durationDays;
   @override
-  double get price;
+  @JsonKey(name: 'price')
+  double? get price;
+  @override
+  @JsonKey(name: 'price_monthly')
+  double? get priceMonthly;
+  @override
+  @JsonKey(name: 'price_yearly')
+  double? get priceYearly;
   @override
   String get currency;
   @override
   @JsonKey(name: 'plan_type')
-  SubscriptionPlanType get planType;
+  SubscriptionPlanType? get planType;
   @override
   @JsonKey(name: 'tier_points_bonus')
   int get tierPointsBonus;
   @override
   Map<String, dynamic>? get features;
+  @override
+  List<String> get benefits;
+  @override
+  @JsonKey(name: 'tier_level')
+  int? get tierLevel;
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;
@@ -882,7 +994,7 @@ abstract class _SubscriptionPlan implements SubscriptionPlan {
   double? get originalPrice;
   @override
   @JsonKey(name: 'created_at')
-  DateTime get createdAt;
+  DateTime? get createdAt;
   @override
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
@@ -901,31 +1013,42 @@ mixin _$UserSubscription {
   String get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'plan_id')
+  String? get planId => throw _privateConstructorUsedError;
+  String? get tier => throw _privateConstructorUsedError;
+  @JsonKey(name: 'billing_cycle')
+  String? get billingCycle => throw _privateConstructorUsedError;
   @JsonKey(name: 'subscription_type')
-  String get subscriptionType => throw _privateConstructorUsedError;
+  String? get subscriptionType => throw _privateConstructorUsedError;
   @JsonKey(name: 'plan_type')
-  SubscriptionPlanType get planType => throw _privateConstructorUsedError;
-  double get amount => throw _privateConstructorUsedError;
-  String get currency => throw _privateConstructorUsedError;
+  SubscriptionPlanType? get planType => throw _privateConstructorUsedError;
+  double? get amount => throw _privateConstructorUsedError;
+  String? get currency => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
   @JsonKey(name: 'payment_reference')
   String? get paymentReference => throw _privateConstructorUsedError;
   @JsonKey(name: 'payment_method')
-  String get paymentMethod => throw _privateConstructorUsedError;
+  String? get paymentMethod => throw _privateConstructorUsedError;
   @JsonKey(name: 'start_date')
   DateTime get startDate => throw _privateConstructorUsedError;
   @JsonKey(name: 'end_date')
   DateTime get endDate => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_auto_renew')
-  bool get isAutoRenew => throw _privateConstructorUsedError;
+  bool? get isAutoRenew => throw _privateConstructorUsedError;
   @JsonKey(name: 'tier_points_earned')
   int get tierPointsEarned => throw _privateConstructorUsedError;
   @JsonKey(name: 'features_unlocked')
   List<String>? get featuresUnlocked => throw _privateConstructorUsedError;
+  @JsonKey(name: 'reward_points')
+  int get rewardPoints => throw _privateConstructorUsedError;
+  @JsonKey(name: 'referral_code')
+  String? get referralCode => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
-  DateTime get createdAt => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'subscription_plans')
+  SubscriptionPlan? get subscriptionPlan => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -942,20 +1065,28 @@ abstract class $UserSubscriptionCopyWith<$Res> {
   $Res call(
       {String id,
       @JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'subscription_type') String subscriptionType,
-      @JsonKey(name: 'plan_type') SubscriptionPlanType planType,
-      double amount,
-      String currency,
+      @JsonKey(name: 'plan_id') String? planId,
+      String? tier,
+      @JsonKey(name: 'billing_cycle') String? billingCycle,
+      @JsonKey(name: 'subscription_type') String? subscriptionType,
+      @JsonKey(name: 'plan_type') SubscriptionPlanType? planType,
+      double? amount,
+      String? currency,
       String status,
       @JsonKey(name: 'payment_reference') String? paymentReference,
-      @JsonKey(name: 'payment_method') String paymentMethod,
+      @JsonKey(name: 'payment_method') String? paymentMethod,
       @JsonKey(name: 'start_date') DateTime startDate,
       @JsonKey(name: 'end_date') DateTime endDate,
-      @JsonKey(name: 'is_auto_renew') bool isAutoRenew,
+      @JsonKey(name: 'is_auto_renew') bool? isAutoRenew,
       @JsonKey(name: 'tier_points_earned') int tierPointsEarned,
       @JsonKey(name: 'features_unlocked') List<String>? featuresUnlocked,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'reward_points') int rewardPoints,
+      @JsonKey(name: 'referral_code') String? referralCode,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'subscription_plans') SubscriptionPlan? subscriptionPlan});
+
+  $SubscriptionPlanCopyWith<$Res>? get subscriptionPlan;
 }
 
 /// @nodoc
@@ -973,20 +1104,26 @@ class _$UserSubscriptionCopyWithImpl<$Res, $Val extends UserSubscription>
   $Res call({
     Object? id = null,
     Object? userId = null,
-    Object? subscriptionType = null,
-    Object? planType = null,
-    Object? amount = null,
-    Object? currency = null,
+    Object? planId = freezed,
+    Object? tier = freezed,
+    Object? billingCycle = freezed,
+    Object? subscriptionType = freezed,
+    Object? planType = freezed,
+    Object? amount = freezed,
+    Object? currency = freezed,
     Object? status = null,
     Object? paymentReference = freezed,
-    Object? paymentMethod = null,
+    Object? paymentMethod = freezed,
     Object? startDate = null,
     Object? endDate = null,
-    Object? isAutoRenew = null,
+    Object? isAutoRenew = freezed,
     Object? tierPointsEarned = null,
     Object? featuresUnlocked = freezed,
-    Object? createdAt = null,
+    Object? rewardPoints = null,
+    Object? referralCode = freezed,
+    Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? subscriptionPlan = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -997,22 +1134,34 @@ class _$UserSubscriptionCopyWithImpl<$Res, $Val extends UserSubscription>
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      subscriptionType: null == subscriptionType
+      planId: freezed == planId
+          ? _value.planId
+          : planId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      tier: freezed == tier
+          ? _value.tier
+          : tier // ignore: cast_nullable_to_non_nullable
+              as String?,
+      billingCycle: freezed == billingCycle
+          ? _value.billingCycle
+          : billingCycle // ignore: cast_nullable_to_non_nullable
+              as String?,
+      subscriptionType: freezed == subscriptionType
           ? _value.subscriptionType
           : subscriptionType // ignore: cast_nullable_to_non_nullable
-              as String,
-      planType: null == planType
+              as String?,
+      planType: freezed == planType
           ? _value.planType
           : planType // ignore: cast_nullable_to_non_nullable
-              as SubscriptionPlanType,
-      amount: null == amount
+              as SubscriptionPlanType?,
+      amount: freezed == amount
           ? _value.amount
           : amount // ignore: cast_nullable_to_non_nullable
-              as double,
-      currency: null == currency
+              as double?,
+      currency: freezed == currency
           ? _value.currency
           : currency // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -1021,10 +1170,10 @@ class _$UserSubscriptionCopyWithImpl<$Res, $Val extends UserSubscription>
           ? _value.paymentReference
           : paymentReference // ignore: cast_nullable_to_non_nullable
               as String?,
-      paymentMethod: null == paymentMethod
+      paymentMethod: freezed == paymentMethod
           ? _value.paymentMethod
           : paymentMethod // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       startDate: null == startDate
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
@@ -1033,10 +1182,10 @@ class _$UserSubscriptionCopyWithImpl<$Res, $Val extends UserSubscription>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      isAutoRenew: null == isAutoRenew
+      isAutoRenew: freezed == isAutoRenew
           ? _value.isAutoRenew
           : isAutoRenew // ignore: cast_nullable_to_non_nullable
-              as bool,
+              as bool?,
       tierPointsEarned: null == tierPointsEarned
           ? _value.tierPointsEarned
           : tierPointsEarned // ignore: cast_nullable_to_non_nullable
@@ -1045,15 +1194,39 @@ class _$UserSubscriptionCopyWithImpl<$Res, $Val extends UserSubscription>
           ? _value.featuresUnlocked
           : featuresUnlocked // ignore: cast_nullable_to_non_nullable
               as List<String>?,
-      createdAt: null == createdAt
+      rewardPoints: null == rewardPoints
+          ? _value.rewardPoints
+          : rewardPoints // ignore: cast_nullable_to_non_nullable
+              as int,
+      referralCode: freezed == referralCode
+          ? _value.referralCode
+          : referralCode // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      subscriptionPlan: freezed == subscriptionPlan
+          ? _value.subscriptionPlan
+          : subscriptionPlan // ignore: cast_nullable_to_non_nullable
+              as SubscriptionPlan?,
     ) as $Val);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $SubscriptionPlanCopyWith<$Res>? get subscriptionPlan {
+    if (_value.subscriptionPlan == null) {
+      return null;
+    }
+
+    return $SubscriptionPlanCopyWith<$Res>(_value.subscriptionPlan!, (value) {
+      return _then(_value.copyWith(subscriptionPlan: value) as $Val);
+    });
   }
 }
 
@@ -1068,20 +1241,29 @@ abstract class _$$UserSubscriptionImplCopyWith<$Res>
   $Res call(
       {String id,
       @JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'subscription_type') String subscriptionType,
-      @JsonKey(name: 'plan_type') SubscriptionPlanType planType,
-      double amount,
-      String currency,
+      @JsonKey(name: 'plan_id') String? planId,
+      String? tier,
+      @JsonKey(name: 'billing_cycle') String? billingCycle,
+      @JsonKey(name: 'subscription_type') String? subscriptionType,
+      @JsonKey(name: 'plan_type') SubscriptionPlanType? planType,
+      double? amount,
+      String? currency,
       String status,
       @JsonKey(name: 'payment_reference') String? paymentReference,
-      @JsonKey(name: 'payment_method') String paymentMethod,
+      @JsonKey(name: 'payment_method') String? paymentMethod,
       @JsonKey(name: 'start_date') DateTime startDate,
       @JsonKey(name: 'end_date') DateTime endDate,
-      @JsonKey(name: 'is_auto_renew') bool isAutoRenew,
+      @JsonKey(name: 'is_auto_renew') bool? isAutoRenew,
       @JsonKey(name: 'tier_points_earned') int tierPointsEarned,
       @JsonKey(name: 'features_unlocked') List<String>? featuresUnlocked,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'reward_points') int rewardPoints,
+      @JsonKey(name: 'referral_code') String? referralCode,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'subscription_plans') SubscriptionPlan? subscriptionPlan});
+
+  @override
+  $SubscriptionPlanCopyWith<$Res>? get subscriptionPlan;
 }
 
 /// @nodoc
@@ -1097,20 +1279,26 @@ class __$$UserSubscriptionImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? userId = null,
-    Object? subscriptionType = null,
-    Object? planType = null,
-    Object? amount = null,
-    Object? currency = null,
+    Object? planId = freezed,
+    Object? tier = freezed,
+    Object? billingCycle = freezed,
+    Object? subscriptionType = freezed,
+    Object? planType = freezed,
+    Object? amount = freezed,
+    Object? currency = freezed,
     Object? status = null,
     Object? paymentReference = freezed,
-    Object? paymentMethod = null,
+    Object? paymentMethod = freezed,
     Object? startDate = null,
     Object? endDate = null,
-    Object? isAutoRenew = null,
+    Object? isAutoRenew = freezed,
     Object? tierPointsEarned = null,
     Object? featuresUnlocked = freezed,
-    Object? createdAt = null,
+    Object? rewardPoints = null,
+    Object? referralCode = freezed,
+    Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? subscriptionPlan = freezed,
   }) {
     return _then(_$UserSubscriptionImpl(
       id: null == id
@@ -1121,22 +1309,34 @@ class __$$UserSubscriptionImplCopyWithImpl<$Res>
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      subscriptionType: null == subscriptionType
+      planId: freezed == planId
+          ? _value.planId
+          : planId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      tier: freezed == tier
+          ? _value.tier
+          : tier // ignore: cast_nullable_to_non_nullable
+              as String?,
+      billingCycle: freezed == billingCycle
+          ? _value.billingCycle
+          : billingCycle // ignore: cast_nullable_to_non_nullable
+              as String?,
+      subscriptionType: freezed == subscriptionType
           ? _value.subscriptionType
           : subscriptionType // ignore: cast_nullable_to_non_nullable
-              as String,
-      planType: null == planType
+              as String?,
+      planType: freezed == planType
           ? _value.planType
           : planType // ignore: cast_nullable_to_non_nullable
-              as SubscriptionPlanType,
-      amount: null == amount
+              as SubscriptionPlanType?,
+      amount: freezed == amount
           ? _value.amount
           : amount // ignore: cast_nullable_to_non_nullable
-              as double,
-      currency: null == currency
+              as double?,
+      currency: freezed == currency
           ? _value.currency
           : currency // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -1145,10 +1345,10 @@ class __$$UserSubscriptionImplCopyWithImpl<$Res>
           ? _value.paymentReference
           : paymentReference // ignore: cast_nullable_to_non_nullable
               as String?,
-      paymentMethod: null == paymentMethod
+      paymentMethod: freezed == paymentMethod
           ? _value.paymentMethod
           : paymentMethod // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       startDate: null == startDate
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
@@ -1157,10 +1357,10 @@ class __$$UserSubscriptionImplCopyWithImpl<$Res>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      isAutoRenew: null == isAutoRenew
+      isAutoRenew: freezed == isAutoRenew
           ? _value.isAutoRenew
           : isAutoRenew // ignore: cast_nullable_to_non_nullable
-              as bool,
+              as bool?,
       tierPointsEarned: null == tierPointsEarned
           ? _value.tierPointsEarned
           : tierPointsEarned // ignore: cast_nullable_to_non_nullable
@@ -1169,14 +1369,26 @@ class __$$UserSubscriptionImplCopyWithImpl<$Res>
           ? _value._featuresUnlocked
           : featuresUnlocked // ignore: cast_nullable_to_non_nullable
               as List<String>?,
-      createdAt: null == createdAt
+      rewardPoints: null == rewardPoints
+          ? _value.rewardPoints
+          : rewardPoints // ignore: cast_nullable_to_non_nullable
+              as int,
+      referralCode: freezed == referralCode
+          ? _value.referralCode
+          : referralCode // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      subscriptionPlan: freezed == subscriptionPlan
+          ? _value.subscriptionPlan
+          : subscriptionPlan // ignore: cast_nullable_to_non_nullable
+              as SubscriptionPlan?,
     ));
   }
 }
@@ -1189,20 +1401,26 @@ class _$UserSubscriptionImpl
   const _$UserSubscriptionImpl(
       {required this.id,
       @JsonKey(name: 'user_id') required this.userId,
-      @JsonKey(name: 'subscription_type') required this.subscriptionType,
-      @JsonKey(name: 'plan_type') required this.planType,
-      required this.amount,
-      required this.currency,
+      @JsonKey(name: 'plan_id') this.planId,
+      this.tier,
+      @JsonKey(name: 'billing_cycle') this.billingCycle,
+      @JsonKey(name: 'subscription_type') this.subscriptionType,
+      @JsonKey(name: 'plan_type') this.planType,
+      this.amount,
+      this.currency,
       required this.status,
       @JsonKey(name: 'payment_reference') this.paymentReference,
-      @JsonKey(name: 'payment_method') required this.paymentMethod,
+      @JsonKey(name: 'payment_method') this.paymentMethod,
       @JsonKey(name: 'start_date') required this.startDate,
       @JsonKey(name: 'end_date') required this.endDate,
-      @JsonKey(name: 'is_auto_renew') required this.isAutoRenew,
+      @JsonKey(name: 'is_auto_renew') this.isAutoRenew,
       @JsonKey(name: 'tier_points_earned') this.tierPointsEarned = 0,
       @JsonKey(name: 'features_unlocked') final List<String>? featuresUnlocked,
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') this.updatedAt})
+      @JsonKey(name: 'reward_points') this.rewardPoints = 0,
+      @JsonKey(name: 'referral_code') this.referralCode,
+      @JsonKey(name: 'created_at') this.createdAt,
+      @JsonKey(name: 'updated_at') this.updatedAt,
+      @JsonKey(name: 'subscription_plans') this.subscriptionPlan})
       : _featuresUnlocked = featuresUnlocked;
 
   factory _$UserSubscriptionImpl.fromJson(Map<String, dynamic> json) =>
@@ -1214,15 +1432,23 @@ class _$UserSubscriptionImpl
   @JsonKey(name: 'user_id')
   final String userId;
   @override
+  @JsonKey(name: 'plan_id')
+  final String? planId;
+  @override
+  final String? tier;
+  @override
+  @JsonKey(name: 'billing_cycle')
+  final String? billingCycle;
+  @override
   @JsonKey(name: 'subscription_type')
-  final String subscriptionType;
+  final String? subscriptionType;
   @override
   @JsonKey(name: 'plan_type')
-  final SubscriptionPlanType planType;
+  final SubscriptionPlanType? planType;
   @override
-  final double amount;
+  final double? amount;
   @override
-  final String currency;
+  final String? currency;
   @override
   final String status;
   @override
@@ -1230,7 +1456,7 @@ class _$UserSubscriptionImpl
   final String? paymentReference;
   @override
   @JsonKey(name: 'payment_method')
-  final String paymentMethod;
+  final String? paymentMethod;
   @override
   @JsonKey(name: 'start_date')
   final DateTime startDate;
@@ -1239,7 +1465,7 @@ class _$UserSubscriptionImpl
   final DateTime endDate;
   @override
   @JsonKey(name: 'is_auto_renew')
-  final bool isAutoRenew;
+  final bool? isAutoRenew;
   @override
   @JsonKey(name: 'tier_points_earned')
   final int tierPointsEarned;
@@ -1256,15 +1482,24 @@ class _$UserSubscriptionImpl
   }
 
   @override
+  @JsonKey(name: 'reward_points')
+  final int rewardPoints;
+  @override
+  @JsonKey(name: 'referral_code')
+  final String? referralCode;
+  @override
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
   @override
   @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
+  @override
+  @JsonKey(name: 'subscription_plans')
+  final SubscriptionPlan? subscriptionPlan;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'UserSubscription(id: $id, userId: $userId, subscriptionType: $subscriptionType, planType: $planType, amount: $amount, currency: $currency, status: $status, paymentReference: $paymentReference, paymentMethod: $paymentMethod, startDate: $startDate, endDate: $endDate, isAutoRenew: $isAutoRenew, tierPointsEarned: $tierPointsEarned, featuresUnlocked: $featuresUnlocked, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserSubscription(id: $id, userId: $userId, planId: $planId, tier: $tier, billingCycle: $billingCycle, subscriptionType: $subscriptionType, planType: $planType, amount: $amount, currency: $currency, status: $status, paymentReference: $paymentReference, paymentMethod: $paymentMethod, startDate: $startDate, endDate: $endDate, isAutoRenew: $isAutoRenew, tierPointsEarned: $tierPointsEarned, featuresUnlocked: $featuresUnlocked, rewardPoints: $rewardPoints, referralCode: $referralCode, createdAt: $createdAt, updatedAt: $updatedAt, subscriptionPlan: $subscriptionPlan)';
   }
 
   @override
@@ -1274,6 +1509,9 @@ class _$UserSubscriptionImpl
       ..add(DiagnosticsProperty('type', 'UserSubscription'))
       ..add(DiagnosticsProperty('id', id))
       ..add(DiagnosticsProperty('userId', userId))
+      ..add(DiagnosticsProperty('planId', planId))
+      ..add(DiagnosticsProperty('tier', tier))
+      ..add(DiagnosticsProperty('billingCycle', billingCycle))
       ..add(DiagnosticsProperty('subscriptionType', subscriptionType))
       ..add(DiagnosticsProperty('planType', planType))
       ..add(DiagnosticsProperty('amount', amount))
@@ -1286,8 +1524,11 @@ class _$UserSubscriptionImpl
       ..add(DiagnosticsProperty('isAutoRenew', isAutoRenew))
       ..add(DiagnosticsProperty('tierPointsEarned', tierPointsEarned))
       ..add(DiagnosticsProperty('featuresUnlocked', featuresUnlocked))
+      ..add(DiagnosticsProperty('rewardPoints', rewardPoints))
+      ..add(DiagnosticsProperty('referralCode', referralCode))
       ..add(DiagnosticsProperty('createdAt', createdAt))
-      ..add(DiagnosticsProperty('updatedAt', updatedAt));
+      ..add(DiagnosticsProperty('updatedAt', updatedAt))
+      ..add(DiagnosticsProperty('subscriptionPlan', subscriptionPlan));
   }
 
   @override
@@ -1297,6 +1538,10 @@ class _$UserSubscriptionImpl
             other is _$UserSubscriptionImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.planId, planId) || other.planId == planId) &&
+            (identical(other.tier, tier) || other.tier == tier) &&
+            (identical(other.billingCycle, billingCycle) ||
+                other.billingCycle == billingCycle) &&
             (identical(other.subscriptionType, subscriptionType) ||
                 other.subscriptionType == subscriptionType) &&
             (identical(other.planType, planType) ||
@@ -1318,32 +1563,45 @@ class _$UserSubscriptionImpl
                 other.tierPointsEarned == tierPointsEarned) &&
             const DeepCollectionEquality()
                 .equals(other._featuresUnlocked, _featuresUnlocked) &&
+            (identical(other.rewardPoints, rewardPoints) ||
+                other.rewardPoints == rewardPoints) &&
+            (identical(other.referralCode, referralCode) ||
+                other.referralCode == referralCode) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.subscriptionPlan, subscriptionPlan) ||
+                other.subscriptionPlan == subscriptionPlan));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      userId,
-      subscriptionType,
-      planType,
-      amount,
-      currency,
-      status,
-      paymentReference,
-      paymentMethod,
-      startDate,
-      endDate,
-      isAutoRenew,
-      tierPointsEarned,
-      const DeepCollectionEquality().hash(_featuresUnlocked),
-      createdAt,
-      updatedAt);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        userId,
+        planId,
+        tier,
+        billingCycle,
+        subscriptionType,
+        planType,
+        amount,
+        currency,
+        status,
+        paymentReference,
+        paymentMethod,
+        startDate,
+        endDate,
+        isAutoRenew,
+        tierPointsEarned,
+        const DeepCollectionEquality().hash(_featuresUnlocked),
+        rewardPoints,
+        referralCode,
+        createdAt,
+        updatedAt,
+        subscriptionPlan
+      ]);
 
   @JsonKey(ignore: true)
   @override
@@ -1364,22 +1622,27 @@ abstract class _UserSubscription implements UserSubscription {
   const factory _UserSubscription(
       {required final String id,
       @JsonKey(name: 'user_id') required final String userId,
-      @JsonKey(name: 'subscription_type')
-      required final String subscriptionType,
-      @JsonKey(name: 'plan_type') required final SubscriptionPlanType planType,
-      required final double amount,
-      required final String currency,
+      @JsonKey(name: 'plan_id') final String? planId,
+      final String? tier,
+      @JsonKey(name: 'billing_cycle') final String? billingCycle,
+      @JsonKey(name: 'subscription_type') final String? subscriptionType,
+      @JsonKey(name: 'plan_type') final SubscriptionPlanType? planType,
+      final double? amount,
+      final String? currency,
       required final String status,
       @JsonKey(name: 'payment_reference') final String? paymentReference,
-      @JsonKey(name: 'payment_method') required final String paymentMethod,
+      @JsonKey(name: 'payment_method') final String? paymentMethod,
       @JsonKey(name: 'start_date') required final DateTime startDate,
       @JsonKey(name: 'end_date') required final DateTime endDate,
-      @JsonKey(name: 'is_auto_renew') required final bool isAutoRenew,
+      @JsonKey(name: 'is_auto_renew') final bool? isAutoRenew,
       @JsonKey(name: 'tier_points_earned') final int tierPointsEarned,
       @JsonKey(name: 'features_unlocked') final List<String>? featuresUnlocked,
-      @JsonKey(name: 'created_at') required final DateTime createdAt,
-      @JsonKey(name: 'updated_at')
-      final DateTime? updatedAt}) = _$UserSubscriptionImpl;
+      @JsonKey(name: 'reward_points') final int rewardPoints,
+      @JsonKey(name: 'referral_code') final String? referralCode,
+      @JsonKey(name: 'created_at') final DateTime? createdAt,
+      @JsonKey(name: 'updated_at') final DateTime? updatedAt,
+      @JsonKey(name: 'subscription_plans')
+      final SubscriptionPlan? subscriptionPlan}) = _$UserSubscriptionImpl;
 
   factory _UserSubscription.fromJson(Map<String, dynamic> json) =
       _$UserSubscriptionImpl.fromJson;
@@ -1390,15 +1653,23 @@ abstract class _UserSubscription implements UserSubscription {
   @JsonKey(name: 'user_id')
   String get userId;
   @override
+  @JsonKey(name: 'plan_id')
+  String? get planId;
+  @override
+  String? get tier;
+  @override
+  @JsonKey(name: 'billing_cycle')
+  String? get billingCycle;
+  @override
   @JsonKey(name: 'subscription_type')
-  String get subscriptionType;
+  String? get subscriptionType;
   @override
   @JsonKey(name: 'plan_type')
-  SubscriptionPlanType get planType;
+  SubscriptionPlanType? get planType;
   @override
-  double get amount;
+  double? get amount;
   @override
-  String get currency;
+  String? get currency;
   @override
   String get status;
   @override
@@ -1406,7 +1677,7 @@ abstract class _UserSubscription implements UserSubscription {
   String? get paymentReference;
   @override
   @JsonKey(name: 'payment_method')
-  String get paymentMethod;
+  String? get paymentMethod;
   @override
   @JsonKey(name: 'start_date')
   DateTime get startDate;
@@ -1415,7 +1686,7 @@ abstract class _UserSubscription implements UserSubscription {
   DateTime get endDate;
   @override
   @JsonKey(name: 'is_auto_renew')
-  bool get isAutoRenew;
+  bool? get isAutoRenew;
   @override
   @JsonKey(name: 'tier_points_earned')
   int get tierPointsEarned;
@@ -1423,11 +1694,20 @@ abstract class _UserSubscription implements UserSubscription {
   @JsonKey(name: 'features_unlocked')
   List<String>? get featuresUnlocked;
   @override
+  @JsonKey(name: 'reward_points')
+  int get rewardPoints;
+  @override
+  @JsonKey(name: 'referral_code')
+  String? get referralCode;
+  @override
   @JsonKey(name: 'created_at')
-  DateTime get createdAt;
+  DateTime? get createdAt;
   @override
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
+  @override
+  @JsonKey(name: 'subscription_plans')
+  SubscriptionPlan? get subscriptionPlan;
   @override
   @JsonKey(ignore: true)
   _$$UserSubscriptionImplCopyWith<_$UserSubscriptionImpl> get copyWith =>

@@ -63,21 +63,25 @@ class SubscriptionPlan with _$SubscriptionPlan {
     required String id,
     required String name,
     String? description,
-    @JsonKey(name: 'duration_days') required int durationDays,
-    required double price,
+    @JsonKey(name: 'duration_days') int? durationDays,
+    @JsonKey(name: 'price') double? price,
+    @JsonKey(name: 'price_monthly') double? priceMonthly,
+    @JsonKey(name: 'price_yearly') double? priceYearly,
     @Default('GHS') String currency,
-    @JsonKey(name: 'plan_type') required SubscriptionPlanType planType,
+    @JsonKey(name: 'plan_type') SubscriptionPlanType? planType,
     @JsonKey(name: 'tier_points_bonus') @Default(0) int tierPointsBonus,
     Map<String, dynamic>? features,
-    @JsonKey(name: 'is_active') required bool isActive,
+    @Default(<String>[]) List<String> benefits,
+    @JsonKey(name: 'tier_level') int? tierLevel,
+    @JsonKey(name: 'is_active') @Default(true) bool isActive,
     @JsonKey(name: 'is_popular') @Default(false) bool isPopular,
     @JsonKey(name: 'discount_percentage') double? discountPercentage,
     @JsonKey(name: 'original_price') double? originalPrice,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _SubscriptionPlan;
 
-  factory SubscriptionPlan.fromJson(Map<String, dynamic> json) => 
+  factory SubscriptionPlan.fromJson(Map<String, dynamic> json) =>
       _$SubscriptionPlanFromJson(json);
 
   // Predefined subscription plans as per client requirements
@@ -223,23 +227,29 @@ class UserSubscription with _$UserSubscription {
   const factory UserSubscription({
     required String id,
     @JsonKey(name: 'user_id') required String userId,
-    @JsonKey(name: 'subscription_type') required String subscriptionType,
-    @JsonKey(name: 'plan_type') required SubscriptionPlanType planType,
-    required double amount,
-    required String currency,
+    @JsonKey(name: 'plan_id') String? planId,
+    String? tier,
+    @JsonKey(name: 'billing_cycle') String? billingCycle,
+    @JsonKey(name: 'subscription_type') String? subscriptionType,
+    @JsonKey(name: 'plan_type') SubscriptionPlanType? planType,
+    double? amount,
+    String? currency,
     required String status,
     @JsonKey(name: 'payment_reference') String? paymentReference,
-    @JsonKey(name: 'payment_method') required String paymentMethod,
+    @JsonKey(name: 'payment_method') String? paymentMethod,
     @JsonKey(name: 'start_date') required DateTime startDate,
     @JsonKey(name: 'end_date') required DateTime endDate,
-    @JsonKey(name: 'is_auto_renew') required bool isAutoRenew,
+    @JsonKey(name: 'is_auto_renew') bool? isAutoRenew,
     @JsonKey(name: 'tier_points_earned') @Default(0) int tierPointsEarned,
     @JsonKey(name: 'features_unlocked') List<String>? featuresUnlocked,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'reward_points') @Default(0) int rewardPoints,
+    @JsonKey(name: 'referral_code') String? referralCode,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'subscription_plans') SubscriptionPlan? subscriptionPlan,
   }) = _UserSubscription;
 
-  factory UserSubscription.fromJson(Map<String, dynamic> json) => 
+  factory UserSubscription.fromJson(Map<String, dynamic> json) =>
       _$UserSubscriptionFromJson(json);
 }
 

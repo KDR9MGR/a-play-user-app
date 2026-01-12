@@ -108,7 +108,7 @@ class SubscriptionHistoryScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        subscription.subscriptionType,
+                        subscription.subscriptionType ?? 'Subscription',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -172,7 +172,7 @@ class SubscriptionHistoryScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${subscription.currency} ${subscription.amount.toStringAsFixed(2)}',
+                      '${subscription.currency ?? 'GHS'} ${(subscription.amount ?? 0).toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(

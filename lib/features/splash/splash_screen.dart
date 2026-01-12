@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import '../authentication/presentation/providers/auth_provider.dart';
@@ -32,32 +33,29 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         ),
       );
 
-      // Add timeout to prevent hanging during debug
+      // Add timeout to prevent hanging
       await _controller.initialize().timeout(
-        const Duration(seconds: 5),
+        const Duration(seconds: 10),
         onTimeout: () {
           debugPrint('Video initialization timeout, using fallback');
-          _useFallback();
-          return;
+          throw Exception('Video initialization timeout');
         },
       );
       
-      // Check if video is actually playing
+      if (!mounted) return;
+
+      // Ensure video is ready before playing
+      setState(() {
+        _isVideoInitialized = true;
+      });
+
+      await _controller.setLooping(false);
+      await _controller.setVolume(1.0);
       await _controller.play();
-      await Future.delayed(const Duration(milliseconds: 500));
       
-      if (_controller.value.isPlaying && mounted) {
-        await _controller.setLooping(false);
-        await _controller.setVolume(1.0);
-        
-        setState(() => _isVideoInitialized = true);
-        
-        // Start checking auth state when video starts playing
-        _controller.addListener(_checkVideoProgress);
-      } else {
-        // Video isn't playing, use fallback
-        _useFallback();
-      }
+      // Start checking video progress
+      _controller.addListener(_checkVideoProgress);
+      
     } catch (e) {
       debugPrint('Error initializing video: $e');
       _useFallback();
@@ -72,13 +70,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       });
       
       // Start delayed navigation with shorter timeout for debug
-      Future.delayed(const Duration(seconds: 1), _checkAuthAndNavigate);
+      Future.delayed(const Duration(seconds: 2), _checkAuthAndNavigate);
     }
   }
 
   void _checkVideoProgress() {
-    if (!_hasNavigated && _controller.value.position >= _controller.value.duration) {
-      _checkAuthAndNavigate();
+    if (!mounted || _hasNavigated) return;
+    
+    final value = _controller.value;
+    if (value.isInitialized && (value.position >= value.duration || (value.position.inMilliseconds > 0 && !value.isPlaying && value.isCompleted))) {
+       _checkAuthAndNavigate();
     }
   }
 
@@ -139,33 +140,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       return Scaffold(
         backgroundColor: Colors.black,
         body: Center(
-          child: Image.asset(
+          child: SvgPicture.asset(
             'assets/images/app_logo.svg',
             fit: BoxFit.contain,
             width: 120,
             height: 120,
-            errorBuilder: (context, error, stackTrace) {
-              // Fallback to app name if image fails
-              return const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.play_circle_filled,
-                    color: Colors.white,
-                    size: 80,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'A Play',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              );
-            },
+            // ignore: deprecated_member_use
+            color: Colors.white,
           ),
         ),
       );
@@ -176,11 +157,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Transform.scale(
-              scale: _getVideoScale(context),
-              child: Center(
-                child: AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
+            child: SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
                   child: VideoPlayer(_controller),
                 ),
               ),
@@ -190,16 +172,4 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       ),
     );
   }
-
-  double _getVideoScale(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final videoRatio = _controller.value.aspectRatio;
-    final screenRatio = size.width / size.height;
-
-    final scale = videoRatio < screenRatio 
-        ? screenRatio / videoRatio 
-        : videoRatio / screenRatio;
-
-    return scale;
-  }
-} 
+}

@@ -1,3 +1,12 @@
+# Play Core (Explicit Keeps for R8)
+-keep class com.google.android.play.core.splitcompat.** { *; }
+-keep class com.google.android.play.core.splitinstall.** { *; }
+-keep class com.google.android.play.core.tasks.** { *; }
+-keep class com.google.android.play.core.common.** { *; }
+-keep class com.google.android.play.core.review.** { *; }
+-keep class com.google.android.play.core.appupdate.** { *; }
+-dontwarn com.google.android.play.core.**
+
 # Flutter Wrapper
 -keep class io.flutter.app.** { *; }
 -keep class io.flutter.plugin.**  { *; }
