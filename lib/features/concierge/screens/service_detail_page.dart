@@ -307,7 +307,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                           HapticFeedback.lightImpact();
                           setState(() => _isUrgent = value);
                         },
-                        activeThumbColor: Colors.red,
+                        activeColor: Colors.red,
                         secondary: Icon(
                           _isUrgent ? Iconsax.flash : Iconsax.clock,
                           color: _isUrgent ? Colors.red : Colors.grey[400],

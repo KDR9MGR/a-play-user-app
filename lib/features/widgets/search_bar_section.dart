@@ -179,7 +179,7 @@ class _FilterModalState extends State<FilterModal> {
                     title: const Text('Show Clubs Only'),
                     value: _showClubsOnly,
                     onChanged: (value) => setState(() => _showClubsOnly = value),
-                    activeThumbColor: theme.colorScheme.primary,
+                    activeColor: theme.colorScheme.primary,
                   ),
                 ],
               ),
