@@ -501,26 +501,24 @@ class SubscriptionService {
           'verified': true,
           'source': 'app_store',
           'receipt_info': receiptInfo,
-          'original_transaction_id': receiptInfo?['originalTransactionId'],
-          'product_id': receiptInfo?['productId'],
-          'subscription_status': receiptInfo?['subscriptionStatus'],
-          'auto_renew_status': receiptInfo?['autoRenewStatus'],
-          'environment': receiptInfo?['environment'],
+          'original_transaction_id': receiptInfo['originalTransactionId'],
+          'product_id': receiptInfo['productId'],
+          'subscription_status': receiptInfo['subscriptionStatus'],
+          'auto_renew_status': receiptInfo['autoRenewStatus'],
+          'environment': receiptInfo['environment'],
         },
       });
 
       debugPrint('Payment recorded successfully');
 
       // Update subscription with receipt data if available
-      if (receiptInfo != null) {
-        try {
-          await updateSubscriptionWithReceiptData(subscriptionId, receiptInfo);
-          debugPrint('Subscription updated with receipt validation data');
-        } catch (e) {
-          debugPrint('Failed to update subscription with receipt data (non-critical): $e');
-        }
+      try {
+        await updateSubscriptionWithReceiptData(subscriptionId, receiptInfo);
+        debugPrint('Subscription updated with receipt validation data');
+      } catch (e) {
+        debugPrint('Failed to update subscription with receipt data (non-critical): $e');
       }
-
+    
       // Optional: notify referral system
       try {
         debugPrint('Triggering referral award...');
@@ -951,7 +949,7 @@ class SubscriptionService {
           continue;
         }
 
-        if (!verified || receiptInfo == null) {
+        if (!verified) {
           debugPrint('Invalid receipt for restored purchase: ${restoredPurchase.transactionId}');
           continue;
         }

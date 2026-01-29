@@ -54,7 +54,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
           backgroundColor: const Color(0xFF1A1A1D),
           elevation: 0,
           scrolledUnderElevation: 2,
-          shadowColor: Colors.black.withOpacity(0.3),
+          shadowColor: Colors.black.withValues(alpha: 0.3),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: Container(
@@ -108,7 +108,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                 ),
@@ -120,7 +120,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF6366F1)
-                                        .withOpacity(0.15),
+                                        .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: const Icon(
@@ -192,7 +192,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color:
-                                    const Color(0xFFEF4444).withOpacity(0.15),
+                                    const Color(0xFFEF4444).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
@@ -359,13 +359,13 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                               ),
                               borderRadius: BorderRadius.circular(24),
                               border: Border.all(
-                                color: const Color(0xFF6366F1).withOpacity(0.3),
+                                color: const Color(0xFF6366F1).withValues(alpha: 0.3),
                                 width: 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
                                   color:
-                                      const Color(0xFF6366F1).withOpacity(0.1),
+                                      const Color(0xFF6366F1).withValues(alpha: 0.1),
                                   blurRadius: 32,
                                   offset: const Offset(0, 12),
                                   spreadRadius: 0,
@@ -390,7 +390,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                                         boxShadow: [
                                           BoxShadow(
                                             color: const Color(0xFF6366F1)
-                                                .withOpacity(0.3),
+                                                .withValues(alpha: 0.3),
                                             blurRadius: 8,
                                             offset: const Offset(0, 4),
                                           ),
@@ -448,7 +448,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                                     boxShadow: [
                                       BoxShadow(
                                         color: const Color(0xFF6366F1)
-                                            .withOpacity(0.4),
+                                            .withValues(alpha: 0.4),
                                         blurRadius: 12,
                                         offset: const Offset(0, 6),
                                       ),
@@ -510,7 +510,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
+                              color: Colors.black.withValues(alpha: 0.06),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -632,7 +632,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                 ),
@@ -645,7 +645,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF6366F1)
-                                          .withOpacity(0.1),
+                                          .withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: const Icon(
@@ -696,7 +696,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
+                                color: Colors.black.withValues(alpha: 0.2),
                                 blurRadius: 20,
                                 offset: const Offset(0, 8),
                               ),
@@ -767,7 +767,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color:
-                                    const Color(0xFFEF4444).withOpacity(0.15),
+                                    const Color(0xFFEF4444).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
@@ -822,7 +822,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -845,7 +845,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF10B981).withOpacity(0.3),
+                      color: const Color(0xFF10B981).withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -940,7 +940,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF10B981).withOpacity(0.4),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.4),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),

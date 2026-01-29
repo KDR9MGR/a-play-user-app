@@ -82,9 +82,9 @@ class ProfileScreen extends ConsumerWidget {
                         final userStatsAsync = ref.watch(userStatsProvider(user.id));
                         return userStatsAsync.when(
                           data: (userStats) => _buildStatsSection(userStats, userPointsAsync),
-                          loading: () => SizedBox(
+                          loading: () => const SizedBox(
                             height: 100,
-                            child: const Center(
+                            child: Center(
                               child: CircularProgressIndicator(
                                 color: AppTheme.primary,
                                 strokeWidth: 2,
@@ -317,7 +317,7 @@ class ProfileScreen extends ConsumerWidget {
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.1),
+          color: AppTheme.primary.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -331,8 +331,8 @@ class ProfileScreen extends ConsumerWidget {
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  AppTheme.primary.withOpacity(0.2),
-                  AppTheme.primary.withOpacity(0.1),
+                  AppTheme.primary.withValues(alpha: 0.2),
+                  AppTheme.primary.withValues(alpha: 0.1),
                 ],
               ),
             ),
@@ -380,10 +380,10 @@ class ProfileScreen extends ConsumerWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.primary.withOpacity(0.15),
+                          color: AppTheme.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                            color: AppTheme.primary.withOpacity(0.3),
+                            color: AppTheme.primary.withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
@@ -417,10 +417,10 @@ class ProfileScreen extends ConsumerWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withOpacity(0.1),
+                            color: Colors.amber.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Colors.amber.withOpacity(0.3),
+                              color: Colors.amber.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -468,7 +468,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -524,7 +524,7 @@ class ProfileScreen extends ConsumerWidget {
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.1),
+          color: AppTheme.primary.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -566,14 +566,14 @@ class ProfileScreen extends ConsumerWidget {
           _showSignOutDialog(ref, context);
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red.withOpacity(0.1),
+          backgroundColor: Colors.red.withValues(alpha: 0.1),
           foregroundColor: Colors.red,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(
-              color: Colors.red.withOpacity(0.3),
+              color: Colors.red.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -874,7 +874,7 @@ class _BookingCard extends StatelessWidget {
           color: const Color(0xFF1A1A1A),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppTheme.primary.withOpacity(0.1),
+            color: AppTheme.primary.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -883,7 +883,7 @@ class _BookingCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -923,14 +923,12 @@ class _SettingsCard extends StatelessWidget {
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
-  final bool showDivider;
 
   const _SettingsCard({
     required this.icon,
     required this.title,
     this.subtitle,
     required this.onTap,
-    this.showDivider = true,
   });
 
   @override
@@ -941,7 +939,7 @@ class _SettingsCard extends StatelessWidget {
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.1),
+          color: AppTheme.primary.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -951,7 +949,7 @@ class _SettingsCard extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppTheme.primary.withOpacity(0.1),
+            color: AppTheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -1012,8 +1010,8 @@ class _PremiumCard extends StatelessWidget {
           gradient: isPremium
               ? LinearGradient(
                   colors: [
-                    AppTheme.primary.withOpacity(0.2),
-                    AppTheme.primary.withOpacity(0.1),
+                    AppTheme.primary.withValues(alpha: 0.2),
+                    AppTheme.primary.withValues(alpha: 0.1),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -1023,8 +1021,8 @@ class _PremiumCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isPremium 
-                ? AppTheme.primary.withOpacity(0.3)
-                : AppTheme.primary.withOpacity(0.1),
+                ? AppTheme.primary.withValues(alpha: 0.3)
+                : AppTheme.primary.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -1034,8 +1032,8 @@ class _PremiumCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isPremium 
-                    ? AppTheme.primary.withOpacity(0.2)
-                    : AppTheme.primary.withOpacity(0.1),
+                    ? AppTheme.primary.withValues(alpha: 0.2)
+                    : AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(

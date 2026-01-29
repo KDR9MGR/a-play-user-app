@@ -209,9 +209,9 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: const Icon(
               Icons.error_outline,
@@ -296,7 +296,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -327,7 +327,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
                 decoration: BoxDecoration(
                   color: const Color(0xFF2A2A2A),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                 ),
                 child: Text(
                   "What's on your mind?",
@@ -365,7 +365,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
             decoration: BoxDecoration(
               color: const Color(0xFF1A1A1A),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: Stack(
               children: [
@@ -398,7 +398,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
+                        color: Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Center(
@@ -472,7 +472,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
                 Text(
                   'User Name', // You can get this from user profile
                   style: TextStyle(
-                    color: canAccess ? Colors.white : Colors.white.withOpacity(0.5),
+                    color: canAccess ? Colors.white : Colors.white.withValues(alpha: 0.5),
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -481,7 +481,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
                 Text(
                   timeago.format(feed.createdAt),
                   style: TextStyle(
-                    color: canAccess ? Colors.grey[400] : Colors.grey[400]?.withOpacity(0.5),
+                    color: canAccess ? Colors.grey[400] : Colors.grey[400]?.withValues(alpha: 0.5),
                     fontSize: 14,
                   ),
                 ),
@@ -517,7 +517,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
                   BlendMode.multiply,
                 )
               : ColorFilter.mode(
-                  Colors.grey.withOpacity(0.6), 
+                  Colors.grey.withValues(alpha: 0.6), 
                   BlendMode.saturation,
                 ),
           child: CachedNetworkImage(
@@ -560,7 +560,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
             icon: feed.isLiked ? Icons.favorite : Icons.favorite_border,
             iconColor: canAccess 
                 ? (feed.isLiked ? const Color(0xFFE50914) : Colors.grey)
-                : Colors.grey.withOpacity(0.5),
+                : Colors.grey.withValues(alpha: 0.5),
             count: feed.likeCount,
             onPressed: canAccess ? () => _toggleLike(feed) : null,
           ),
@@ -569,7 +569,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
           // Comment Button
           _buildActionButton(
             icon: Icons.chat_bubble_outline,
-            iconColor: canAccess ? Colors.grey : Colors.grey.withOpacity(0.5),
+            iconColor: canAccess ? Colors.grey : Colors.grey.withValues(alpha: 0.5),
             count: feed.commentCount,
             onPressed: canAccess ? () => _showComments(feed) : null,
           ),
@@ -578,7 +578,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
           // Share Button
           _buildActionButton(
             icon: Icons.share_outlined,
-            iconColor: canAccess ? Colors.grey : Colors.grey.withOpacity(0.5),
+            iconColor: canAccess ? Colors.grey : Colors.grey.withValues(alpha: 0.5),
             onPressed: canAccess ? () => _sharePost(feed) : null,
           ),
           
@@ -588,7 +588,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
           IconButton(
             icon: Icon(
               Icons.bookmark_border,
-              color: canAccess ? Colors.grey : Colors.grey.withOpacity(0.5),
+              color: canAccess ? Colors.grey : Colors.grey.withValues(alpha: 0.5),
             ),
             onPressed: canAccess ? () => _savePost(feed) : null,
           ),
@@ -848,7 +848,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
             decoration: BoxDecoration(
               color: const Color(0xFF2A2A2A),
               border: Border(
-                top: BorderSide(color: Colors.white.withOpacity(0.1)),
+                top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
               ),
             ),
             child: Row(
@@ -945,7 +945,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
       return Text(
         content,
         style: TextStyle(
-          color: canAccess ? Colors.white : Colors.white.withOpacity(0.5),
+          color: canAccess ? Colors.white : Colors.white.withValues(alpha: 0.5),
           fontSize: 16,
           height: 1.4,
         ),
@@ -956,7 +956,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
       decoration: BoxDecoration(
         color: const Color(0xFF2A2A2A),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -980,7 +980,7 @@ class _EnhancedFeedScreenState extends ConsumerState<EnhancedFeedScreen>
               const Spacer(),
               Text(
                 'Filtered automatically',
-                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
               ),
             ],
           )

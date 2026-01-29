@@ -107,7 +107,18 @@ lib/
    - Add `google-services.json` to `android/app/`
    - Add `GoogleService-Info.plist` to `ios/Runner/`
 
-5. **Run the app**
+5.3. **Environment Setup**
+   - Copy the example environment file:
+     ```bash
+     cp .env.example .env
+     ```
+   - Open `.env` and add your keys (e.g., Paystack):
+     ```
+     PAYSTACK_SECRET_KEY=your_secret_key_here
+     PAYSTACK_PUBLIC_KEY=your_public_key_here
+     ```
+
+4. **Run the app**
    ```bash
    flutter run
    ```

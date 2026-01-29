@@ -49,6 +49,17 @@ app.*.map.json
 .env.*
 /client_ids.txt
 
+# Secrets / credentials
+**/*.keystore
+**/*.jks
+**/key.properties
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+serviceAccountKey*.json
+service-account-key*.json
+*firebase-adminsdk*.json
+.mcp.json
+
 
 # Local pub cache and build artifacts
 .local-pub-cache/

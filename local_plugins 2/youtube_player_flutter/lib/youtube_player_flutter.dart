@@ -161,7 +161,7 @@ class YoutubePlayerFlags {
 
 class YoutubePlayer extends StatefulWidget {
   const YoutubePlayer({
-    Key? key,
+    super.key,
     required this.controller,
     this.width,
     this.aspectRatio = 16 / 9,
@@ -170,7 +170,7 @@ class YoutubePlayer extends StatefulWidget {
     this.showVideoProgressIndicator = false,
     this.progressIndicatorColor,
     this.progressColors,
-  }) : super(key: key);
+  });
 
   final YoutubePlayerController controller;
   final double? width;
@@ -316,11 +316,11 @@ class ProgressBarColors {
 
 class YoutubePlayerBuilder extends StatelessWidget {
   const YoutubePlayerBuilder({
-    Key? key,
+    super.key,
     required this.player,
     required this.builder,
     this.onExitFullScreen,
-  }) : super(key: key);
+  });
 
   final YoutubePlayer player;
   final Widget Function(BuildContext, Widget) builder;

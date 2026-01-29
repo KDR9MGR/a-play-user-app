@@ -35,7 +35,7 @@ class BookingConfirmationScreen extends ConsumerWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.2),
+                color: Colors.green.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.green, width: 2),
               ),
@@ -166,7 +166,7 @@ class BookingConfirmationScreen extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue[900]?.withOpacity(0.3),
+                color: Colors.blue[900]?.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.blue[700]!),
               ),

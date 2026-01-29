@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:glassmorphism/glassmorphism.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
 import '../model/subscription_model.dart';
@@ -62,9 +60,9 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -160,14 +158,14 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
                     return Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.1 + _glowController.value * 0.2),
+                          color: Colors.white.withValues(alpha: 0.1 + _glowController.value * 0.2),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFE50914).withOpacity(_glowController.value * 0.3),
+                            color: const Color(0xFFE50914).withValues(alpha: _glowController.value * 0.3),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -215,9 +213,9 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
       margin: const EdgeInsets.all(24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         children: [
@@ -370,18 +368,18 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
               ],
             )
           : null,
-        color: isSelected ? null : Colors.white.withOpacity(0.05),
+        color: isSelected ? null : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isSelected 
-            ? Colors.white.withOpacity(0.3)
-            : Colors.white.withOpacity(0.1),
+            ? Colors.white.withValues(alpha: 0.3)
+            : Colors.white.withValues(alpha: 0.1),
           width: isSelected ? 2 : 1,
         ),
         boxShadow: isSelected
           ? [
               BoxShadow(
-                color: const Color(0xFFE50914).withOpacity(0.3),
+                color: const Color(0xFFE50914).withValues(alpha: 0.3),
                 blurRadius: 20,
                 spreadRadius: 0,
               ),
@@ -413,7 +411,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
                         Text(
                           plan.description!,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 14,
                           ),
                         ),
@@ -459,7 +457,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
                   child: Text(
                     plan.currency,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -472,7 +470,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
             Text(
               _getPlanDuration(plan.planType),
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),
@@ -483,9 +481,9 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.2),
+                  color: Colors.green.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   'Save ${plan.discountPercentage!.toStringAsFixed(1)}%',
@@ -504,7 +502,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
             Text(
               'Features:',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -526,7 +524,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
                       Text(
                         _formatFeatureName(feature.key),
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 14,
                         ),
                       ),
@@ -543,7 +541,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -600,9 +598,9 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
       margin: const EdgeInsets.all(24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -647,7 +645,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
                   child: Text(
                     feature,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 16,
                     ),
                   ),
@@ -676,7 +674,7 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFE50914).withOpacity(0.3),
+                  color: const Color(0xFFE50914).withValues(alpha: 0.3),
                   blurRadius: 20,
                   spreadRadius: 0,
                   offset: const Offset(0, 8),

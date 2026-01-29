@@ -150,10 +150,10 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.orange.withOpacity(0.1),
+                            color: AppColors.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppColors.orange.withOpacity(0.3),
+                              color: AppColors.orange.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(
@@ -504,7 +504,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

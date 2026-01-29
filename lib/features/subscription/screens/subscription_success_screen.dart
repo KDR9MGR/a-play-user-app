@@ -130,7 +130,7 @@ class _SubscriptionSuccessScreenState
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.primary.withOpacity(0.5),
+                              color: AppTheme.primary.withValues(alpha: 0.5),
                               blurRadius: 30,
                               spreadRadius: 5,
                               offset: const Offset(0, 10),
@@ -190,7 +190,7 @@ class _SubscriptionSuccessScreenState
                           ),
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: AppTheme.primary.withOpacity(0.3),
+                            color: AppTheme.primary.withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
@@ -362,7 +362,7 @@ class _SubscriptionSuccessScreenState
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppTheme.primary.withOpacity(0.1),
+            color: AppTheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -405,17 +405,17 @@ class _SubscriptionSuccessScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.1),
+        color: AppTheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.3),
+          color: AppTheme.primary.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Iconsax.tick_circle5,
             size: 16,
             color: AppTheme.primary,

@@ -225,7 +225,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
                                 children: [
                                   Icon(
                                     Icons.table_bar,
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha: 0.7),
                                     size: 24,
                                   ),
                                   const SizedBox(height: 4),
@@ -287,7 +287,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.2),
+                                  color: Colors.red.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(color: Colors.red),
                                 ),
@@ -407,7 +407,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.2),
+            color: Colors.green.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -487,7 +487,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.2),
+            color: Colors.red.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: const Icon(

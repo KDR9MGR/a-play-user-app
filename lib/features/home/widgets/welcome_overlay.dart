@@ -288,7 +288,7 @@ class _WelcomeOverlayState extends ConsumerState<WelcomeOverlay>
                       Text(
                         _getGreeting(),
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                         ),

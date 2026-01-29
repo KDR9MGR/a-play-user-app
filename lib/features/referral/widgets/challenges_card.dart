@@ -108,7 +108,7 @@ class ChallengesCard extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color:
-                      (isCompleted ? Colors.green : typeColor).withOpacity(0.2),
+                      (isCompleted ? Colors.green : typeColor).withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -136,7 +136,7 @@ class ChallengesCard extends StatelessWidget {
                           challenge.description!,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                           ),
                         ),
                       ),
@@ -146,7 +146,7 @@ class ChallengesCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.2),
+                  color: Colors.amber.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -168,7 +168,7 @@ class ChallengesCard extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: progressPercent.clamp(0.0, 1.0),
                   borderRadius: BorderRadius.circular(12),
-                  backgroundColor: Colors.white.withOpacity(0.2),
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
                   color: isCompleted ? Colors.green : typeColor,
                 ),
               ),

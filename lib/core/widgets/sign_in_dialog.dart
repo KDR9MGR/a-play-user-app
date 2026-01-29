@@ -85,7 +85,7 @@ class _SignInDialogContent extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColors.primaryGradient[0].withOpacity(0.1),
+                color: AppColors.primaryGradient[0].withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -244,7 +244,7 @@ class _SignInBottomSheetContent extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.primaryGradient[0].withOpacity(0.1),
+              color: AppColors.primaryGradient[0].withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(

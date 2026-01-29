@@ -170,7 +170,7 @@ class _PodcastScreenState extends ConsumerState<PodcastScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: isSelected ? Border.all(color: Colors.white30) : null,
         ),
@@ -288,7 +288,7 @@ class _PodcastScreenState extends ConsumerState<PodcastScreen> {
             end: Alignment.bottomCenter,
             colors: [
               Colors.transparent,
-              Colors.black.withOpacity(0.8),
+              Colors.black.withValues(alpha: 0.8),
             ],
           ),
         ),

@@ -21,7 +21,7 @@ class GiftButtonWidget extends ConsumerStatefulWidget {
 
 class _GiftButtonWidgetState extends ConsumerState<GiftButtonWidget> {
   final GiftService _giftService = GiftService();
-  bool _isLoading = false;
+  final bool _isLoading = false;
   PostGiftSummary? _giftSummary;
 
   @override
@@ -71,12 +71,12 @@ class _GiftButtonWidgetState extends ConsumerState<GiftButtonWidget> {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: userHasGifted
-                ? Colors.amber.withOpacity(0.5)
-                : Colors.grey.withOpacity(0.3),
+                ? Colors.amber.withValues(alpha: 0.5)
+                : Colors.grey.withValues(alpha: 0.3),
             width: 1,
           ),
           color: userHasGifted
-              ? Colors.amber.withOpacity(0.1)
+              ? Colors.amber.withValues(alpha: 0.1)
               : Colors.transparent,
         ),
         child: Row(
@@ -380,16 +380,16 @@ class _GiftDialogContentState extends State<_GiftDialogContent> {
                         border: Border.all(
                           color: _selectedGiftType == GiftType.custom
                               ? Theme.of(context).primaryColor
-                              : Colors.grey.withOpacity(0.3),
+                              : Colors.grey.withValues(alpha: 0.3),
                           width: _selectedGiftType == GiftType.custom ? 2 : 1,
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
-                          Text(
+                          const Text(
                             '💎',
-                            style: const TextStyle(fontSize: 24),
+                            style: TextStyle(fontSize: 24),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -510,12 +510,12 @@ class _GiftTypeButton extends StatelessWidget {
           border: Border.all(
             color: isSelected
                 ? Theme.of(context).primaryColor
-                : Colors.grey.withOpacity(0.3),
+                : Colors.grey.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
           color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
               : Colors.transparent,
         ),
         child: Column(

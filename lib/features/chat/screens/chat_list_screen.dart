@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:a_play/core/theme/app_theme.dart';
@@ -10,7 +9,6 @@ import '../controller/chat_controller.dart';
 import '../model/chat_room_model.dart';
 import 'chat_room_screen.dart';
 import 'user_search_screen.dart';
-import 'friends_screen.dart';
 
 class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
@@ -86,7 +84,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen>
                 color: Colors.grey[900],
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: AppTheme.primary.withOpacity(0.3),
+                  color: AppTheme.primary.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -117,7 +115,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen>
               color: Colors.grey[900],
               borderRadius: BorderRadius.circular(25),
               border: Border.all(
-                color: AppTheme.primary.withOpacity(0.3),
+                color: AppTheme.primary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -306,7 +304,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen>
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              border: Border.all(color: AppTheme.primary.withOpacity(0.5), width: 2),
+              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.5), width: 2),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -429,7 +427,7 @@ class ChatRoomTile extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.2),
+          color: AppTheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),

@@ -117,13 +117,13 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.primary.withOpacity(0.1),
-            AppTheme.accentCyan.withOpacity(0.1),
+            AppTheme.primary.withValues(alpha: 0.1),
+            AppTheme.accentCyan.withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.2),
+          color: AppTheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -253,13 +253,13 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
           end: Alignment.bottomRight,
           colors: [
             AppTheme.primary,
-            AppTheme.primary.withOpacity(0.8),
+            AppTheme.primary.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.3),
+            color: AppTheme.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -273,7 +273,7 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -443,7 +443,7 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.2),
+                    color: Colors.green.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -552,7 +552,7 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.1),
+                  color: AppTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(

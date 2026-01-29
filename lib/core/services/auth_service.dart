@@ -11,14 +11,18 @@ class AuthService {
       final session = _client.auth.currentSession;
       
       if (session == null) {
-        debugPrint('No session found');
+        if (kDebugMode) {
+          debugPrint('No session found');
+        }
         return false;
       }
       
       // Check if token is expired or about to expire (within 5 minutes)
       final expiresAtSeconds = session.expiresAt;
       if (expiresAtSeconds == null) {
-        debugPrint('No expiry time found in session');
+        if (kDebugMode) {
+          debugPrint('No expiry time found in session');
+        }
         return false;
       }
       
@@ -27,14 +31,18 @@ class AuthService {
       final timeUntilExpiry = expiresAt.difference(now);
       
       if (timeUntilExpiry.inMinutes <= 5) {
-        debugPrint('Token expiring soon, refreshing...');
+        if (kDebugMode) {
+          debugPrint('Token expiring soon, refreshing...');
+        }
         await refreshSession();
         return _client.auth.currentSession != null;
       }
       
       return true;
     } catch (e) {
-      debugPrint('Error checking session validity: $e');
+      if (kDebugMode) {
+        debugPrint('Error checking session validity: $e');
+      }
       return false;
     }
   }
@@ -46,9 +54,13 @@ class AuthService {
       if (response.session == null) {
         throw Exception('Failed to refresh session');
       }
-      debugPrint('Session refreshed successfully');
+      if (kDebugMode) {
+        debugPrint('Session refreshed successfully');
+      }
     } catch (e) {
-      debugPrint('Error refreshing session: $e');
+      if (kDebugMode) {
+        debugPrint('Error refreshing session: $e');
+      }
       await _client.auth.signOut();
       throw Exception('Session expired. Please sign in again.');
     }
@@ -65,11 +77,15 @@ class AuthService {
           e.toString().contains('PGRST301') ||
           e.toString().contains('Unauthorized')) {
         try {
-          debugPrint('JWT expired, attempting to refresh...');
+          if (kDebugMode) {
+            debugPrint('JWT expired, attempting to refresh...');
+          }
           await refreshSession();
           return await operation();
         } catch (refreshError) {
-          debugPrint('Failed to refresh session: $refreshError');
+          if (kDebugMode) {
+            debugPrint('Failed to refresh session: $refreshError');
+          }
           await _client.auth.signOut();
           throw Exception('Session expired. Please sign in again.');
         }
@@ -83,7 +99,9 @@ class AuthService {
     try {
       await _client.auth.signOut();
     } catch (e) {
-      debugPrint('Error during sign out: $e');
+      if (kDebugMode) {
+        debugPrint('Error during sign out: $e');
+      }
     }
   }
   
@@ -112,7 +130,9 @@ class AuthService {
       
       return 'User';
     } catch (e) {
-      debugPrint('Error getting user name: $e');
+      if (kDebugMode) {
+        debugPrint('Error getting user name: $e');
+      }
       return 'User';
     }
   }

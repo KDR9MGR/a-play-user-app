@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:a_play/features/home/model/club_model.dart';
 import 'package:a_play/features/club_booking/screens/club_details_screen.dart';
-import 'package:go_router/go_router.dart';
 
 class ClubsGrid extends ConsumerWidget {
   final List<Club> clubs;
@@ -62,7 +61,7 @@ class ClubCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                   image: DecorationImage(
                     image: NetworkImage(club.logoUrl ?? ''),
                     fit: BoxFit.cover,

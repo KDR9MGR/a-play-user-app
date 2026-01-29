@@ -32,7 +32,7 @@ class EventSearchDelegate extends SearchDelegate<EventModel?> {
       ),
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: TextStyle(
-          color: theme.colorScheme.onSurface.withOpacity(0.7),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
         ),
         border: InputBorder.none,
       ),
@@ -86,13 +86,13 @@ class EventSearchDelegate extends SearchDelegate<EventModel?> {
             Icon(
               Icons.search,
               size: 64,
-              color: theme.colorScheme.onSurface.withOpacity(0.5),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
               'No recent searches',
               style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -179,7 +179,7 @@ class EventSearchDelegate extends SearchDelegate<EventModel?> {
           subtitle: Text(
             event.startDate.toString().split(' ')[0],
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           onTap: () {

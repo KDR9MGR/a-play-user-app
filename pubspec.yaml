@@ -128,6 +128,7 @@ dependencies:
   tutorial_coach_mark: ^1.2.11
   onesignal_flutter: ^5.3.4
   confetti: ^0.7.0
+  firebase_crashlytics: ^5.0.7
 
 dev_dependencies:
   flutter_test:

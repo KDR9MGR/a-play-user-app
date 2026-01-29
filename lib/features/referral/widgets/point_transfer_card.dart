@@ -172,7 +172,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.purple.withOpacity(0.3),
+            color: Colors.purple.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -187,7 +187,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -212,7 +212,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
                     Text(
                       'Available: $currentPoints points',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontSize: 14,
                       ),
                     ),
@@ -242,10 +242,10 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                         ),
                       ),
                       child: TextField(
@@ -254,11 +254,11 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
                         decoration: InputDecoration(
                           hintText: 'Enter username',
                           hintStyle: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                           ),
                           prefixIcon: Icon(
                             Iconsax.user,
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                           ),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
@@ -272,7 +272,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
                   const SizedBox(width: 12),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
@@ -303,17 +303,17 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.green.withOpacity(0.5),
+                  color: Colors.green.withValues(alpha: 0.5),
                 ),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     backgroundImage: _selectedUser!['avatar_url'] != null
                         ? NetworkImage(_selectedUser!['avatar_url'])
                         : null,
@@ -337,7 +337,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
                           Text(
                             _selectedUser!['full_name'],
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 12,
                             ),
                           ),
@@ -371,10 +371,10 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
                 child: TextField(
@@ -385,11 +385,11 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
                   decoration: InputDecoration(
                     hintText: 'Enter points amount',
                     hintStyle: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                     ),
                     prefixIcon: Icon(
                       Iconsax.coin,
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
@@ -411,17 +411,17 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
               Text(
                 'Note (Optional)',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 14,
                 ),
               ),
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
                 child: TextField(
@@ -431,7 +431,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
                   decoration: InputDecoration(
                     hintText: 'Add a note for this transfer...',
                     hintStyle: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(

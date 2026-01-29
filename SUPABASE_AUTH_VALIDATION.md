@@ -212,7 +212,7 @@ final isAuthenticated = authState.value != null;
 
 ## 🔍 MCP Supabase Configuration
 
-**File:** [.mcp.json](.mcp.json)
+**File:** `.mcp.json`
 
 ```json
 {
@@ -225,7 +225,7 @@ final isAuthenticated = authState.value != null;
         "-y",
         "@supabase/mcp-server-supabase@latest",
         "--access-token",
-        "sbp_9a32a131341f1a37ceb951e14ed594e671a36fa7"
+        "sbp_REDACTED"
       ]
     }
   }

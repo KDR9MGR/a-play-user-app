@@ -125,7 +125,7 @@ class ProfileContent extends StatelessWidget {
               Row(
                 children: [
                   SvgPicture.asset('assets/images/app_logo.svg',
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       width: 32,
                       height: 32),
                 ],

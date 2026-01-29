@@ -1,34 +1,47 @@
+import 'dart:async';
+
 import 'package:a_play/core/theme/app_theme.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:a_play/config/router.dart';
 import 'package:a_play/core/config/supabase_config.dart';
+import 'package:a_play/core/config/env.dart';
 import 'package:a_play/core/widgets/connectivity_overlay.dart';
 import 'package:a_play/core/widgets/auth_error_handler.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:a_play/features/subscription/service/platform_subscription_service.dart';
 import 'package:a_play/core/services/realtime_sync_service.dart';
+import 'package:a_play/firebase_options.dart';
 
 // Initialize app state provider
 final appInitializationProvider = StateProvider<bool>((ref) => false);
  
 Future<void> main() async {
-  try {
-    // Ensure Flutter bindings are initialized first
-    WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
 
-    // Clear any cached state in debug mode
-    assert(() {
-      debugPrint('Debug mode: Clearing cached state for fresh restart');
-      return true;
-    }());
+  await Env.initialize();
 
-    // Initialize Connectivity Plugin
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  FlutterError.onError = (details) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  runZonedGuarded(() async {
     await Connectivity().checkConnectivity();
 
-    // Set system preferences
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -43,46 +56,39 @@ Future<void> main() async {
       ),
     );
 
-    debugPrint('Initializing Supabase with URL: ${SupabaseConfig.projectUrl}');
-    
-    // Initialize Supabase first
-    try {
-      await Supabase.initialize(
-        url: SupabaseConfig.projectUrl,
-        anonKey: SupabaseConfig.anonKey,
-        debug: true,
-      );
-    } catch (e) {
-      // If already initialized, that's fine in debug mode
-      debugPrint('Supabase initialization: $e');
+    final supabaseUrl = SupabaseConfig.projectUrl;
+    final supabaseAnonKey = SupabaseConfig.anonKey;
+
+    if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
+      throw Exception('Supabase credentials are missing in .env');
     }
 
-    debugPrint('Supabase initialized successfully');
+    await Supabase.initialize(
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
+      debug: kDebugMode,
+    );
 
-    // Initialize Platform Subscription Service early for debugging
-    debugPrint('=== EARLY PLATFORM SUBSCRIPTION SERVICE INIT ===');
     final platformService = PlatformSubscriptionService();
     await platformService.initialize();
-    debugPrint('=== EARLY PLATFORM SUBSCRIPTION SERVICE INIT COMPLETE ===');
 
-    // Initialize Real-time Sync Service for live data updates
-    debugPrint('=== INITIALIZING REAL-TIME SYNC SERVICE ===');
     final realtimeService = RealtimeSyncService();
     await realtimeService.initialize();
-    debugPrint('✅ Real-time sync initialized - User app will receive live updates from admin/org apps');
 
-    // Run the app only after Supabase is initialized
     runApp(
-      // Use a new ProviderScope for fresh state in debug mode
       ProviderScope(
         key: ValueKey('app_${DateTime.now().millisecondsSinceEpoch}'),
         child: const APlayApp(),
       ),
     );
-  } catch (e, stackTrace) {
-    debugPrint('Error in main: $e');
-    debugPrint('Stack trace: $stackTrace');
-    // Show error UI
+  }, (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
+
+    if (kDebugMode) {
+      debugPrint('Error in main: $error');
+      debugPrint('Stack trace: $stackTrace');
+    }
+
     runApp(
       MaterialApp(
         home: Scaffold(
@@ -93,7 +99,7 @@ Future<void> main() async {
                 const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
                 Text(
-                  'Failed to initialize app: $e',
+                  'Failed to initialize app: $error',
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16),
                 ),
@@ -108,7 +114,7 @@ Future<void> main() async {
         ),
       ),
     );
-  }
+  });
 }
 
 class APlayApp extends ConsumerWidget {

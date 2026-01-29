@@ -65,14 +65,22 @@ if [ -f ".env" ]; then
     echo -e "${GREEN}✓ .env file found${NC}"
 else
     echo -e "${RED}✗ .env file missing!${NC}"
-    echo "Creating .env file..."
-    cat > .env << 'EOF'
-SUPABASE_URL=https://yvnfhsipyfxdmulajbgl.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2bmZoc2lweWZ4ZG11bGFqYmdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2NDUwNTgsImV4cCI6MjA2MzIyMTA1OH0.9mw2t1IKIHJkh30CdWcAfB2JhuJYdHQ_e_iHOZWcIqs
-PAYSTACK_PUBLIC_KEY=pk_live_2185650de44c83c0fe00df70cbdf4bb3bb9b8f74
-PAYSTACK_SECRET_KEY=sk_live_feb2476ad491d30a6b3cfc643080769d21724357
+    if [ -f ".env.example" ]; then
+        echo "Creating .env from .env.example..."
+        cp .env.example .env
+        echo -e "${GREEN}✓ .env file created from .env.example${NC}"
+        echo -e "${YELLOW}⚠ Please fill in required keys inside .env before running the app.${NC}"
+    else
+        echo "Creating .env template..."
+        cat > .env << 'EOF'
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+PAYSTACK_PUBLIC_KEY=
+PAYSTACK_SECRET_KEY=
 EOF
-    echo -e "${GREEN}✓ .env file created${NC}"
+        echo -e "${GREEN}✓ .env template created${NC}"
+        echo -e "${YELLOW}⚠ Please fill in required keys inside .env before running the app.${NC}"
+    fi
 fi
 echo ""
 

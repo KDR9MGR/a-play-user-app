@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:a_play/features/home/model/club_model.dart';
 import 'package:a_play/features/club_booking/provider/club_booking_provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 
 class ClubDetailsScreen extends ConsumerStatefulWidget {

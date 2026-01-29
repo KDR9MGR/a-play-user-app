@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../core/theme/app_colors.dart';
 
 /// Search bar widget for the home page
 class SearchBarSection extends StatelessWidget {

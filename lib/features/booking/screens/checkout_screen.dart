@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:a_play/core/config/paystack_config.dart';
-import 'package:a_play/features/booking/model/booking_model.dart';
 import 'package:a_play/features/booking/model/zoneModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -95,8 +94,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     setState(() => isLoading = true);
     try {
-      final secretKey = PaystackConfig.secretKey;
-      final publicKey = PaystackConfig.publicKey;
+      const secretKey = PaystackConfig.secretKey;
+      const publicKey = PaystackConfig.publicKey;
 
       final email = user.email;
       final reference = 'aplay_${DateTime.now().millisecondsSinceEpoch}';
@@ -251,7 +250,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.grey[900]?.withOpacity(0.5),
+              color: Colors.grey[900]?.withValues(alpha: 0.5),
               border: Border(
                 bottom: BorderSide(
                   color: Colors.grey[800]!,
@@ -329,10 +328,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[900]?.withOpacity(0.3),
+                      color: Colors.grey[900]?.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.grey[800]!.withOpacity(0.5),
+                        color: Colors.grey[800]!.withValues(alpha: 0.5),
                         width: 1,
                       ),
                     ),

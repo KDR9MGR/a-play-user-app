@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../model/subscription_model.dart';
 
@@ -37,7 +38,9 @@ class TierService {
 
       return UserTierInfo.fromJson(response);
     } catch (e) {
-      print('Error fetching user tier info: $e');
+      if (kDebugMode) {
+        debugPrint('Error fetching user tier info: $e');
+      }
       // Create new tier info for user if doesn't exist
       return await createUserTierInfo(userId);
     }

@@ -14,7 +14,7 @@ class YoutubePlayer extends StatelessWidget {
   final List<Widget>? bottomActions;
 
   const YoutubePlayer({
-    Key? key,
+    super.key,
     required this.controller,
     this.width,
     this.aspectRatio = 16 / 9,
@@ -24,7 +24,7 @@ class YoutubePlayer extends StatelessWidget {
     this.progressIndicatorColor,
     this.progressColors,
     this.bottomActions,
-  }) : super(key: key);
+  });
 
   // Static method to get thumbnail of a video
   static String getThumbnail({
@@ -92,10 +92,10 @@ class YoutubePlayerBuilder extends StatelessWidget {
   final Widget Function(BuildContext, Widget) builder;
 
   const YoutubePlayerBuilder({
-    Key? key,
+    super.key,
     required this.player,
     required this.builder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -109,10 +109,10 @@ class RawYoutubePlayer extends StatelessWidget {
   final Function? onWebViewCreated;
 
   const RawYoutubePlayer({
-    Key? key,
+    super.key,
     required this.source,
     this.onWebViewCreated,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

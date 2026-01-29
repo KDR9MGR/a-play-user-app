@@ -2,7 +2,6 @@ import 'package:a_play/core/theme/app_theme.dart';
 import 'package:a_play/features/concierge/screens/service_detail_page.dart';
 import 'package:a_play/features/widgets/squircle_container.dart';
 import 'package:a_play/features/subscription/utils/subscription_utils.dart';
-import 'package:a_play/features/subscription/provider/subscription_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
@@ -63,7 +62,7 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
                             center: Alignment.topRight,
                             radius: 1.0,
                             colors: [
-                              Colors.white.withOpacity(0.1),
+                              Colors.white.withValues(alpha: 0.1),
                               Colors.transparent,
                             ],
                           ),
@@ -104,7 +103,7 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
                           Text(
                             'Your personal lifestyle assistant',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
@@ -433,12 +432,12 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
               color: const Color.fromARGB(255, 19, 19, 19),
               
               border: Border.all(
-                color: AppTheme.primary.withOpacity(0.3),
+                color: AppTheme.primary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.primary.withOpacity(0.15),
+                  color: AppTheme.primary.withValues(alpha: 0.15),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -487,7 +486,7 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
                                     BlendMode.multiply,
                                   )
                                 : ColorFilter.mode(
-                                    Colors.grey.withOpacity(0.6), 
+                                    Colors.grey.withValues(alpha: 0.6), 
                                     BlendMode.saturation,
                                   ),
                             child: Lottie.asset(
@@ -505,7 +504,7 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
                               fontWeight: FontWeight.bold,
                               color: hasPremiumAccess 
                                   ? Colors.white 
-                                  : Colors.white.withOpacity(0.5),
+                                  : Colors.white.withValues(alpha: 0.5),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -520,7 +519,7 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
+                        color: Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Center(
@@ -577,12 +576,12 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
         decoration: BoxDecoration(
           color: Colors.grey[900],
           border: Border.all(
-            color: AppTheme.primary.withOpacity(0.4),
+            color: AppTheme.primary.withValues(alpha: 0.4),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primary.withOpacity(0.1),
+              color: AppTheme.primary.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -633,18 +632,18 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppTheme.primary.withOpacity(0.1),
-              AppTheme.primary.withOpacity(0.05),
+              AppTheme.primary.withValues(alpha: 0.1),
+              AppTheme.primary.withValues(alpha: 0.05),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppTheme.primary.withOpacity(0.5),
+            color: AppTheme.primary.withValues(alpha: 0.5),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primary.withOpacity(0.2),
+              color: AppTheme.primary.withValues(alpha: 0.2),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

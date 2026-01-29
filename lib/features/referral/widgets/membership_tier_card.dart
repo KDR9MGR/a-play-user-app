@@ -125,7 +125,7 @@ class MembershipTierCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isCurrent
-            ? _getTierColor(tier.name).withOpacity(0.1)
+            ? _getTierColor(tier.name).withValues(alpha: 0.1)
             : Colors.transparent,
         border: Border.all(
           color: isCurrent
@@ -140,7 +140,7 @@ class MembershipTierCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _getTierColor(tier.name).withOpacity(0.2),
+              color: _getTierColor(tier.name).withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -171,7 +171,7 @@ class MembershipTierCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: _getTierColor(tier.name).withOpacity(0.2),
+                          color: _getTierColor(tier.name).withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(

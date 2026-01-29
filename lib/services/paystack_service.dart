@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class PaystackService {
-  static const String _secretKey = String.fromEnvironment('PAYSTACK_SECRET_KEY', defaultValue: 'sk_live_feb2476ad491d30a6b3cfc643080769d21724357');
-  static const String _publicKey = String.fromEnvironment('PAYSTACK_PUBLIC_KEY', defaultValue: 'pk_live_2185650de44c83c0fe00df70cbdf4bb3bb9b8f74');
+  static String get _secretKey => dotenv.env['PAYSTACK_SECRET_KEY'] ?? '';
 
   // Initialize payment
   Future<Map<String, dynamic>> initializeTransaction({

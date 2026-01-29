@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:a_play/core/constants/colors.dart';
 import 'package:a_play/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -164,7 +163,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.1),
+          color: AppTheme.primary.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -180,8 +179,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.primary.withOpacity(0.2),
-                      AppTheme.primary.withOpacity(0.1),
+                      AppTheme.primary.withValues(alpha: 0.2),
+                      AppTheme.primary.withValues(alpha: 0.1),
                     ],
                   ),
                 ),
@@ -239,7 +238,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primary.withOpacity(0.3),
+                          color: AppTheme.primary.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -270,10 +269,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.1),
+              color: AppTheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AppTheme.primary.withOpacity(0.3),
+                color: AppTheme.primary.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -335,7 +334,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.1),
+          color: AppTheme.primary.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -399,7 +398,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           color: const Color(0xFF1A1A1A),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppTheme.primary.withOpacity(0.1),
+            color: AppTheme.primary.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -408,7 +407,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -464,7 +463,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.1),
+          color: AppTheme.primary.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -473,7 +472,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppTheme.primary.withOpacity(0.1),
+            color: AppTheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -513,14 +512,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           _showSignOutDialog();
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red.withOpacity(0.1),
+          backgroundColor: Colors.red.withValues(alpha: 0.1),
           foregroundColor: Colors.red,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(
-              color: Colors.red.withOpacity(0.3),
+              color: Colors.red.withValues(alpha: 0.3),
               width: 1,
             ),
           ),

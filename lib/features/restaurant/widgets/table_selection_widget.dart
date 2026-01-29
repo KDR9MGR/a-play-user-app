@@ -176,7 +176,7 @@ class TableSelectionWidget extends ConsumerWidget {
               onTap: () => onTableSelected(table),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.orange.withOpacity(0.2) : Colors.grey[800],
+                  color: isSelected ? Colors.orange.withValues(alpha: 0.2) : Colors.grey[800],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected ? Colors.orange : Colors.grey[700]!,

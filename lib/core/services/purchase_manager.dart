@@ -153,7 +153,7 @@ class PurchaseManager extends ChangeNotifier {
     
     // Check if store is available
     if (!isAvailable) {
-      final errorMsg = 'Store not available. This is normal in simulator - test on a physical device.';
+      const errorMsg = 'Store not available. This is normal in simulator - test on a physical device.';
       if (kDebugMode) print('PurchaseManager: $errorMsg');
       onPurchaseError?.call(errorMsg);
       return;
@@ -161,7 +161,7 @@ class PurchaseManager extends ChangeNotifier {
 
     // Check if products are loaded
     if (products.isEmpty) {
-      final errorMsg = 'No products loaded. Please wait for initialization to complete.';
+      const errorMsg = 'No products loaded. Please wait for initialization to complete.';
       if (kDebugMode) print('PurchaseManager: $errorMsg');
       onPurchaseError?.call(errorMsg);
       return;
@@ -244,7 +244,7 @@ class PurchaseManager extends ChangeNotifier {
       await Future.delayed(const Duration(seconds: 2));
       
       // Cancel the temporary subscription
-      await restoreSubscription?.cancel();
+      await restoreSubscription.cancel();
       
       if (kDebugMode) print('PurchaseManager: Restore completed. Found ${restoredPurchases.length} purchases');
       

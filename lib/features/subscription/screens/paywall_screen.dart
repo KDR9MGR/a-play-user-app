@@ -74,8 +74,8 @@ class PaywallScreen extends ConsumerWidget {
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: [
-                              AppTheme.primary.withOpacity(0.2),
-                              AppTheme.primary.withOpacity(0.1),
+                              AppTheme.primary.withValues(alpha: 0.2),
+                              AppTheme.primary.withValues(alpha: 0.1),
                               Colors.transparent,
                             ],
                           ),
@@ -258,7 +258,7 @@ class PaywallScreen extends ConsumerWidget {
           color: AppTheme.backgroundMiddle,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppTheme.primary.withOpacity(0.1),
+            color: AppTheme.primary.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -267,7 +267,7 @@ class PaywallScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(

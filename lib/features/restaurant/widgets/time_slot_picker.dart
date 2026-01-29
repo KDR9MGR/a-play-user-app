@@ -95,7 +95,7 @@ class TimeSlotPicker extends ConsumerWidget {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: isSelected 
-                                ? Colors.orange.withOpacity(0.2)
+                                ? Colors.orange.withValues(alpha: 0.2)
                                 : isAvailable 
                                     ? Colors.grey[800]
                                     : Colors.grey[850],

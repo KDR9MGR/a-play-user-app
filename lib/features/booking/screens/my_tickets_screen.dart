@@ -364,7 +364,7 @@ class TicketCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
         ),
       clipBehavior: Clip.antiAlias,
@@ -386,7 +386,7 @@ class TicketCard extends StatelessWidget {
                         imageUrl: booking.eventCoverImage!,
                         fit: BoxFit.cover,
                         errorWidget: (context, error, stackTrace) => Container(
-                          color: AppColors.orange.withOpacity(0.2),
+                          color: AppColors.orange.withValues(alpha: 0.2),
                           child: const Icon(
                             Iconsax.gallery,
                             size: 30,
@@ -398,7 +398,7 @@ class TicketCard extends StatelessWidget {
                         booking.eventCoverImage!,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
-                      color: AppColors.orange.withOpacity(0.2),
+                      color: AppColors.orange.withValues(alpha: 0.2),
                           child: const Icon(
                             Iconsax.gallery,
                             size: 30,
@@ -533,12 +533,12 @@ class TicketCard extends StatelessWidget {
                                 Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                   decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),  
               border: Border(
                
                 top: BorderSide(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),
@@ -564,7 +564,7 @@ class TicketCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.orange.withOpacity(0.2),
+                      color: AppColors.orange.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -269,7 +270,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
       height: 8,
       width: isActive ? 24 : 8,
       decoration: BoxDecoration(
-        color: isActive ? AppTheme.primary : AppTheme.textMuted.withOpacity(0.3),
+        color: isActive ? AppTheme.primary : AppTheme.textMuted.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -300,7 +301,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.3),
+            color: AppTheme.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -317,7 +318,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Iconsax.crown_15, color: Colors.white, size: 24),
@@ -331,7 +332,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -340,7 +341,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                           'Expires in $daysUntilExpiry ${daysUntilExpiry == 1 ? 'day' : 'days'}',
                           style: GoogleFonts.poppins(
                             fontSize: 11,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                     ],
@@ -350,13 +351,13 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Iconsax.verify5,
                       color: Colors.white,
                       size: 14,
@@ -420,7 +421,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                   ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1.5),
+                    side: BorderSide(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -465,13 +466,13 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
   }) {
     return Row(
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.9), size: 16),
+        Icon(icon, color: Colors.white.withValues(alpha: 0.9), size: 16),
         const SizedBox(width: 8),
         Text(
           '$label: ',
           style: GoogleFonts.poppins(
             fontSize: 13,
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
           ),
         ),
         Text(
@@ -518,11 +519,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
             ),
             borderRadius: BorderRadius.circular(32),
             border: Border.all(
-              color: isActive ? AppTheme.primary.withOpacity(0.5) : Colors.white.withOpacity(0.1),
+              color: isActive ? AppTheme.primary.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.1),
               width: 2,
             ),
             boxShadow: isActive
-                ? [BoxShadow(color: AppTheme.primary.withOpacity(0.2), blurRadius: 30, offset: const Offset(0, 15))]
+                ? [BoxShadow(color: AppTheme.primary.withValues(alpha: 0.2), blurRadius: 30, offset: const Offset(0, 15))]
                 : [],
           ),
           child: ClipRRect(
@@ -533,7 +534,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [AppTheme.primary.withOpacity(0.05), Colors.transparent],
+                        colors: [AppTheme.primary.withValues(alpha: 0.05), Colors.transparent],
                         begin: Alignment.topRight,
                         end: Alignment.bottomLeft,
                       ),
@@ -586,18 +587,18 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withOpacity(0.1),
+                              color: AppTheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 1),
+                              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2), width: 1),
                             ),
                             child: Icon(_getPlanIcon(plan.name), color: AppTheme.primary, size: 28),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withOpacity(0.1),
+                              color: AppTheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 1),
+                              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2), width: 1),
                             ),
                             child: Text(
                               plan.durationDays != null && plan.durationDays! > 0
@@ -671,7 +672,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                                 style: GoogleFonts.poppins(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: Colors.white.withValues(alpha: 0.7),
                                   height: 1,
                                 ),
                               ),
@@ -684,8 +685,8 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.white.withOpacity(0.1),
-                              Colors.white.withOpacity(0.05),
+                              Colors.white.withValues(alpha: 0.1),
+                              Colors.white.withValues(alpha: 0.05),
                               Colors.transparent,
                             ],
                           ),
@@ -710,7 +711,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                             Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: AppTheme.primary.withOpacity(0.1),
+                                color: AppTheme.primary.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Iconsax.tick_circle5, color: AppTheme.primary, size: 16),
@@ -721,7 +722,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                                 feature,
                                 style: GoogleFonts.poppins(
                                   fontSize: 13,
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   height: 1.4,
                                 ),
                                 maxLines: 2,
@@ -740,7 +741,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primary,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: AppTheme.textMuted.withOpacity(0.2),
+                            disabledBackgroundColor: AppTheme.textMuted.withValues(alpha: 0.2),
                             disabledForegroundColor: AppTheme.textMuted,
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -886,16 +887,19 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
 
       setState(() => _isProcessingPayment = true);
 
-      // Debug logging
-      print('=== SUBSCRIPTION PAYMENT METHOD SELECTION ===');
-      print('Platform.isIOS: ${Platform.isIOS}');
-      print('shouldUseNativeIAP: ${_platformService.shouldUseNativeIAP()}');
-      print('appleIAPService available: ${_platformService.appleIAPService != null}');
+      if (kDebugMode) {
+        debugPrint('=== SUBSCRIPTION PAYMENT METHOD SELECTION ===');
+        debugPrint('Platform.isIOS: ${Platform.isIOS}');
+        debugPrint('shouldUseNativeIAP: ${_platformService.shouldUseNativeIAP()}');
+        debugPrint('appleIAPService available: ${_platformService.appleIAPService != null}');
+      }
 
       // iOS MUST use Apple IAP only (Apple App Store guideline 3.1.1)
       // PayStack is NOT allowed for digital subscriptions on iOS
       if (Platform.isIOS) {
-        print('iOS detected - Using Apple IAP ONLY (App Store requirement)');
+        if (kDebugMode) {
+          debugPrint('iOS detected - Using Apple IAP ONLY (App Store requirement)');
+        }
         await _handleAppleIAPPurchase(plan);
       } else {
         // Android and other platforms can use PayStack
@@ -909,7 +913,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           }
         }
 
-        print('Non-iOS platform - Using Paystack for subscription');
+        if (kDebugMode) {
+          debugPrint('Non-iOS platform - Using Paystack for subscription');
+        }
         await _handlePaystackPurchase(plan);
       }
     } catch (e) {
@@ -927,18 +933,24 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
 
   Future<void> _handleAppleIAPPurchase(SubscriptionPlan plan) async {
     try {
-      print('Setting up Apple IAP callbacks...');
+      if (kDebugMode) {
+        debugPrint('Setting up Apple IAP callbacks...');
+      }
       
       // Debug: Print PurchaseManager status
       if (_platformService.appleIAPService != null) {
         final debugInfo = _platformService.appleIAPService!.getDebugInfo();
-        print('PurchaseManager Debug Info: $debugInfo');
+        if (kDebugMode) {
+          debugPrint('PurchaseManager Debug Info: $debugInfo');
+        }
       }
       
       // Set up callbacks for purchase success, error, and cancellation
       if (_platformService.appleIAPService != null) {
         _platformService.appleIAPService!.onPurchaseSuccess = (planId, transactionId, receiptData) async {
-          print('Apple IAP purchase successful: $planId, $transactionId');
+          if (kDebugMode) {
+            debugPrint('Apple IAP purchase successful: $planId, $transactionId');
+          }
           // Stop timeout and immediately stop processing indicator
           _purchaseTimeout?.cancel();
           if (mounted) {
@@ -968,7 +980,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
               );
             }
           } catch (e) {
-            print('Backend verification failed: $e');
+            if (kDebugMode) {
+              debugPrint('Backend verification failed: $e');
+            }
 
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -982,7 +996,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         };
 
         _platformService.appleIAPService!.onPurchaseError = (error) {
-          print('Apple IAP purchase error: ${error.message}');
+          if (kDebugMode) {
+            debugPrint('Apple IAP purchase error: ${error.message}');
+          }
           _purchaseTimeout?.cancel();
           setState(() => _isProcessingPayment = false);
           
@@ -1152,11 +1168,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                     hintStyle: GoogleFonts.poppins(color: AppTheme.textMuted),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.textMuted.withOpacity(0.3)),
+                      borderSide: BorderSide(color: AppTheme.textMuted.withValues(alpha: 0.3)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.textMuted.withOpacity(0.3)),
+                      borderSide: BorderSide(color: AppTheme.textMuted.withValues(alpha: 0.3)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),

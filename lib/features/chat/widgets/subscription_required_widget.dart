@@ -180,7 +180,7 @@ class InlineSubscriptionPrompt extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.amber.withOpacity(0.3),
+            color: Colors.amber.withValues(alpha: 0.3),
           ),
         ),
         child: Row(

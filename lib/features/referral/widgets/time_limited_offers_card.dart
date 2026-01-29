@@ -70,7 +70,7 @@ class TimeLimitedOffersCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            offerColor.withOpacity(0.1),
+            offerColor.withValues(alpha: 0.1),
             Colors.transparent,
           ],
           begin: Alignment.topLeft,
@@ -78,7 +78,7 @@ class TimeLimitedOffersCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: offerColor.withOpacity(0.5),
+          color: offerColor.withValues(alpha: 0.5),
         ),
       ),
       child: Column(
@@ -89,7 +89,7 @@ class TimeLimitedOffersCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: offerColor.withOpacity(0.2),
+                  color: offerColor.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -127,7 +127,7 @@ class TimeLimitedOffersCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.2),
+                  color: Colors.amber.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

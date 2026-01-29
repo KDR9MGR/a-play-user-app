@@ -230,7 +230,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
       height: 8,
       width: isActive ? 24 : 8,
       decoration: BoxDecoration(
-        color: isActive ? AppTheme.primary : AppTheme.textMuted.withOpacity(0.3),
+        color: isActive ? AppTheme.primary : AppTheme.textMuted.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -255,7 +255,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.3),
+            color: AppTheme.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -269,7 +269,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Iconsax.crown_1, color: Colors.white, size: 24),
@@ -318,7 +318,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                       'Amount',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -387,11 +387,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
             ),
             borderRadius: BorderRadius.circular(32),
             border: Border.all(
-              color: isActive ? AppTheme.primary.withOpacity(0.5) : Colors.white.withOpacity(0.1),
+              color: isActive ? AppTheme.primary.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.1),
               width: 2,
             ),
             boxShadow: isActive
-                ? [BoxShadow(color: AppTheme.primary.withOpacity(0.2), blurRadius: 30, offset: const Offset(0, 15))]
+                ? [BoxShadow(color: AppTheme.primary.withValues(alpha: 0.2), blurRadius: 30, offset: const Offset(0, 15))]
                 : [],
           ),
           child: ClipRRect(
@@ -402,7 +402,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [AppTheme.primary.withOpacity(0.05), Colors.transparent],
+                        colors: [AppTheme.primary.withValues(alpha: 0.05), Colors.transparent],
                         begin: Alignment.topRight,
                         end: Alignment.bottomLeft,
                       ),
@@ -452,18 +452,18 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withOpacity(0.1),
+                              color: AppTheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 1),
+                              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2), width: 1),
                             ),
                             child: Icon(_getPlanIcon(plan.name), color: AppTheme.primary, size: 28),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withOpacity(0.1),
+                              color: AppTheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 1),
+                              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2), width: 1),
                             ),
                             child: Text(
                               '${plan.durationDays} Days',
@@ -535,7 +535,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                                 style: GoogleFonts.poppins(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: Colors.white.withValues(alpha: 0.7),
                                   height: 1,
                                 ),
                               ),
@@ -548,8 +548,8 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.white.withOpacity(0.1),
-                              Colors.white.withOpacity(0.05),
+                              Colors.white.withValues(alpha: 0.1),
+                              Colors.white.withValues(alpha: 0.05),
                               Colors.transparent,
                             ],
                           ),
@@ -574,7 +574,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                             Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: AppTheme.primary.withOpacity(0.1),
+                                color: AppTheme.primary.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Iconsax.tick_circle5, color: AppTheme.primary, size: 16),
@@ -585,7 +585,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                                 feature,
                                 style: GoogleFonts.poppins(
                                   fontSize: 13,
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   height: 1.4,
                                 ),
                                 maxLines: 2,
@@ -604,7 +604,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primary,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: AppTheme.textMuted.withOpacity(0.2),
+                            disabledBackgroundColor: AppTheme.textMuted.withValues(alpha: 0.2),
                             disabledForegroundColor: AppTheme.textMuted,
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -830,11 +830,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                     hintStyle: GoogleFonts.poppins(color: AppTheme.textMuted),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.textMuted.withOpacity(0.3)),
+                      borderSide: BorderSide(color: AppTheme.textMuted.withValues(alpha: 0.3)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.textMuted.withOpacity(0.3)),
+                      borderSide: BorderSide(color: AppTheme.textMuted.withValues(alpha: 0.3)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1042,7 +1042,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
            SnackBar(
              content: Row(
                children: [
-                 SizedBox(
+                 const SizedBox(
                    width: 20,
                    height: 20,
                    child: CircularProgressIndicator(
@@ -1050,12 +1050,12 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                    ),
                  ),
-                 SizedBox(width: 16),
+                 const SizedBox(width: 16),
                  Text('Restoring purchases...', style: GoogleFonts.poppins()),
                ],
              ),
              backgroundColor: Colors.blue,
-             duration: Duration(seconds: 30), // Long duration for restore process
+             duration: const Duration(seconds: 30), // Long duration for restore process
            ),
          );
        }
@@ -1076,7 +1076,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
              SnackBar(
                content: Text(message, style: GoogleFonts.poppins()),
                backgroundColor: activeSubscriptions > 0 ? Colors.green : Colors.orange,
-               duration: Duration(seconds: 4),
+               duration: const Duration(seconds: 4),
              ),
            );
          } else {
@@ -1084,7 +1084,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
              SnackBar(
                content: Text('No previous purchases found to restore', style: GoogleFonts.poppins()),
                backgroundColor: Colors.orange,
-               duration: Duration(seconds: 3),
+               duration: const Duration(seconds: 3),
              ),
            );
          }
@@ -1111,7 +1111,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
            SnackBar(
              content: Text(errorMessage, style: GoogleFonts.poppins()),
              backgroundColor: Colors.red,
-             duration: Duration(seconds: 4),
+             duration: const Duration(seconds: 4),
              action: SnackBarAction(
                label: 'Retry',
                textColor: Colors.white,

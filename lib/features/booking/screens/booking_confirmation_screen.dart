@@ -5,7 +5,6 @@ import 'package:a_play/core/constants/colors.dart';
 import 'package:a_play/features/booking/service/booking_service.dart';
 import 'package:intl/intl.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:a_play/features/home/screens/home_screen2.dart';
 import 'package:go_router/go_router.dart';
 
 // Provider for loading state
@@ -167,15 +166,15 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.green.withOpacity(0.2),
-                              Colors.green.withOpacity(0.05),
+                              Colors.green.withValues(alpha: 0.2),
+                              Colors.green.withValues(alpha: 0.05),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                           ),
                           borderRadius: BorderRadius.circular(32),
                           border: Border.all(
-                            color: Colors.green.withOpacity(0.3),
+                            color: Colors.green.withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
@@ -184,7 +183,7 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.2),
+                                color: Colors.green.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -215,10 +214,10 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
-                                color: AppColors.orange.withOpacity(0.2),
+                                color: AppColors.orange.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: AppColors.orange.withOpacity(0.3),
+                                  color: AppColors.orange.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Text(
@@ -244,7 +243,7 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                         borderRadius: BorderRadius.circular(32),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.orange.withOpacity(0.2),
+                            color: AppColors.orange.withValues(alpha: 0.2),
                             blurRadius: 20,
                             spreadRadius: 5,
                             offset: const Offset(0, 8),
@@ -330,7 +329,7 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 15,
                             offset: const Offset(0, 5),
                           ),
@@ -344,7 +343,7 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: AppColors.orange.withOpacity(0.2),
+                                  color: AppColors.orange.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: const Icon(
@@ -407,7 +406,7 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                         gradient: LinearGradient(
                           colors: [
                             AppColors.orange,
-                            AppColors.orange.withOpacity(0.8),
+                            AppColors.orange.withValues(alpha: 0.8),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -415,7 +414,7 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.orange.withOpacity(0.3),
+                            color: AppColors.orange.withValues(alpha: 0.3),
                             blurRadius: 15,
                             offset: const Offset(0, 8),
                           ),

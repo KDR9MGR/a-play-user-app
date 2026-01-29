@@ -38,16 +38,16 @@ class EulaConsentDialog extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'To continue, you must agree to our End User License Agreement (EULA).',
-              style: const TextStyle(color: Colors.white70),
+              style: TextStyle(color: Colors.white70),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             const Text(
               'Key points:',
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             const Text('• No tolerance for objectionable content or abusive users.',
                 style: TextStyle(color: Colors.white70)),
             const Text('• Content filtering is enabled to reduce exposure to objectionable material.',
@@ -56,7 +56,7 @@ class EulaConsentDialog extends StatelessWidget {
                 style: TextStyle(color: Colors.white70)),
             const Text('• Reports are reviewed within 24 hours; offending content is removed and users may be ejected.',
                 style: TextStyle(color: Colors.white70)),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             const Text(
               'By tapping Agree, you acknowledge these terms and agree to abide by them.',
               style: TextStyle(color: Colors.white70),

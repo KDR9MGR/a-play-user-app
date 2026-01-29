@@ -72,7 +72,7 @@ class SubscriptionPlanShimmer extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(32),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           width: 2,
         ),
       ),
@@ -82,11 +82,11 @@ class SubscriptionPlanShimmer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Icon and duration
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ShimmerLoading.circular(size: 52),
-                const ShimmerLoading.rectangle(width: 80, height: 32, borderRadius: 12),
+                ShimmerLoading.rectangle(width: 80, height: 32, borderRadius: 12),
               ],
             ),
             const SizedBox(height: 24),
@@ -100,18 +100,18 @@ class SubscriptionPlanShimmer extends StatelessWidget {
             const SizedBox(height: 32),
 
             // Price
-            Row(
+            const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ShimmerLoading.rectangle(width: 40, height: 24, borderRadius: 6),
-                const SizedBox(width: 8),
-                const ShimmerLoading.rectangle(width: 120, height: 56, borderRadius: 8),
+                ShimmerLoading.rectangle(width: 40, height: 24, borderRadius: 6),
+                SizedBox(width: 8),
+                ShimmerLoading.rectangle(width: 120, height: 56, borderRadius: 8),
               ],
             ),
             const SizedBox(height: 32),
 
             // Divider shimmer
-            ShimmerLoading.rectangle(
+            const ShimmerLoading.rectangle(
               width: double.infinity,
               height: 1,
               borderRadius: 0,
@@ -125,13 +125,13 @@ class SubscriptionPlanShimmer extends StatelessWidget {
             // Features list
             ...List.generate(
               4,
-              (index) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+              (index) => const Padding(
+                padding: EdgeInsets.only(bottom: 12),
                 child: Row(
                   children: [
                     ShimmerLoading.circular(size: 24),
-                    const SizedBox(width: 12),
-                    const Expanded(
+                    SizedBox(width: 12),
+                    Expanded(
                       child: ShimmerLoading.rectangle(width: double.infinity, height: 16, borderRadius: 4),
                     ),
                   ],
@@ -172,32 +172,32 @@ class ActiveSubscriptionShimmer extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
           Row(
             children: [
               ShimmerLoading.circular(size: 40),
-              const SizedBox(width: 12),
-              const ShimmerLoading.rectangle(width: 100, height: 16, borderRadius: 8),
+              SizedBox(width: 12),
+              ShimmerLoading.rectangle(width: 100, height: 16, borderRadius: 8),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           // Plan name
-          const ShimmerLoading.rectangle(width: 150, height: 28, borderRadius: 8),
-          const SizedBox(height: 8),
+          ShimmerLoading.rectangle(width: 150, height: 28, borderRadius: 8),
+          SizedBox(height: 8),
 
           // Valid until
-          const ShimmerLoading.rectangle(width: 180, height: 14, borderRadius: 6),
-          const SizedBox(height: 20),
+          ShimmerLoading.rectangle(width: 180, height: 14, borderRadius: 6),
+          SizedBox(height: 20),
 
           // Amount and button
           Row(
@@ -206,12 +206,12 @@ class ActiveSubscriptionShimmer extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const ShimmerLoading.rectangle(width: 60, height: 12, borderRadius: 4),
-                  const SizedBox(height: 4),
-                  const ShimmerLoading.rectangle(width: 100, height: 20, borderRadius: 6),
+                  ShimmerLoading.rectangle(width: 60, height: 12, borderRadius: 4),
+                  SizedBox(height: 4),
+                  ShimmerLoading.rectangle(width: 100, height: 20, borderRadius: 6),
                 ],
               ),
-              const ShimmerLoading.rectangle(width: 120, height: 40, borderRadius: 12),
+              ShimmerLoading.rectangle(width: 120, height: 40, borderRadius: 12),
             ],
           ),
         ],
@@ -236,13 +236,13 @@ class ListItemShimmer extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [
-            ShimmerLoading.circular(size: 56),
+            const ShimmerLoading.circular(size: 56),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ShimmerLoading.rectangle(
+                  const ShimmerLoading.rectangle(
                     width: double.infinity,
                     height: 16,
                     borderRadius: 4,
@@ -289,7 +289,7 @@ class GridItemShimmer extends StatelessWidget {
       itemBuilder: (context, index) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
+          const Expanded(
             child: ShimmerLoading.rectangle(
               width: double.infinity,
               height: double.infinity,

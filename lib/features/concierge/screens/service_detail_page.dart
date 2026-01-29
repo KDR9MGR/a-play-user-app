@@ -1,11 +1,9 @@
-import 'package:a_play/core/theme/app_theme.dart';
 import 'package:a_play/features/concierge/providers/concierge_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 import 'package:flutter/services.dart';
 
 class ServiceItem {
@@ -126,9 +124,9 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      widget.color.withOpacity(0.8),
-                      widget.color.withOpacity(0.6),
-                      widget.color.withOpacity(0.4),
+                      widget.color.withValues(alpha: 0.8),
+                      widget.color.withValues(alpha: 0.6),
+                      widget.color.withValues(alpha: 0.4),
                     ],
                   ),
                 ),
@@ -142,7 +140,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                             center: Alignment.topRight,
                             radius: 1.0,
                             colors: [
-                              Colors.white.withOpacity(0.1),
+                              Colors.white.withValues(alpha: 0.1),
                               Colors.transparent,
                             ],
                           ),
@@ -162,7 +160,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Icon(
@@ -188,7 +186,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                                     Text(
                                       'Premium Concierge Service',
                                       style: TextStyle(
-                                        color: Colors.white.withOpacity(0.9),
+                                        color: Colors.white.withValues(alpha: 0.9),
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -286,7 +284,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                         color: Colors.grey[900],
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: _isUrgent ? Colors.red.withOpacity(0.5) : Colors.grey[800]!,
+                          color: _isUrgent ? Colors.red.withValues(alpha: 0.5) : Colors.grey[800]!,
                           width: 1,
                         ),
                       ),
@@ -325,13 +323,13 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                         gradient: LinearGradient(
                           colors: [
                             widget.color,
-                            widget.color.withOpacity(0.8),
+                            widget.color.withValues(alpha: 0.8),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: widget.color.withOpacity(0.3),
+                            color: widget.color.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -404,7 +402,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
         ),
         boxShadow: isSelected ? [
           BoxShadow(
-            color: widget.color.withOpacity(0.2),
+            color: widget.color.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -426,7 +424,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isSelected 
-                        ? widget.color.withOpacity(0.2)
+                        ? widget.color.withValues(alpha: 0.2)
                         : Colors.grey[800],
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -478,13 +476,13 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            widget.color.withOpacity(0.1),
-            widget.color.withOpacity(0.05),
+            widget.color.withValues(alpha: 0.1),
+            widget.color.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: widget.color.withOpacity(0.3),
+          color: widget.color.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -498,7 +496,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: widget.color.withOpacity(0.2),
+                    color: widget.color.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(

@@ -252,9 +252,9 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
-                        canBook ? Colors.white : Colors.grey.withOpacity(0.3),
+                        canBook ? Colors.white : Colors.grey.withValues(alpha: 0.3),
                     foregroundColor:
-                        canBook ? Colors.black : Colors.white.withOpacity(0.5),
+                        canBook ? Colors.black : Colors.white.withValues(alpha: 0.5),
                     fixedSize: const Size(180, 56),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -430,7 +430,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[900]?.withOpacity(0.3),
+          color: Colors.grey[900]?.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -489,7 +489,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
     return Container(
       height: 200,
       decoration: BoxDecoration(
-        color: Colors.grey[900]?.withOpacity(0.3),
+        color: Colors.grey[900]?.withValues(alpha: 0.3),
       ),
       child: SquircleContainer(
         radius: 16,
@@ -738,7 +738,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
+                            color: Colors.black.withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Row(

@@ -106,9 +106,7 @@ class PlatformSubscriptionService {
     }
 
     try {
-      if (_subscriptionService == null) {
-        _subscriptionService = SubscriptionService();
-      }
+      _subscriptionService ??= SubscriptionService();
 
       debugPrint('Starting Apple IAP restore purchases...');
       
@@ -178,9 +176,7 @@ class PlatformSubscriptionService {
       debugPrint('Handling successful purchase: $planId, $transactionId, $paymentMethod');
       
       // Use existing subscription service to create the subscription
-      if (_subscriptionService == null) {
-        _subscriptionService = SubscriptionService();
-      }
+      _subscriptionService ??= SubscriptionService();
       
       // Create subscription for Apple IAP with backend verification when available
       if (paymentMethod == 'apple_iap' && receiptData != null && receiptData.isNotEmpty) {
@@ -224,15 +220,11 @@ class PlatformSubscriptionService {
       );
 
       // Use existing subscription service to create the subscription
-      if (_subscriptionService == null) {
-        _subscriptionService = SubscriptionService();
-      }
+      _subscriptionService ??= SubscriptionService();
       
       // Create subscription for Apple IAP with backend verification when available
       if (paymentMethod == 'apple_iap' && receiptData != null && receiptData.isNotEmpty) {
-        if (_subscriptionService == null) {
-          _subscriptionService = SubscriptionService();
-        }
+        _subscriptionService ??= SubscriptionService();
         await _subscriptionService!.createSubscriptionForApple(planId, transactionId, receiptData);
         debugPrint('Subscription created via Apple IAP for plan: $planId');
       } else {
@@ -256,9 +248,7 @@ class PlatformSubscriptionService {
     }
 
     try {
-      if (_subscriptionService == null) {
-        _subscriptionService = SubscriptionService();
-      }
+      _subscriptionService ??= SubscriptionService();
       
       debugPrint('Starting sync of all Apple subscriptions...');
       await _subscriptionService!.syncAllAppleSubscriptions();
@@ -277,9 +267,7 @@ class PlatformSubscriptionService {
     }
 
     try {
-      if (_subscriptionService == null) {
-        _subscriptionService = SubscriptionService();
-      }
+      _subscriptionService ??= SubscriptionService();
       
       debugPrint('Syncing Apple subscription for transaction: $transactionId');
       await _subscriptionService!.syncAppleSubscriptionStatus(transactionId);

@@ -18,7 +18,7 @@ class FeaturedShimmer extends StatelessWidget {
           ),
           child: Shimmer.fromColors(
             baseColor: AppColors.darkGrey,
-            highlightColor: AppColors.white.withOpacity(0.5),
+            highlightColor: AppColors.white.withValues(alpha: 0.5),
             child: Container(
               width: double.infinity,
               height: 200,
@@ -36,7 +36,7 @@ class FeaturedShimmer extends StatelessWidget {
             itemCount: 5,
             itemBuilder: (context, index) => Shimmer.fromColors(
               baseColor: AppColors.darkGrey,
-              highlightColor: AppColors.white.withOpacity(0.5),
+              highlightColor: AppColors.white.withValues(alpha: 0.5),
               child: const SizedBox(
                 width: 200,
                 height: 200,

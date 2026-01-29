@@ -10,11 +10,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:a_play/core/constants/app_constants.dart';
 import 'package:a_play/features/booking/service/booking_service.dart';
-import 'package:intl/intl.dart';
 import 'package:a_play/core/constants/colors.dart';
 import 'package:a_play/services/unified_payment_service.dart';
 import 'package:a_play/features/booking/screens/zone_selection_screen.dart';
-import 'package:a_play/features/booking/screens/booking_confirmation_screen.dart';
 import 'package:go_router/go_router.dart';
 
 // Provider for BookingService
@@ -422,7 +420,7 @@ class _PaymentReviewScreenState extends ConsumerState<PaymentReviewScreen> {
                               horizontal: 16, vertical: 8),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.amber[900]?.withOpacity(0.2),
+                            color: Colors.amber[900]?.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border:
                                 Border.all(color: Colors.amber[700]!, width: 1),

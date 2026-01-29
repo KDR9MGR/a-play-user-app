@@ -153,7 +153,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.purple.shade200.withOpacity(0.5),
+            color: Colors.purple.shade200.withValues(alpha: 0.5),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -187,7 +187,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           Text(
             'Valid until $endDate',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
           ),
           const SizedBox(height: 16),

@@ -76,7 +76,7 @@ class PointTransactionItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: backgroundColor.withOpacity(0.2),
+        color: backgroundColor.withValues(alpha: 0.2),
         shape: BoxShape.circle,
       ),
       child: Icon(

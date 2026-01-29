@@ -1,10 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../controller/table_booking_controller.dart';
 import '../model/restaurant_model.dart';
 import '../model/restaurant_table_model.dart';
-import '../model/restaurant_booking_model.dart';
 import '../widgets/table_selection_widget.dart';
 import '../widgets/time_slot_picker.dart';
 import 'booking_confirmation_screen.dart';
@@ -304,7 +304,9 @@ class _TableBookingScreenState extends ConsumerState<TableBookingScreen> {
                 firstDate: DateTime.now(),
                 lastDate: DateTime.now().add(const Duration(days: 30)),
                 onDateChanged: (date) {
-                  print('Date changed to: $date'); // Debug log
+                  if (kDebugMode) {
+                    debugPrint('Date changed to: $date');
+                  }
                   ref.read(selectedDateProvider.notifier).state = date;
                   // Reset dependent selections
                   ref.read(selectedTimeSlotProvider.notifier).state = null;
@@ -320,9 +322,9 @@ class _TableBookingScreenState extends ConsumerState<TableBookingScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -570,7 +572,7 @@ class _TableBookingScreenState extends ConsumerState<TableBookingScreen> {
         color: Colors.grey[900],
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),

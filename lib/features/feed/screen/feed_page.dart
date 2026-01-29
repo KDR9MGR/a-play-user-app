@@ -3,11 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../model/feed_model.dart';
-import '../model/blogger_follow_model.dart';
 import '../provider/feed_provider.dart';
 import '../../chat/screens/chat_list_screen.dart';
 class FeedPage extends ConsumerStatefulWidget {
@@ -206,7 +204,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     spreadRadius: 5,
                   ),
@@ -242,7 +240,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                               icon: Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(Icons.close, size: 16),
@@ -339,7 +337,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 5,
                           offset: const Offset(0, -2),
                         ),
@@ -597,7 +595,7 @@ class _FeedPageState extends ConsumerState<FeedPage> {
                   IconButton(
                     icon: const Icon(Iconsax.send_2, size: 26),
                     onPressed: () {
-                      final text = '${authorName} shared: ${feed.content}';
+                      final text = '$authorName shared: ${feed.content}';
                       Share.share(text, subject: 'Check out this post on A Play');
                     },
                   ),

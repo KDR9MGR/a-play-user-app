@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 // Progress bar widgets
 class CurrentPosition extends StatelessWidget {
-  const CurrentPosition({Key? key}) : super(key: key);
+  const CurrentPosition({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class CurrentPosition extends StatelessWidget {
 }
 
 class RemainingDuration extends StatelessWidget {
-  const RemainingDuration({Key? key}) : super(key: key);
+  const RemainingDuration({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class RemainingDuration extends StatelessWidget {
 }
 
 class PlaybackSpeedButton extends StatelessWidget {
-  const PlaybackSpeedButton({Key? key}) : super(key: key);
+  const PlaybackSpeedButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +38,10 @@ class ProgressBar extends StatelessWidget {
   final ProgressBarColors colors;
 
   const ProgressBar({
-    Key? key,
+    super.key,
     this.isExpanded = false,
     required this.colors,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

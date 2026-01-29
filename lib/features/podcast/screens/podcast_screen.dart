@@ -8,7 +8,6 @@ import '../widgets/podcast_tab_bar.dart';
 import '../widgets/featured_content.dart';
 import '../widgets/content_section.dart';
 import '../widgets/continue_watching_section.dart';
-import '../widgets/video_player_dialog.dart';
 import 'video_player_screen.dart';
 
 class PodcastScreen extends ConsumerStatefulWidget {
@@ -39,7 +38,7 @@ class _PodcastScreenState extends ConsumerState<PodcastScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.blue.withOpacity(0.7),
+                  Colors.blue.withValues(alpha: 0.7),
                   Colors.transparent,
                 ],
               ),
