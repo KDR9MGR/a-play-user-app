@@ -40,7 +40,14 @@ class ClubsHorizontalList extends ConsumerWidget {
               if (clubs.length > 5)
                 TextButton(
                   onPressed: () {
-                    // TODO: Navigate to see all clubs
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => _SeeAllClubsScreen(
+                          title: title,
+                          clubs: clubs,
+                        ),
+                      ),
+                    );
                   },
                   child: const Text(
                     'See All',
@@ -113,6 +120,68 @@ class ClubsHorizontalList extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SeeAllClubsScreen extends StatelessWidget {
+  final String title;
+  final List<Club> clubs;
+
+  const _SeeAllClubsScreen({
+    required this.title,
+    required this.clubs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          title,
+          style: GoogleFonts.parisienne(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: clubs.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final club = clubs[index];
+          return ListTile(
+            tileColor: AppTheme.surfaceMedium,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            leading: CircleAvatar(
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+              backgroundImage: club.logoUrl != null ? NetworkImage(club.logoUrl!) : null,
+              child: club.logoUrl == null
+                  ? const Icon(Icons.local_bar_outlined, color: Colors.white)
+                  : null,
+            ),
+            title: Text(
+              club.name,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              club.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white54),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ClubDetailsScreen(club: club),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

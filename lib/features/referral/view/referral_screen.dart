@@ -585,8 +585,8 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                   ),
                   const SizedBox(height: 16),
                   PointRedemptionCard(
-                    onRedeem: (points, purpose) {
-                      ref
+                    onRedeem: (points, purpose) async {
+                      await ref
                           .read(userPointsProvider.notifier)
                           .redeemPoints(points, purpose);
                     },

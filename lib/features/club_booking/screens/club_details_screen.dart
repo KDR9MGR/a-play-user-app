@@ -314,6 +314,7 @@ class _ClubDetailsScreenState extends ConsumerState<ClubDetailsScreen> {
                       context,
                       featureName: 'Club Booking',
                       message: 'Sign in to book a table at ${widget.club.name}',
+                      showContinueAsGuest: false,
                     );
 
                     if (!signedIn) {

@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:a_play/features/chat/screens/chat_list_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ConciergePage extends ConsumerStatefulWidget {
   const ConciergePage({super.key});
@@ -654,7 +656,19 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
           child: InkWell(
             onTap: () {
               HapticFeedback.mediumImpact();
-              // TODO: Implement quick action
+              if (title.toLowerCase().contains('chat')) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ChatListScreen()),
+                );
+                return;
+              }
+              if (title.toLowerCase().contains('callback')) {
+                launchUrl(
+                  Uri(scheme: 'tel', path: '+12345678900'),
+                  mode: LaunchMode.externalApplication,
+                );
+                return;
+              }
             },
             borderRadius: BorderRadius.circular(16),
             child: Padding(

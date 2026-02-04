@@ -71,8 +71,9 @@ class PlatformSubscriptionService {
         }).toList();
       } catch (e) {
         debugPrint('Error loading Apple IAP products: $e');
-        // Fallback to default plans
-        return SubscriptionPlan.defaultPlans;
+        return SubscriptionPlan.defaultPlans
+            .where((plan) => AppleIAPService.getProductIdFromPlanId(plan.id) != null)
+            .toList();
       }
     } else {
       // Return default plans for other platforms

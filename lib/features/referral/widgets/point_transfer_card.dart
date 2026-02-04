@@ -123,7 +123,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Successfully transferred $points points to ${_selectedUser!['username']}'),
+            content: Text('Successfully transferred $points points to ${_selectedUser!['full_name'] ?? 'user'}'),
             backgroundColor: Colors.green,
           ),
         );
@@ -229,7 +229,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Recipient Username',
+                'Recipient Name or User ID',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -252,7 +252,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
                         controller: _usernameController,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          hintText: 'Enter username',
+                          hintText: 'Enter full name or user ID',
                           hintStyle: TextStyle(
                             color: Colors.white.withValues(alpha: 0.6),
                           ),
@@ -327,20 +327,19 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _selectedUser!['username'] ?? 'Unknown User',
+                          _selectedUser!['full_name'] ?? 'Unknown User',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        if (_selectedUser!['full_name'] != null)
-                          Text(
-                            _selectedUser!['full_name'],
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 12,
-                            ),
+                        Text(
+                          _selectedUser!['id'] ?? '',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 12,
                           ),
+                        ),
                       ],
                     ),
                   ),

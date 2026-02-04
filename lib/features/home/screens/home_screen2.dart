@@ -151,97 +151,100 @@ class _HomeScreen2State extends ConsumerState<HomeScreen2> {
     required TutorialCoachMarkController controller,
     bool isLastStep = false,
   }) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange, width: 1),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  step,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.orange, width: 1),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    step,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(),
-              GestureDetector(
-                onTap: () => controller.skip(),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.grey,
-                  size: 20,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 14,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (!isLastStep)
-                TextButton(
+                const Spacer(),
+                IconButton(
                   onPressed: () => controller.skip(),
-                  child: const Text(
-                    'Skip Tour',
-                    style: TextStyle(color: Colors.grey),
+                  icon: const Icon(
+                    Icons.close,
+                    color: Colors.grey,
+                    size: 20,
                   ),
                 ),
-              if (isLastStep) const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  if (isLastStep) {
-                    controller.skip();
-                  } else {
-                    controller.next();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(isLastStep ? 'Get Started' : 'Next'),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (!isLastStep)
+                  TextButton(
+                    onPressed: () => controller.skip(),
+                    child: const Text(
+                      'Skip Tour',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                if (isLastStep) const Spacer(),
+                ElevatedButton(
+                  onPressed: () {
+                    if (isLastStep) {
+                      controller.skip();
+                    } else {
+                      controller.next();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(isLastStep ? 'Get Started' : 'Next'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

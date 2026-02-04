@@ -19,6 +19,7 @@ class SignInDialog {
     String? message,
     String? featureName,
     bool barrierDismissible = true,
+    bool showContinueAsGuest = true,
   }) async {
     final result = await showDialog<bool>(
       context: context,
@@ -27,6 +28,7 @@ class SignInDialog {
         title: title,
         message: message,
         featureName: featureName,
+        showContinueAsGuest: showContinueAsGuest,
       ),
     );
     return result ?? false;
@@ -39,6 +41,7 @@ class SignInDialog {
     String? message,
     String? featureName,
     bool isDismissible = true,
+    bool showContinueAsGuest = true,
   }) async {
     final result = await showModalBottomSheet<bool>(
       context: context,
@@ -50,6 +53,7 @@ class SignInDialog {
         title: title,
         message: message,
         featureName: featureName,
+        showContinueAsGuest: showContinueAsGuest,
       ),
     );
     return result ?? false;
@@ -61,11 +65,13 @@ class _SignInDialogContent extends StatelessWidget {
   final String? title;
   final String? message;
   final String? featureName;
+  final bool showContinueAsGuest;
 
   const _SignInDialogContent({
     this.title,
     this.message,
     this.featureName,
+    required this.showContinueAsGuest,
   });
 
   @override
@@ -159,7 +165,7 @@ class _SignInDialogContent extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  context.push('/register');
+                  context.push('/sign-up');
                 },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -182,16 +188,17 @@ class _SignInDialogContent extends StatelessWidget {
             const SizedBox(height: 12),
 
             // Continue as Guest Button
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(
-                'Continue as Guest',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: Colors.grey[400],
+            if (showContinueAsGuest)
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'Continue as Guest',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[400],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -204,11 +211,13 @@ class _SignInBottomSheetContent extends StatelessWidget {
   final String? title;
   final String? message;
   final String? featureName;
+  final bool showContinueAsGuest;
 
   const _SignInBottomSheetContent({
     this.title,
     this.message,
     this.featureName,
+    required this.showContinueAsGuest,
   });
 
   @override
@@ -341,16 +350,17 @@ class _SignInBottomSheetContent extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Continue as Guest Button
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Continue as Guest',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.grey[400],
+          if (showContinueAsGuest)
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                'Continue as Guest',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey[400],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

@@ -146,8 +146,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
                       }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                      if (value.length < 8) {
+                        return 'Password must be at least 8 characters';
+                      }
+                      final hasNumber = RegExp(r'[0-9]').hasMatch(value);
+                      final hasSpecial = RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value);
+                      if (!hasNumber || !hasSpecial) {
+                        return 'Password must include a number and a special character';
                       }
                       return null;
                     },

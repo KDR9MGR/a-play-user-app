@@ -316,6 +316,7 @@ class _RestaurantDetailsScreenState extends ConsumerState<RestaurantDetailsScree
                       context,
                       featureName: 'Restaurant Booking',
                       message: 'Sign in to book a table at ${restaurantData.name}',
+                      showContinueAsGuest: false,
                     );
 
                     if (!signedIn) {

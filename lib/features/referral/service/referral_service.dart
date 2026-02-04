@@ -628,25 +628,26 @@ class ReferralService {
         throw Exception('Insufficient points for transfer');
       }
       
-      // Get sender's username
+      // Get sender's name
       final senderProfile = await _client
           .from('profiles')
-          .select('username')
+          .select('full_name')
           .eq('id', userId)
           .maybeSingle();
       
-      final senderUsername = senderProfile?['username'] ?? 'user';
+      final senderName = senderProfile?['full_name'] ?? 'User';
       
       // Check if recipient exists
       final recipient = await _client
           .from('profiles')
-          .select('id, username')
+          .select('id, full_name')
           .eq('id', recipientId)
           .maybeSingle();
       
       if (recipient == null) {
         throw Exception('Recipient user not found');
       }
+      final recipientName = recipient['full_name'] ?? 'User';
       
       final now = DateTime.now().toUtc();
       final transferId = const Uuid().v4();
@@ -657,12 +658,12 @@ class ReferralService {
         'user_id': userId,
         'points': -points,
         'transaction_type': 'transfer_out',
-        'description': 'Points transferred to ${recipient['username']}',
+        'description': 'Points transferred to $recipientName',
         'created_at': now.toIso8601String(),
         'metadata': {
           'transfer_id': transferId,
           'recipient_id': recipientId,
-          'recipient_username': recipient['username'],
+          'recipient_name': recipientName,
           'note': note.isNotEmpty ? note : null,
         },
       });
@@ -673,12 +674,12 @@ class ReferralService {
         'user_id': recipientId,
         'points': points,
         'transaction_type': 'transfer_in',
-        'description': 'Points received from $senderUsername',
+        'description': 'Points received from $senderName',
         'created_at': now.toIso8601String(),
         'metadata': {
           'transfer_id': transferId,
           'sender_id': userId,
-          'sender_username': senderUsername,
+          'sender_name': senderName,
           'note': note.isNotEmpty ? note : null,
         },
       });
@@ -696,15 +697,21 @@ class ReferralService {
         throw Exception('User not authenticated');
       }
       
-      final user = await _client
-          .from('profiles')
-          .select('id, username, full_name, avatar_url')
-          .ilike('username', username)
-          .neq('id', userId) // Exclude current user
-          .maybeSingle();
+      final query = username.trim();
+      final looksLikeUuid = RegExp(r'^[0-9a-fA-F-]{32,36}$').hasMatch(query);
+
+      final builder = _client.from('profiles').select('id, full_name, avatar_url');
+
+      final user = looksLikeUuid
+          ? await builder.eq('id', query).neq('id', userId).maybeSingle()
+          : await builder
+              .ilike('full_name', '%$query%')
+              .neq('id', userId)
+              .limit(1)
+              .maybeSingle();
       
       if (user == null) {
-        throw Exception('User with username "$username" not found');
+        throw Exception('User not found');
       }
       
       return user;

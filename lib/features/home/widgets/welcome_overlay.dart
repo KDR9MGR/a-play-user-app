@@ -7,6 +7,7 @@ import 'package:a_play/features/authentication/presentation/providers/auth_provi
 import 'package:a_play/features/home/services/user_stats_service.dart';
 import 'package:a_play/features/home/providers/home_event_provider.dart';
 import 'package:a_play/data/models/event_model.dart';
+import 'package:go_router/go_router.dart';
 
 // Provider for user stats
 final userStatsProvider =
@@ -195,14 +196,9 @@ class _WelcomeOverlayState extends ConsumerState<WelcomeOverlay>
                       ),
                       data: (user) {
                         if (user == null) {
-                          return const Center(
-                            child: Text(
-                              'Please log in to view your stats',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
+                          return SlideTransition(
+                            position: _slideAnimation,
+                            child: _buildGuestContent(),
                           );
                         }
 
@@ -376,6 +372,114 @@ class _WelcomeOverlayState extends ConsumerState<WelcomeOverlay>
                 'Explore Events',
                 style: TextStyle(
                   fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGuestContent() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1F1F1F),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 59,
+                  height: 59,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: const Icon(Icons.person, size: 32, color: Colors.grey),
+                ),
+                const SizedBox(width: 20),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome',
+                        style: TextStyle(
+                          color: Colors.white54,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Guest',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Explore events, venues, and content. Sign in when you\'re ready to book and earn points.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.white70,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _dismissWelcome,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text(
+                'Continue as Guest',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {
+                _dismissWelcome();
+                if (context.mounted) {
+                  context.push('/sign-in');
+                }
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text(
+                'Sign In',
+                style: TextStyle(
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
               ),

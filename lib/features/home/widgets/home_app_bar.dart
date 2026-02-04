@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -103,6 +104,13 @@ class HomeAppBar extends ConsumerWidget {
       ),
       centerTitle: false,
       actions: [
+        IconButton(
+          icon: const Icon(Iconsax.user, size: 20),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            context.go('/profile');
+          },
+        ),
         // Subscription button
         hasSubscriptionAsync.when(
           data: (hasSubscription) => Container(

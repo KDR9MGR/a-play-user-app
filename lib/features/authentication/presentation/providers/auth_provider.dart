@@ -256,6 +256,20 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         throw const AuthException('Failed to sign up: No user returned');
       }
 
+      try {
+        final resolvedName = (displayName != null && displayName.trim().isNotEmpty)
+            ? displayName.trim()
+            : (user.userMetadata?['display_name'] as String?) ?? email.split('@').first;
+        await _client.functions.invoke(
+          'send-welcome-email',
+          body: {
+            'email': email,
+            'fullName': resolvedName,
+            'isOrganizer': false,
+          },
+        );
+      } catch (_) {}
+
       state = AsyncValue.data(UserModel.fromSupabaseUser(user.toJson()));
     } on AuthException catch (e, stack) {
       state = AsyncValue.error(e, stack);

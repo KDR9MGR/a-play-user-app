@@ -60,10 +60,10 @@ class PurchaseManager extends ChangeNotifier {
   
   // Product IDs that match your App Store Connect configuration
   List<String> kProductIds = <String>[
-    'SUB7DAY',       // Weekly Access (trial/weekly)
-    'SUBM',          // Monthly Premium
-    'SUBM3',         // 3 Months Bundle (quarterly/biannual)
-    'SUBAU',         // Annual Ultimate
+    '3SUB', // 3 months
+    '1month', // Monthly Premium
+    '7day', // 7 Days
+    '365day', // 365 Days
   ];
   
   List<ProductDetails> products = [];
@@ -372,7 +372,6 @@ class PurchaseManager extends ChangeNotifier {
   }
 
   /// Verify purchase with Supabase Edge Function
-  /// Calls verify-apple-sub to validate receipt with Apple and store in database
   Future<void> _verifyPurchaseWithBackend(PurchaseDetails purchase, String receiptData) async {
     if (kDebugMode) print('PurchaseManager: Starting backend verification...');
 

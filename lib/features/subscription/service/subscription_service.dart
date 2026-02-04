@@ -558,7 +558,7 @@ class SubscriptionService {
           .select()
           .eq('user_id', userId)
           .eq('payment_method', 'apple_iap')
-          .or('payment_reference.eq.$originalTransactionId,metadata->>original_transaction_id.eq.$originalTransactionId');
+          .eq('payment_reference', originalTransactionId);
 
       if (existingSubscriptions.isEmpty) {
         debugPrint('No existing subscription found for transaction: $originalTransactionId');
@@ -625,20 +625,9 @@ class SubscriptionService {
         throw Exception('User not authenticated');
       }
 
-      // Extract relevant data from receipt
-      final isExpired = receiptData['isExpired'] as bool? ?? false;
-      final subscriptionStatus = receiptData['subscriptionStatus'] as String? ?? 'active';
-      final autoRenewStatus = receiptData['autoRenewStatus'] as bool? ?? false;
       final expiresDateMs = receiptData['expiresDateMs'] as String?;
-      
-      String dbStatus = 'active';
-      if (isExpired) {
-        dbStatus = subscriptionStatus == 'cancelled' ? 'cancelled' : 'expired';
-      }
 
       final updateData = <String, dynamic>{
-        'status': dbStatus,
-        'is_auto_renew': autoRenewStatus,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
       };
 
@@ -649,19 +638,8 @@ class SubscriptionService {
           isUtc: true,
         );
         updateData['end_date'] = expiresDate.toIso8601String();
+        updateData['status'] = expiresDate.isAfter(DateTime.now().toUtc()) ? 'active' : 'expired';
       }
-
-      // Update metadata with receipt information
-      final currentSubscription = await _client
-          .from('user_subscriptions')
-          .select('metadata')
-          .eq('id', subscriptionId)
-          .single();
-
-      final currentMetadata = currentSubscription['metadata'] as Map<String, dynamic>? ?? {};
-      currentMetadata['last_receipt_validation'] = receiptData;
-      currentMetadata['last_sync'] = DateTime.now().toUtc().toIso8601String();
-      updateData['metadata'] = currentMetadata;
 
       // Update the subscription
       await _client
@@ -960,12 +938,18 @@ class SubscriptionService {
           orElse: () => SubscriptionPlan.defaultPlans.first,
         );
 
-        // Calculate subscription end date from receipt
-        final subscriptionEndDate = receiptInfo['expires_date'] != null
-            ? DateTime.parse(receiptInfo['expires_date'])
-            : DateTime.now()
-                .toUtc()
-                .add(Duration(days: plan.durationDays ?? 30));
+        DateTime subscriptionEndDate;
+        final expiresDateMs = receiptInfo['expiresDateMs'] as String?;
+        if (expiresDateMs != null) {
+          subscriptionEndDate = DateTime.fromMillisecondsSinceEpoch(
+            int.parse(expiresDateMs),
+            isUtc: true,
+          );
+        } else {
+          subscriptionEndDate = DateTime.now()
+              .toUtc()
+              .add(Duration(days: plan.durationDays ?? 30));
+        }
 
         final now = DateTime.now().toUtc();
         final status = subscriptionEndDate.isAfter(now) ? 'active' : 'expired';
@@ -981,17 +965,18 @@ class SubscriptionService {
             .eq('user_id', userId)
             .eq('status', 'active');
 
-        // Create new subscription entry
         final subscriptionData = {
+          'id': const Uuid().v4(),
           'user_id': userId,
-          'plan_name': plan.name,
-          'plan_price': plan.price ?? 0.0,
-          'plan_duration_days': plan.durationDays ?? 30,
+          'plan_id': planId,
+          'subscription_type': plan.name,
+          'amount': plan.price ?? 0.0,
+          'currency': plan.currency,
+          'status': status,
+          'payment_reference': restoredPurchase.transactionId,
+          'payment_method': 'apple_iap',
           'start_date': restoredPurchase.transactionDate?.toUtc().toIso8601String() ?? now.toIso8601String(),
           'end_date': subscriptionEndDate.toIso8601String(),
-          'status': status,
-          'payment_method': 'apple_iap',
-          'payment_reference': restoredPurchase.transactionId,
           'is_auto_renew': true,
           'created_at': now.toIso8601String(),
           'updated_at': now.toIso8601String(),

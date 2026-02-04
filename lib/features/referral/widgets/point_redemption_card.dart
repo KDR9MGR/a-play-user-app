@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 class PointRedemptionCard extends StatelessWidget {
-  final Function(int points, String purpose) onRedeem;
+  final Future<void> Function(int points, String purpose) onRedeem;
 
   const PointRedemptionCard({
     super.key,
@@ -117,12 +117,22 @@ class PointRedemptionCard extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              onRedeem(points, title);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Successfully redeemed for $title')),
-              );
+              try {
+                await onRedeem(points, title);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Successfully redeemed for $title')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to redeem: $e')),
+                  );
+                }
+              }
             },
             child: const Text('Confirm'),
           ),

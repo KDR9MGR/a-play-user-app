@@ -778,6 +778,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
         context,
         featureName: 'Event Booking',
         message: 'Sign in to book tickets for ${widget.event.title}',
+        showContinueAsGuest: false,
       );
 
       if (!signedIn) {

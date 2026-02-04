@@ -502,6 +502,14 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
 
     final isPopular = plan.name.toLowerCase().contains('gold') ||
                       plan.name.toLowerCase().contains('premium');
+    final planPrice = _getPlanPrice(plan);
+    final isTrialPlan =
+        plan.planType == SubscriptionPlanType.trial ||
+        plan.name.toLowerCase().contains('trial');
+    final isFreePlan =
+        planPrice <= 0 &&
+        !isTrialPlan &&
+        plan.name.toLowerCase().contains('free');
 
     return AnimatedScale(
       scale: isActive ? 1.0 : 0.95,
@@ -737,7 +745,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
-                          onPressed: hasActiveSubscription ? null : () => _handleSubscription(plan),
+                          onPressed: (hasActiveSubscription || isFreePlan)
+                              ? null
+                              : () => _handleSubscription(plan),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primary,
                             foregroundColor: Colors.white,
@@ -753,7 +763,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                                   child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
                                 )
                               : Text(
-                                  hasActiveSubscription ? 'Already Subscribed' : 'Get Started',
+                                  hasActiveSubscription
+                                      ? 'Already Subscribed'
+                                      : (isFreePlan
+                                          ? 'Current Plan'
+                                          : (isTrialPlan ? 'Start Trial' : 'Get Started')),
                                   style: GoogleFonts.poppins(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -886,6 +900,42 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
       }
 
       setState(() => _isProcessingPayment = true);
+      final planPrice = _getPlanPrice(plan);
+      final isTrialPlan =
+          plan.planType == SubscriptionPlanType.trial ||
+          plan.name.toLowerCase().contains('trial');
+
+      if (planPrice <= 0) {
+        try {
+          if (isTrialPlan) {
+            await ref.read(subscriptionServiceProvider).startFreeTrial();
+            ref.invalidate(activeSubscriptionProvider);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Trial activated successfully!', style: GoogleFonts.poppins()),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              Navigator.of(context).pop();
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Free plan is already available.', style: GoogleFonts.poppins()),
+                  backgroundColor: Colors.blueGrey,
+                ),
+              );
+            }
+          }
+        } finally {
+          if (mounted) {
+            setState(() => _isProcessingPayment = false);
+          }
+        }
+        return;
+      }
 
       if (kDebugMode) {
         debugPrint('=== SUBSCRIPTION PAYMENT METHOD SELECTION ===');

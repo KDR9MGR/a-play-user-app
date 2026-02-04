@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HelpSupportPage extends StatelessWidget {
   const HelpSupportPage({super.key});
@@ -43,8 +44,18 @@ class HelpSupportPage extends StatelessWidget {
                 icon: Icons.email_outlined,
                 title: 'Email Support',
                 subtitle: 'support@aplayworld.com',
-                onTap: () {
-                  // TODO: Implement email support
+                onTap: () async {
+                  final uri = Uri(
+                    scheme: 'mailto',
+                    path: 'support@aplayworld.com',
+                  );
+                  final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  if (!context.mounted) return;
+                  if (!ok) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Could not open email app')),
+                    );
+                  }
                 },
               ),
               _buildContactTile(
@@ -52,8 +63,18 @@ class HelpSupportPage extends StatelessWidget {
                 icon: Icons.phone_outlined,
                 title: 'Phone Support',
                 subtitle: '+1 (234) 567-8900',
-                onTap: () {
-                  // TODO: Implement phone support
+                onTap: () async {
+                  final uri = Uri(
+                    scheme: 'tel',
+                    path: '+12345678900',
+                  );
+                  final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  if (!context.mounted) return;
+                  if (!ok) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Could not open phone dialer')),
+                    );
+                  }
                 },
               ),
               _buildContactTile(
@@ -62,7 +83,9 @@ class HelpSupportPage extends StatelessWidget {
                 title: 'Live Chat',
                 subtitle: 'Available 24/7',
                 onTap: () {
-                  // TODO: Implement live chat
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Live chat is coming soon')),
+                  );
                 },
               ),
             ],

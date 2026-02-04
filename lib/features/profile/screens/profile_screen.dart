@@ -55,7 +55,60 @@ class ProfileScreen extends ConsumerWidget {
           IconButton(
             onPressed: () {
               HapticFeedback.lightImpact();
-              // TODO: Navigate to settings
+              showModalBottomSheet<void>(
+                context: context,
+                backgroundColor: AppTheme.backgroundStart,
+                showDragHandle: true,
+                builder: (sheetContext) {
+                  return SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Iconsax.edit, color: Colors.white),
+                          title: const Text('Edit Profile', style: TextStyle(color: Colors.white)),
+                          onTap: () {
+                            Navigator.of(sheetContext).pop();
+                            context.go('/profile/edit');
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Iconsax.gift, color: Colors.white),
+                          title: const Text('Points & Referrals', style: TextStyle(color: Colors.white)),
+                          onTap: () {
+                            Navigator.of(sheetContext).pop();
+                            context.push('/profile/referral');
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Iconsax.shield_tick, color: Colors.white),
+                          title: const Text('Privacy Policy', style: TextStyle(color: Colors.white)),
+                          onTap: () {
+                            Navigator.of(sheetContext).pop();
+                            context.push('/profile/privacy-policy');
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Iconsax.document, color: Colors.white),
+                          title: const Text('Legal Links', style: TextStyle(color: Colors.white)),
+                          onTap: () {
+                            Navigator.of(sheetContext).pop();
+                            context.push('/profile/legal');
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Iconsax.info_circle, color: Colors.white),
+                          title: const Text('About', style: TextStyle(color: Colors.white)),
+                          onTap: () {
+                            Navigator.of(sheetContext).pop();
+                            context.push('/profile/about');
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
             },
             icon: const Icon(
               Iconsax.setting_2,

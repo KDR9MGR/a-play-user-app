@@ -38,7 +38,16 @@ class PubsHorizontalList extends ConsumerWidget {
               ),
               if (pubs.length > 5)
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => _SeeAllPubsScreen(
+                          title: title,
+                          pubs: pubs,
+                        ),
+                      ),
+                    );
+                  },
                   child: const Text(
                     'See All',
                     style: TextStyle(
@@ -124,7 +133,11 @@ class HorizontalPubCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pub details coming soon')),
+        );
+      },
       child: Container(
         width: MediaQuery.of(context).size.width * 0.3,
         decoration: BoxDecoration(
@@ -194,6 +207,66 @@ class HorizontalPubCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SeeAllPubsScreen extends StatelessWidget {
+  final String title;
+  final List<Pub> pubs;
+
+  const _SeeAllPubsScreen({
+    required this.title,
+    required this.pubs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          title,
+          style: GoogleFonts.parisienne(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: pubs.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final pub = pubs[index];
+          final imageUrl = pub.logoUrl ?? pub.coverImageUrl;
+          return ListTile(
+            tileColor: AppTheme.surfaceMedium,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            leading: CircleAvatar(
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+              backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+              child: imageUrl == null
+                  ? const Icon(Icons.sports_bar_outlined, color: Colors.white)
+                  : null,
+            ),
+            title: Text(
+              pub.name,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              pub.address.isNotEmpty ? pub.address : pub.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+            ),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Pub details coming soon')),
+              );
+            },
+          );
+        },
       ),
     );
   }

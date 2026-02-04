@@ -6,11 +6,12 @@ import 'package:a_play/features/podcast/screens/podcast_screen.dart';
 import 'package:a_play/features/profile/screens/about_screen.dart';
 import 'package:a_play/features/profile/screens/edit_profile_page.dart';
 import 'package:a_play/features/profile/screens/privacy_policy_screen.dart';
+import 'package:a_play/features/location/screens/select_location_screen.dart';
 import 'package:a_play/presentation/pages/legal_links_page.dart';
 import 'package:a_play/features/referral/view/referral_screen.dart';
 import 'package:a_play/features/restaurant/screens/restaurant_details_screen.dart';
 import 'package:a_play/features/splash/splash_screen.dart';
-import 'package:a_play/features/subscription/screens/subscription_plans_screen.dart';
+import 'package:a_play/features/subscription/screens/subscription_plans_screen_old.dart';
 import 'package:a_play/features/subscription/screens/subscription_history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; 
@@ -45,6 +46,7 @@ class RouterNotifier extends ChangeNotifier {
       '/home',
       '/podcast',
       '/explore',
+      '/location',
       '/subscription', // Allow guests to view subscription plans (auth required to purchase)
     ];
 
@@ -77,6 +79,10 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/home',
           builder: (context, state) => const BottomNavigation(),
+        ),
+        GoRoute(
+          path: '/location',
+          builder: (context, state) => const SelectLocationScreen(),
         ),
         GoRoute(
           path: '/profile',
