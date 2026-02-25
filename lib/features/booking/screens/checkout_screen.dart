@@ -10,7 +10,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:a_play/core/constants/app_constants.dart';
 
@@ -94,8 +93,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     setState(() => isLoading = true);
     try {
-      const secretKey = PaystackConfig.secretKey;
-      const publicKey = PaystackConfig.publicKey;
+      final secretKey = PaystackConfig.secretKey;
 
       final email = user.email;
       final reference = 'aplay_${DateTime.now().millisecondsSinceEpoch}';
@@ -436,7 +434,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 }
 
-class PaystackWebView extends StatefulWidget {
+class PaystackWebView extends StatelessWidget {
   final String authorizationUrl;
   final String reference;
   final String secretKey;
@@ -453,142 +451,7 @@ class PaystackWebView extends StatefulWidget {
   });
 
   @override
-  State<PaystackWebView> createState() => _PaystackWebViewState();
-}
-
-class _PaystackWebViewState extends State<PaystackWebView> {
-  late final WebViewController _controller;
-  bool _isLoading = true;
-  bool _hasError = false;
-  String _errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeWebView();
-  }
-
-  void _initializeWebView() {
-    try {
-      _controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(Colors.white)
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onPageStarted: (String url) {
-              setState(() => _isLoading = true);
-              debugPrint('Page started loading: $url');
-            },
-            onPageFinished: (String url) {
-              setState(() => _isLoading = false);
-              debugPrint('Page finished loading: $url');
-
-              if (url.contains('payment-callback')) {
-                _verifyTransaction();
-              }
-            },
-            onWebResourceError: (WebResourceError error) {
-              debugPrint('WebView error: ${error.description}');
-              setState(() {
-                _hasError = true;
-                _errorMessage = error.description;
-                _isLoading = false;
-              });
-            },
-          ),
-        )
-        ..loadRequest(Uri.parse(widget.authorizationUrl));
-    } catch (e) {
-      debugPrint('Error initializing WebView: $e');
-      setState(() {
-        _hasError = true;
-        _errorMessage = e.toString();
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _verifyTransaction() async {
-    try {
-      final response = await http.get(
-        Uri.parse(
-            'https://api.paystack.co/transaction/verify/${widget.reference}'),
-        headers: {
-          'Authorization': 'Bearer ${widget.secretKey}',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      final responseData = jsonDecode(response.body);
-      if (response.statusCode == 200 &&
-          responseData['status'] == true &&
-          responseData['data']['status'] == 'success') {
-        widget.onSuccess();
-        if (mounted) {
-          Navigator.of(context).pop(true);
-        }
-      } else {
-        final message = responseData['data']['gateway_response'] ??
-            responseData['message'] ??
-            'Payment verification failed';
-        widget.onError(message);
-        if (mounted) {
-          Navigator.of(context).pop(false);
-        }
-      }
-    } catch (e) {
-      debugPrint('Verification Error: $e');
-      widget.onError(e.toString());
-      if (mounted) {
-        Navigator.of(context).pop(false);
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_hasError) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Payment'),
-          leading: CloseButton(
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                'Error loading payment page',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _errorMessage,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _hasError = false;
-                    _errorMessage = '';
-                    _isLoading = true;
-                  });
-                  _initializeWebView();
-                },
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Payment'),
@@ -596,14 +459,14 @@ class _PaystackWebViewState extends State<PaystackWebView> {
           onPressed: () => Navigator.of(context).pop(false),
         ),
       ),
-      body: Stack(
-        children: [
-          WebViewWidget(controller: _controller),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            onError('Payment webview unavailable');
+            Navigator.of(context).pop(false);
+          },
+          child: const Text('Close'),
+        ),
       ),
     );
   }

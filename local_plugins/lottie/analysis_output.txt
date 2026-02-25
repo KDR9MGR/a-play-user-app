@@ -1,0 +1,201 @@
+Analyzing lottie...                                             
+
+warning • The include file 'package:flutter_lints/flutter.yaml' in '/Users/abdulrazak/Downloads/a-play-user-app-main/local_plugins/lottie/analysis_options.yaml' can't be found when analyzing '/Users/abdulrazak/Downloads/a-play-user-app-main/local_plugins/lottie' • analysis_options.yaml:1:10 • include_file_not_found
+  error • Target of URI doesn't exist: 'package:path_provider/path_provider.dart' • example/lib/examples/save_frames.dart:7:8 • uri_does_not_exist
+  error • The function 'getTemporaryDirectory' isn't defined • example/lib/examples/save_frames.dart:103:31 • undefined_function
+warning • The asset directory 'assets/' doesn't exist • example/pubspec.yaml:37:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/lottiefiles/' doesn't exist • example/pubspec.yaml:38:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/Mobilo/' doesn't exist • example/pubspec.yaml:39:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/Tests/' doesn't exist • example/pubspec.yaml:40:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/Tests/images/' doesn't exist • example/pubspec.yaml:41:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/Logo/' doesn't exist • example/pubspec.yaml:42:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/Images/' doesn't exist • example/pubspec.yaml:43:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/Images/WeAccept/' doesn't exist • example/pubspec.yaml:44:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/weather/' doesn't exist • example/pubspec.yaml:45:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/example_with_images/' doesn't exist • example/pubspec.yaml:46:7 • asset_directory_does_not_exist
+warning • The asset directory 'assets/example_with_images/images/' doesn't exist • example/pubspec.yaml:47:7 • asset_directory_does_not_exist
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/base_stroke_content.dart:4:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/animation/content/base_stroke_content.dart:143:28 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/base_stroke_content.dart:206:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/base_stroke_content.dart:292:18 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/base_stroke_content.dart:315:36 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/content_group.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/animation/content/content_group.dart:46:9 • undefined_class
+  error • Undefined name 'Matrix4' • lib/src/animation/content/content_group.dart:46:27 • undefined_identifier
+  error • Undefined class 'Matrix4' • lib/src/animation/content/content_group.dart:127:3 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/content_group.dart:156:28 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/content_group.dart:210:18 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/drawing_content.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/animation/content/drawing_content.dart:6:28 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/drawing_content.dart:7:18 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/fill_content.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/animation/content/fill_content.dart:84:28 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/fill_content.dart:132:18 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/gradient_fill_content.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/animation/content/gradient_fill_content.dart:102:28 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/gradient_fill_content.dart:156:18 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/gradient_stroke_content.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/animation/content/gradient_stroke_content.dart:69:28 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/gradient_stroke_content.dart:86:31 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/gradient_stroke_content.dart:112:31 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/gradient_stroke_content.dart:145:25 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/polystar_content.dart:3:8 • uri_does_not_exist
+  error • The method 'radians' isn't defined for the type 'PolystarContent' • lib/src/animation/content/polystar_content.dart:130:20 • undefined_method
+  error • The method 'radians' isn't defined for the type 'PolystarContent' • lib/src/animation/content/polystar_content.dart:243:20 • undefined_method
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/rectangle_content.dart:3:8 • uri_does_not_exist
+  error • The method 'radians' isn't defined for the type 'RectangleContent' • lib/src/animation/content/rectangle_content.dart:117:9 • undefined_method
+  error • The method 'radians' isn't defined for the type 'RectangleContent' • lib/src/animation/content/rectangle_content.dart:132:9 • undefined_method
+  error • The method 'radians' isn't defined for the type 'RectangleContent' • lib/src/animation/content/rectangle_content.dart:133:9 • undefined_method
+  error • The method 'radians' isn't defined for the type 'RectangleContent' • lib/src/animation/content/rectangle_content.dart:148:9 • undefined_method
+  error • The method 'radians' isn't defined for the type 'RectangleContent' • lib/src/animation/content/rectangle_content.dart:149:9 • undefined_method
+  error • The method 'radians' isn't defined for the type 'RectangleContent' • lib/src/animation/content/rectangle_content.dart:164:9 • undefined_method
+  error • The method 'radians' isn't defined for the type 'RectangleContent' • lib/src/animation/content/rectangle_content.dart:165:9 • undefined_method
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/repeater_content.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/animation/content/repeater_content.dart:26:9 • undefined_class
+  error • Undefined name 'Matrix4' • lib/src/animation/content/repeater_content.dart:26:27 • undefined_identifier
+  error • Undefined class 'Matrix4' • lib/src/animation/content/repeater_content.dart:112:28 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/content/repeater_content.dart:127:18 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/content/stroke_content.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/animation/content/stroke_content.dart:42:28 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/animation/keyframe/transform_keyframe_animation.dart:3:8 • uri_does_not_exist
+  error • Undefined name 'Matrix4' • lib/src/animation/keyframe/transform_keyframe_animation.dart:18:13 • undefined_identifier
+  error • Undefined name 'Matrix4' • lib/src/animation/keyframe/transform_keyframe_animation.dart:21:13 • undefined_identifier
+  error • Undefined name 'Matrix4' • lib/src/animation/keyframe/transform_keyframe_animation.dart:24:13 • undefined_identifier
+  error • Undefined name 'Matrix4' • lib/src/animation/keyframe/transform_keyframe_animation.dart:36:19 • undefined_identifier
+  error • Undefined class 'Matrix4' • lib/src/animation/keyframe/transform_keyframe_animation.dart:37:9 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/keyframe/transform_keyframe_animation.dart:38:9 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/keyframe/transform_keyframe_animation.dart:39:9 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/animation/keyframe/transform_keyframe_animation.dart:96:3 • undefined_class
+  error • The method 'degrees' isn't defined for the type 'TransformKeyframeAnimation' • lib/src/animation/keyframe/transform_keyframe_animation.dart:121:29 • undefined_method
+  error • The method 'radians' isn't defined for the type 'TransformKeyframeAnimation' • lib/src/animation/keyframe/transform_keyframe_animation.dart:138:17 • undefined_method
+  error • The method 'radians' isn't defined for the type 'TransformKeyframeAnimation' • lib/src/animation/keyframe/transform_keyframe_animation.dart:141:17 • undefined_method
+  error • The method 'radians' isn't defined for the type 'TransformKeyframeAnimation' • lib/src/animation/keyframe/transform_keyframe_animation.dart:142:24 • undefined_method
+  error • Undefined class 'Matrix4' • lib/src/animation/keyframe/transform_keyframe_animation.dart:224:3 • undefined_class
+  error • The method 'Vector3' isn't defined for the type 'TransformKeyframeAnimation' • lib/src/animation/keyframe/transform_keyframe_animation.dart:252:9 • undefined_method
+  error • The method 'radians' isn't defined for the type 'TransformKeyframeAnimation' • lib/src/animation/keyframe/transform_keyframe_animation.dart:257:9 • undefined_method
+  error • Undefined name 'Matrix4' • lib/src/lottie_drawable.dart:15:19 • undefined_identifier
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:64:9 • undefined_class
+  error • Undefined name 'Matrix4' • lib/src/model/layer/base_layer.dart:64:27 • undefined_identifier
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:73:9 • undefined_class
+  error • Undefined name 'Matrix4' • lib/src/model/layer/base_layer.dart:73:32 • undefined_identifier
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:163:18 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:183:28 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:278:46 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:329:47 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:349:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:353:48 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:457:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:471:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:487:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:500:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:518:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/base_layer.dart:534:5 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/model/layer/composition_layer.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/model/layer/composition_layer.dart:83:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/composition_layer.dart:121:18 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/model/layer/image_layer.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/model/layer/image_layer.dart:19:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/image_layer.dart:51:18 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/model/layer/null_layer.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/model/layer/null_layer.dart:11:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/null_layer.dart:18:18 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/model/layer/shape_layer.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/model/layer/shape_layer.dart:36:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/shape_layer.dart:43:18 • undefined_class
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/model/layer/solid_layer.dart:2:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/model/layer/solid_layer.dart:26:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/solid_layer.dart:65:18 • undefined_class
+  error • Undefined name 'Matrix4' • lib/src/model/layer/text_layer.dart:21:19 • undefined_identifier
+  error • Undefined class 'Matrix4' • lib/src/model/layer/text_layer.dart:85:18 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/text_layer.dart:99:5 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/model/layer/text_layer.dart:160:5 • undefined_class
+  error • Undefined class 'Characters' • lib/src/model/layer/text_layer.dart:222:5 • undefined_class
+  error • The name 'Characters' isn't a type, so it can't be used as a type argument • lib/src/model/layer/text_layer.dart:325:8 • non_type_as_type_argument
+  error • The getter 'characters' isn't defined for the type 'String' • lib/src/model/layer/text_layer.dart:332:40 • undefined_getter
+  error • Undefined class 'Characters' • lib/src/model/layer/text_layer.dart:336:5 • undefined_class
+  error • Undefined class 'Characters' • lib/src/model/layer/text_layer.dart:357:5 • undefined_class
+  error • The getter 'characters' isn't defined for the type 'String' • lib/src/model/layer/text_layer.dart:419:41 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • lib/src/model/layer/text_layer.dart:434:41 • undefined_getter
+  error • Undefined class 'Characters' • lib/src/model/layer/text_layer.dart:631:3 • undefined_class
+  error • Undefined name 'Characters' • lib/src/model/layer/text_layer.dart:631:21 • undefined_identifier
+  error • Undefined class 'Characters' • lib/src/model/layer/text_layer.dart:634:12 • undefined_class
+  error • Undefined name 'Matrix4' • lib/src/render_cache/store_drawing.dart:95:19 • undefined_identifier
+  error • Undefined name 'Matrix4' • lib/src/render_cache/store_raster.dart:135:19 • undefined_identifier
+  error • Target of URI doesn't exist: 'package:vector_math/vector_math_64.dart' • lib/src/utils.dart:3:8 • uri_does_not_exist
+  error • Undefined class 'Matrix4' • lib/src/utils.dart:22:31 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/utils.dart:23:18 • undefined_class
+  error • Undefined class 'Matrix4' • lib/src/utils.dart:31:22 • undefined_class
+  error • Undefined class 'Characters' • lib/src/utils/characters.dart:3:34 • undefined_class
+  error • Undefined class 'Characters' • lib/src/utils/characters.dart:4:3 • undefined_class
+  error • Undefined class 'Characters' • lib/src/utils/characters.dart:4:27 • undefined_class
+  error • Undefined name 'length' • lib/src/utils/characters.dart:7:13 • undefined_identifier
+  error • Undefined class 'Characters' • lib/src/utils/characters.dart:14:3 • undefined_class
+  error • Undefined class 'Characters' • lib/src/utils/characters.dart:14:26 • undefined_class
+  error • Undefined name 'length' • lib/src/utils/characters.dart:17:17 • undefined_identifier
+  error • A value of type 'double' can't be assigned to a variable of type 'int' • lib/src/utils/characters.dart:19:12 • invalid_assignment
+  error • Undefined class 'Characters' • lib/src/utils/characters.dart:24:3 • undefined_class
+  error • Undefined class 'Characters' • lib/src/utils/characters.dart:24:19 • undefined_class
+warning • Unused import: 'package:flutter/material.dart' • test/characters_test.dart:1:8 • unused_import
+warning • Unused import: 'package:lottie/src/utils/characters.dart' • test/characters_test.dart:3:8 • unused_import
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:8:18 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:8:46 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:9:16 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:11:16 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:11:44 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:11:60 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:12:18 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:12:46 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:12:64 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:13:18 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:13:46 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:13:63 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:14:21 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:14:50 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:14:68 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:15:19 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:15:48 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:15:64 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:16:15 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:16:43 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:16:59 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:17:15 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:17:44 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:17:60 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:18:16 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:18:45 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:18:62 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:19:18 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:19:47 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:19:64 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:23:19 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:23:46 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:23:65 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:24:16 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:24:43 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:24:59 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:25:18 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:25:45 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:25:61 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:26:19 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:26:46 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:26:63 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:27:18 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:27:46 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:27:63 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:28:20 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:28:48 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:28:65 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:29:19 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:29:47 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:29:63 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:30:21 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:30:49 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:30:67 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:31:15 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:31:41 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:31:57 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:35:19 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:35:39 • undefined_getter
+  error • The getter 'characters' isn't defined for the type 'String' • test/characters_test.dart:35:57 • undefined_getter
+
+197 issues found. (ran in 2.2s)

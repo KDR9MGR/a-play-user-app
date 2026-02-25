@@ -33,7 +33,7 @@ class ContinueWatchingSection extends ConsumerWidget {
           return const SizedBox.shrink(); // Don't show section if no continue watching content
         }
 
-        return Column(
+          return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
@@ -46,16 +46,17 @@ class ContinueWatchingSection extends ConsumerWidget {
                     'Continue Watching for $userName',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
                     ),
                   );
                 },
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             SizedBox(
-              height: 140,
+              height: 170,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -71,7 +72,8 @@ class ContinueWatchingSection extends ConsumerWidget {
                   return VideoCard(
                     content: content,
                     onTap: () => onVideoTap(content, progress.watchedDuration),
-                    height: 90,
+                    height: 170,
+                    width: 200,
                     showProgress: true,
                     watchProgress: progress,
                   );
@@ -94,29 +96,30 @@ class ContinueWatchingSection extends ConsumerWidget {
             'Continue Watching',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         SizedBox(
-          height: 140,
+          height: 170,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: 3,
             itemBuilder: (context, index) {
               return Container(
-                width: 120,
-                margin: const EdgeInsets.only(right: 12),
+                width: 200,
+                margin: const EdgeInsets.only(right: 16),
                 child: Column(
                   children: [
                     Container(
-                      height: 90,
+                      height: 140,
                       decoration: BoxDecoration(
                         color: Colors.grey[700],
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Center(
                         child: CircularProgressIndicator(
@@ -154,18 +157,19 @@ class ContinueWatchingSection extends ConsumerWidget {
             'Continue Watching',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Container(
-          height: 140,
+          height: 170,
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: Colors.grey[800],
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
           ),
           child: const Center(
             child: Column(

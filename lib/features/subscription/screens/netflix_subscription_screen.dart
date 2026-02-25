@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
 import '../model/subscription_model.dart';
 import '../provider/subscription_provider.dart';
@@ -714,33 +713,21 @@ class _NetflixSubscriptionScreenState extends ConsumerState<NetflixSubscriptionS
                   fontSize: 12,
                 ),
               ),
-              TextButton(
-                onPressed: () => launchUrl(
-                  Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula'),
-                  mode: LaunchMode.externalApplication,
-                ),
-                child: const Text('Apple EULA'),
+              const TextButton(
+                onPressed: null,
+                child: Text('Apple EULA'),
               ),
-              TextButton(
-                onPressed: () => launchUrl(
-                  Uri.parse('https://www.aplayworld.com/terms-and-conditions'),
-                  mode: LaunchMode.externalApplication,
-                ),
-                child: const Text('Terms & Conditions'),
+              const TextButton(
+                onPressed: null,
+                child: Text('Terms & Conditions'),
               ),
-              TextButton(
-                onPressed: () => launchUrl(
-                  Uri.parse('https://www.aplayworld.com/privacy-policy'),
-                  mode: LaunchMode.externalApplication,
-                ),
-                child: const Text('Privacy Policy'),
+              const TextButton(
+                onPressed: null,
+                child: Text('Privacy Policy'),
               ),
-              TextButton(
-                onPressed: () => launchUrl(
-                  Uri.parse('https://www.aplayworld.com/refund-policy'),
-                  mode: LaunchMode.externalApplication,
-                ),
-                child: const Text('Refund Policy'),
+              const TextButton(
+                onPressed: null,
+                child: Text('Refund Policy'),
               ),
             ],
           ),

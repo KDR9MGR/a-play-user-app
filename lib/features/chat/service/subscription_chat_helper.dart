@@ -9,26 +9,7 @@ class SubscriptionChatHelper {
 
   /// Check if current user has an active subscription
   Future<bool> hasActiveSubscription() async {
-    try {
-      final userId = _client.auth.currentUser?.id;
-      if (userId == null) return false;
-
-      final response = await _client
-          .from('user_subscriptions')
-          .select('status, plan_id')
-          .eq('user_id', userId)
-          .eq('status', 'active')
-          .maybeSingle();
-
-      return response != null;
-    } catch (e, stackTrace) {
-      debugPrint(ErrorHandler.formatForLogging(
-        e,
-        stackTrace,
-        context: 'Check Active Subscription',
-      ));
-      return false;
-    }
+    return _client.auth.currentUser?.id != null;
   }
 
   /// Get user's subscription tier
@@ -58,23 +39,7 @@ class SubscriptionChatHelper {
 
   /// Check if a specific user has an active subscription
   Future<bool> userHasActiveSubscription(String userId) async {
-    try {
-      final response = await _client
-          .from('user_subscriptions')
-          .select('status')
-          .eq('user_id', userId)
-          .eq('status', 'active')
-          .maybeSingle();
-
-      return response != null;
-    } catch (e, stackTrace) {
-      debugPrint(ErrorHandler.formatForLogging(
-        e,
-        stackTrace,
-        context: 'Check User Has Active Subscription',
-      ));
-      return false;
-    }
+    return userId.isNotEmpty;
   }
 
   /// Search for users with active subscriptions only
@@ -85,23 +50,12 @@ class SubscriptionChatHelper {
         throw Exception('Please sign in to search for users.');
       }
 
-      // First, check if current user has active subscription
-      final hasSubscription = await hasActiveSubscription();
-      if (!hasSubscription) {
-        throw Exception(
-          'You need an active subscription to chat. Please subscribe to continue.',
-        );
-      }
-
-      // Search for users with active subscriptions
-      // Using a complex query with joins to filter by subscription status
-      final response = await _client.rpc(
-        'search_subscribed_users',
-        params: {
-          'search_query': query,
-          'requesting_user_id': currentUserId,
-        },
-      );
+      final response = await _client
+          .from('profiles')
+          .select('id,email,full_name,avatar_url,current_tier,is_active')
+          .or('full_name.ilike.%$query%,email.ilike.%$query%')
+          .neq('id', currentUserId)
+          .limit(50);
 
       return (response as List).cast<Map<String, dynamic>>();
     } catch (e, stackTrace) {
@@ -120,29 +74,9 @@ class SubscriptionChatHelper {
     String otherUserId,
   ) async {
     try {
-      // Check if current user has subscription
-      final currentUserHasSub = await userHasActiveSubscription(currentUserId);
-      if (!currentUserHasSub) {
-        return ChatAccessValidation(
-          canChat: false,
-          reason: 'You need an active subscription to chat.',
-          requiresAction: 'subscribe',
-        );
-      }
-
-      // Check if other user has subscription
-      final otherUserHasSub = await userHasActiveSubscription(otherUserId);
-      if (!otherUserHasSub) {
-        return ChatAccessValidation(
-          canChat: false,
-          reason: 'This user doesn\'t have an active subscription.',
-          requiresAction: 'inform',
-        );
-      }
-
       return ChatAccessValidation(
         canChat: true,
-        reason: 'Both users have active subscriptions.',
+        reason: 'Access granted',
       );
     } catch (e, stackTrace) {
       debugPrint(ErrorHandler.formatForLogging(
@@ -152,7 +86,7 @@ class SubscriptionChatHelper {
       ));
       return ChatAccessValidation(
         canChat: false,
-        reason: 'Unable to verify subscription status.',
+        reason: 'Unable to verify access.',
         requiresAction: 'retry',
       );
     }
@@ -160,12 +94,7 @@ class SubscriptionChatHelper {
 
   /// Get subscription upgrade prompt message
   String getUpgradeMessage() {
-    return 'Chat is available for subscribed members only.\n\n'
-        'Subscribe to:\n'
-        '• Chat with other members\n'
-        '• Make new connections\n'
-        '• Join group conversations\n'
-        '• Access exclusive features';
+    return 'Chat is available for all users.';
   }
 
   /// Get user's subscription details

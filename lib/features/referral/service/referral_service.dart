@@ -700,12 +700,12 @@ class ReferralService {
       final query = username.trim();
       final looksLikeUuid = RegExp(r'^[0-9a-fA-F-]{32,36}$').hasMatch(query);
 
-      final builder = _client.from('profiles').select('id, full_name, avatar_url');
+      final builder = _client.from('profiles').select('id, full_name, username, avatar_url');
 
       final user = looksLikeUuid
           ? await builder.eq('id', query).neq('id', userId).maybeSingle()
           : await builder
-              .ilike('full_name', '%$query%')
+              .or('username.ilike.%$query%,full_name.ilike.%$query%')
               .neq('id', userId)
               .limit(1)
               .maybeSingle();

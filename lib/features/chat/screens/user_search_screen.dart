@@ -173,13 +173,11 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
                         );
 
                         // Create or get direct message chat room
-                        final chatRoom = await ref
-                            .read(chatControllerProvider.notifier)
-                            .createRoom(
-                              name: searchUser.username ?? 'Chat',
-                              participantIds: [user.id, searchUser.userId],
-                              isGroup: false,
+                        final chatRoom = await ref.read(chatServiceProvider).getOrCreateDirectChatRoom(
+                              otherUserId: searchUser.userId,
+                              otherDisplayName: searchUser.username ?? 'Chat',
                             );
+                        await ref.read(chatControllerProvider.notifier).refreshRooms();
 
                         // Close loading dialog
                         if (context.mounted) Navigator.of(context).pop();

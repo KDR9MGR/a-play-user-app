@@ -224,19 +224,21 @@ class YoutubeContentService {
 
   /// Map database fields to model fields (handling snake_case to camelCase)
   Map<String, dynamic> _mapDatabaseToModel(Map<String, dynamic> dbData) {
+    final rawYoutubeUrl = dbData['youtube_url'] as String?;
+    final rawVideoId = dbData['video_id'] as String?;
     return {
-      'id': dbData['id'],
-      'videoId': dbData['video_id'],
-      'title': dbData['title'],
+      'id': dbData['id']?.toString() ?? '',
+      'videoId': rawVideoId ?? (rawYoutubeUrl != null ? _extractVideoIdFromUrl(rawYoutubeUrl) : ''),
+      'title': dbData['title'] ?? 'Untitled',
       'description': dbData['description'],
       'category': dbData['category'],
       'year': dbData['year'],
       'maturityRating': dbData['maturity_rating'],
       'seasons': dbData['seasons'],
-      'contentType': dbData['content_type'],
+      'contentType': dbData['content_type'] ?? 'video',
       'sectionName': dbData['section_name'],
-      'isFeatured': dbData['is_featured'],
-      'youtubeUrl': dbData['youtube_url'],
+      'isFeatured': dbData['is_featured'] ?? false,
+      'youtubeUrl': rawYoutubeUrl,
       'coverImage': dbData['cover_image'],
       'createdAt': _formatDateTimeForJson(dbData['created_at']),
       'updatedAt': _formatDateTimeForJson(dbData['updated_at']),

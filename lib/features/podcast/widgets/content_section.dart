@@ -26,6 +26,8 @@ class ContentSection extends StatelessWidget {
     }
 
     final displayContent = content.take(maxItems).toList();
+    final cardHeight = showProgress ? 150.0 : 240.0;
+    final cardWidth = showProgress ? 160.0 : 150.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,8 +42,9 @@ class ContentSection extends StatelessWidget {
                   title,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
                       ),
                 ),
               ),
@@ -61,9 +64,9 @@ class ContentSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.25,
+          height: cardHeight,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -73,9 +76,8 @@ class ContentSection extends StatelessWidget {
               return VideoCard(
                 content: videoContent,
                 onTap: () => onVideoTap(videoContent),
-                height: showProgress
-                    ? 80
-                    : MediaQuery.of(context).size.height * 0.25,
+                height: cardHeight,
+                width: cardWidth,
                 showProgress: showProgress,
                 progressValue: showProgress ? 0.3 + (index * 0.2) : null,
               );
@@ -152,10 +154,10 @@ class CategoryContent extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 0.7,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 16,
+              crossAxisCount: 2,
+              childAspectRatio: 0.72,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 20,
             ),
             itemCount: content.length,
             itemBuilder: (context, index) {

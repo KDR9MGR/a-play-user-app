@@ -7,16 +7,16 @@ part 'chat_message_model.g.dart';
 class ChatMessage with _$ChatMessage {
   const factory ChatMessage({
     required String id,
-    required String content,
-    required String senderId,
-    required String roomId,
-    String? receiverId,
-    @Default('text') String messageType,
-    String? attachmentUrl,
-    String? replyTo,
-    @Default(false) bool isEdited,
-    required DateTime createdAt,
-    required DateTime updatedAt,
+    @JsonKey(name: 'content') required String content,
+    @JsonKey(name: 'sender_id') required String senderId,
+    @JsonKey(name: 'room_id') required String roomId,
+    @JsonKey(name: 'receiver_id') String? receiverId,
+    @JsonKey(name: 'message_type') @Default('text') String messageType,
+    @JsonKey(name: 'attachment_url') String? attachmentUrl,
+    @JsonKey(name: 'reply_to') String? replyTo,
+    @JsonKey(name: 'is_edited') @Default(false) bool isEdited,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'updated_at') required DateTime updatedAt,
     
     // Additional fields for UI
     String? senderName,
@@ -32,10 +32,10 @@ class ChatMessage with _$ChatMessage {
 class MessageReaction with _$MessageReaction {
   const factory MessageReaction({
     required String id,
-    required String messageId,
-    required String userId,
+    @JsonKey(name: 'message_id') required String messageId,
+    @JsonKey(name: 'user_id') required String userId,
     required String emoji,
-    required DateTime createdAt,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
     
     // Additional fields for UI
     String? userName,

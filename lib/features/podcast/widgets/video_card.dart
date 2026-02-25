@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:iconsax/iconsax.dart';
 import '../model/youtube_content.dart';
 import '../model/watch_progress.dart';
 
@@ -12,20 +11,16 @@ class VideoCard extends StatelessWidget {
   final bool showProgress;
   final double? progressValue;
   final WatchProgress? watchProgress;
-  final VoidCallback? onMoreOptions;
-  final VoidCallback? onInfo;
 
   const VideoCard({
     super.key,
     required this.content,
     required this.onTap,
-    this.width = 110,
-    this.height = 195,
+    this.width = 150,
+    this.height = 240,
     this.showProgress = true,
     this.progressValue,
     this.watchProgress,
-    this.onMoreOptions,
-    this.onInfo,
   });
 
   String get _formattedDuration {
@@ -48,7 +43,7 @@ class VideoCard extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      margin: const EdgeInsets.only(right: 12),
+      margin: const EdgeInsets.only(right: 16),
       child: Stack(
         children: [
           // Main video container
@@ -56,15 +51,22 @@ class VideoCard extends StatelessWidget {
             width: width,
             height: height,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(10),
               color: Colors.grey[900],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.35),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
             child: Stack(
               children: [
                 // Video thumbnail
                 Positioned.fill(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(10),
                     child: CachedNetworkImage(
                       imageUrl: content.coverImage!,
                       fit: BoxFit.cover,
@@ -97,13 +99,13 @@ class VideoCard extends StatelessWidget {
                       color: Colors.transparent,
                       child: Center(
                         child: Container(
-                          width: 57,
-                          height: 57,
+                          width: 52,
+                          height: 52,
                           decoration: const BoxDecoration(
-                            color: Color(0x8A000000), // Semi-transparent black
+                            color: Color(0x8A000000),
                             shape: BoxShape.circle,
                             border: Border.fromBorderSide(
-                              BorderSide(color: Colors.white, width: 1.8),
+                              BorderSide(color: Colors.white, width: 1.6),
                             ),
                           ),
                           child: const Icon(
@@ -119,74 +121,20 @@ class VideoCard extends StatelessWidget {
 
                 // Duration overlay with gradient background
                 Positioned(
-                  bottom: 39, // Above the progress bar and options
-                  left: 0,
-                  right: 0,
-                  height: 29,
+                  bottom: showProgress ? 10 : 12,
+                  right: 10,
                   child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        
-                        colors: [
-                          Color(0x00000000), // Transparent
-                          Color.fromARGB(255, 40, 40, 40), // Black
-                        ],
-                      ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    child: Center(
-                      child: Text(
-                        _formattedDuration,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Video options container
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: 39,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 40, 40, 40), // Dark gray background
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(4),
-                        bottomRight: Radius.circular(4),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7.5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Info icon
-                          GestureDetector(
-                            onTap: onInfo ?? () {},
-                            child: const Icon(
-                              Iconsax.info_circle,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          
-                          // More options icon
-                          GestureDetector(
-                            onTap: onMoreOptions ?? () {},
-                            child: const Icon(
-                              Iconsax.more,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ],
+                    child: Text(
+                      _formattedDuration,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -205,8 +153,8 @@ class VideoCard extends StatelessWidget {
               child: Container(
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(4),
-                    bottomRight: Radius.circular(4),
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10),
                   ),
                 ),
                 child: Stack(
@@ -218,8 +166,8 @@ class VideoCard extends StatelessWidget {
                       decoration: const BoxDecoration(
                         color: Color(0xFF999999), // Gray background
                         borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(4),
-                          bottomRight: Radius.circular(4),
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
                         ),
                       ),
                     ),
@@ -230,8 +178,8 @@ class VideoCard extends StatelessWidget {
                       decoration: const BoxDecoration(
                         color: Color(0xFFD01319), // Red progress
                         borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(4),
-                          bottomRight: Radius.circular(4),
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
                         ),
                       ),
                     ),

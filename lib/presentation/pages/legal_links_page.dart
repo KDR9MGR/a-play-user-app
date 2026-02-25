@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LegalLinksPage extends StatelessWidget {
   const LegalLinksPage({super.key});
@@ -42,11 +41,6 @@ class LegalLinksPage extends StatelessWidget {
     },
   ];
 
-  Future<void> _openUrl(String url) async {
-    final uri = Uri.parse(url);
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +56,7 @@ class LegalLinksPage extends StatelessWidget {
             title: Text(item['title']!),
             subtitle: Text(item['subtitle']!),
             trailing: const Icon(Icons.open_in_new),
-            onTap: () => _openUrl(item['url']!),
+            onTap: () {},
           );
         },
       ),

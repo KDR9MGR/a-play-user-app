@@ -37,7 +37,7 @@ class ClubsHorizontalList extends ConsumerWidget {
                   color: Colors.white,
                 ),
               ),
-              if (clubs.length > 5)
+              if (clubs.isNotEmpty)
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -301,7 +301,7 @@ class HorizontalClubCardSkeleton extends StatelessWidget {
         children: [
           // Image skeleton
           Container(
-            height: MediaQuery.of(context).size.height * 0.20,
+            height: MediaQuery.of(context).size.height * 0.22,
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(8),
@@ -312,22 +312,13 @@ class HorizontalClubCardSkeleton extends StatelessWidget {
           // Content skeleton
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     height: 12,
                     width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[700],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    height: 10,
-                    width: 80,
                     decoration: BoxDecoration(
                       color: Colors.grey[700],
                       borderRadius: BorderRadius.circular(8),

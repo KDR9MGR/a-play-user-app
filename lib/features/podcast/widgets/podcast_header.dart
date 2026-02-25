@@ -10,7 +10,7 @@ class PodcastHeader extends StatelessWidget {
     return Container(
       color: Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 16.0), // Extra top padding
+        padding: const EdgeInsets.fromLTRB(16.0, 28.0, 16.0, 20.0),
         child: Row(
         children: [
           BackButton(
@@ -31,8 +31,9 @@ class PodcastHeader extends StatelessWidget {
                       'For $userName',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.3,
                       ),
                     ),
                   ],

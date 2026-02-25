@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class PaystackWebView extends StatefulWidget {
@@ -24,7 +23,6 @@ class PaystackWebView extends StatefulWidget {
 }
 
 class _PaystackWebViewState extends State<PaystackWebView> {
-  late final WebViewController _controller;
   bool _isLoading = true;
   bool _isVerifying = false;
 
@@ -35,32 +33,7 @@ class _PaystackWebViewState extends State<PaystackWebView> {
   }
 
   void _initializeWebView() {
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (String url) {
-            setState(() => _isLoading = true);
-            _checkPaymentStatus(url);
-          },
-          onPageFinished: (String url) {
-            setState(() => _isLoading = false);
-            _checkPaymentStatus(url);
-          },
-          onNavigationRequest: (NavigationRequest request) {
-            _checkPaymentStatus(request.url);
-            return NavigationDecision.navigate;
-          },
-          onWebResourceError: (WebResourceError error) {
-            widget.onError('Payment error: ${error.description}');
-            if (mounted) {
-              Navigator.of(context).pop(false);
-            }
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.authorizationUrl));
+    setState(() => _isLoading = false);
   }
 
   void _checkPaymentStatus(String url) {
@@ -132,7 +105,11 @@ class _PaystackWebViewState extends State<PaystackWebView> {
         ),
         body: Stack(
           children: [
-            WebViewWidget(controller: _controller),
+            Center(
+              child: Text(
+                _isVerifying ? 'Verifying payment...' : 'Payment page unavailable',
+              ),
+            ),
             if (_isLoading || _isVerifying)
               Container(
                 color: Colors.black54,

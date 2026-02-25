@@ -349,34 +349,34 @@ class _HomeScreen2State extends ConsumerState<HomeScreen2> {
                   ),
                   //Carousel for featured events
                   SliverToBoxAdapter(
-                    child: featuredEvents.when(
-                      data: (events) {
-                        if (events.isEmpty) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24.0),
-                              child: Text(
-                                'No featured events available',
-                                style: TextStyle(color: Colors.grey[400]),
+                    child: Container(
+                      key: featuredEventsKey,
+                      child: featuredEvents.when(
+                        data: (events) {
+                          if (events.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Text(
+                                  'No featured events available',
+                                  style: TextStyle(color: Colors.grey[400]),
+                                ),
                               ),
-                            ),
-                          );
-                        }
-                        return Container(
-                          key: featuredEventsKey,
-                          child: EventCarousel2(
+                            );
+                          }
+                          return EventCarousel2(
                             events: events,
-                            key: ValueKey(events.length), // Add key for proper rebuilding
+                            key: ValueKey(events.length),
+                          );
+                        },
+                        error: (error, stack) => Center(
+                          child: Text(
+                            'Error loading featured events',
+                            style: TextStyle(color: Colors.grey[400]),
                           ),
-                        );
-                      },
-                      error: (error, stack) => Center(
-                        child: Text(
-                          'Error loading featured events',
-                          style: TextStyle(color: Colors.grey[400]),
                         ),
+                        loading: () => const Center(child: FeaturedShimmer()),
                       ),
-                      loading: () => const Center(child: FeaturedShimmer()),
                     ),
                   ),
                   // Filter delegate for time filters
@@ -400,23 +400,23 @@ class _HomeScreen2State extends ConsumerState<HomeScreen2> {
                   ),
                   // 1. Clubs Section
                   SliverToBoxAdapter(
-                    child: popularClubs.when(
-                      data: (clubsList) => Container(
-                        key: popularClubsKey,
-                        child: ClubsHorizontalList(
+                    child: Container(
+                      key: popularClubsKey,
+                      child: popularClubs.when(
+                        data: (clubsList) => ClubsHorizontalList(
                           clubs: clubsList,
                           title: 'Clubs',
                         ),
-                      ),
-                      error: (error, stack) => const ClubsHorizontalList(
-                        clubs: [],
-                        title: 'Clubs',
-                        isLoading: false,
-                      ),
-                      loading: () => const ClubsHorizontalList(
-                        clubs: [],
-                        title: 'Clubs',
-                        isLoading: true,
+                        error: (error, stack) => const ClubsHorizontalList(
+                          clubs: [],
+                          title: 'Clubs',
+                          isLoading: false,
+                        ),
+                        loading: () => const ClubsHorizontalList(
+                          clubs: [],
+                          title: 'Clubs',
+                          isLoading: true,
+                        ),
                       ),
                     ),
                   ),

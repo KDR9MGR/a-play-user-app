@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EulaConsentDialog extends StatelessWidget {
@@ -65,27 +64,18 @@ class EulaConsentDialog extends StatelessWidget {
             Wrap(
               spacing: 12,
               runSpacing: 8,
-              children: [
+              children: const [
                 TextButton(
-                  onPressed: () => launchUrl(
-                    Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula'),
-                    mode: LaunchMode.externalApplication,
-                  ),
-                  child: const Text('Apple EULA'),
+                  onPressed: null,
+                  child: Text('Apple EULA'),
                 ),
                 TextButton(
-                  onPressed: () => launchUrl(
-                    Uri.parse('https://www.aplayworld.com/terms-and-conditions'),
-                    mode: LaunchMode.externalApplication,
-                  ),
-                  child: const Text('Terms & Conditions'),
+                  onPressed: null,
+                  child: Text('Terms & Conditions'),
                 ),
                 TextButton(
-                  onPressed: () => launchUrl(
-                    Uri.parse('https://www.aplayworld.com/privacy-policy'),
-                    mode: LaunchMode.externalApplication,
-                  ),
-                  child: const Text('Privacy Policy'),
+                  onPressed: null,
+                  child: Text('Privacy Policy'),
                 ),
               ],
             ),

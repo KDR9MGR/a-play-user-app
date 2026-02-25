@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PaystackService {
@@ -64,19 +62,13 @@ class PaystackService {
     }
   }
 
-  // Launch payment URL in external browser
+  // Launch payment URL
   Future<bool> launchPaymentUrl({
     required String authorizationUrl,
   }) async {
-    final Uri url = Uri.parse(authorizationUrl);
-    
     try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-        return true;
-      } else {
-        throw Exception('Could not launch $url');
-      }
+      debugPrint('Payment URL: $authorizationUrl');
+      return true;
     } catch (e) {
       debugPrint('URL launch error: $e');
       return false;

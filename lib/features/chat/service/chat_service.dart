@@ -6,6 +6,86 @@ import '../model/friendship_model.dart';
 class ChatService {
   final SupabaseClient _client = Supabase.instance.client;
 
+  Map<String, dynamic> _toFriendshipJson(
+    Map<String, dynamic> row, {
+    Map<String, dynamic>? friendProfile,
+  }) {
+    final createdAt = row['created_at'];
+    final updatedAt = row['updated_at'];
+
+    return {
+      'id': row['id']?.toString() ?? '',
+      'userId': row['user_id']?.toString() ?? '',
+      'friendId': row['friend_id']?.toString() ?? '',
+      'status': (row['status'] as String?) ?? 'accepted',
+      'createdAt': createdAt is String ? createdAt : DateTime.now().toIso8601String(),
+      'updatedAt': updatedAt is String ? updatedAt : DateTime.now().toIso8601String(),
+      'friendName': friendProfile?['full_name'] ?? friendProfile?['email'],
+      'friendUsername': friendProfile?['full_name'] ?? friendProfile?['email'],
+      'friendAvatarUrl': friendProfile?['avatar_url'],
+    };
+  }
+
+  Future<List<ChatParticipant>> getAllUsers({int limit = 50}) async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final response = await _client
+          .from('profiles')
+          .select('''
+            id,
+            full_name,
+            avatar_url,
+            email
+          ''')
+          .neq('id', userId)
+          .order('full_name', ascending: true)
+          .limit(limit);
+
+      return response.map<ChatParticipant>((user) {
+        final id = user['id'] as String;
+        final username = (user['full_name'] as String?) ?? (user['email'] as String?);
+
+        return ChatParticipant(
+          id: id,
+          chatRoomId: '',
+          userId: id,
+          username: username,
+          avatarUrl: user['avatar_url'] as String?,
+        );
+      }).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch users: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUserRoomParticipations() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not authenticated');
+
+    final response = await _client
+        .from('chat_participants')
+        .select('chat_room_id,last_read_at,left_at')
+        .eq('user_id', userId);
+
+    return (response as List).cast<Map<String, dynamic>>().where((row) {
+      final leftAt = row['left_at'];
+      return leftAt == null;
+    }).toList();
+  }
+
+  Future<void> markRoomAsRead(String roomId) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not authenticated');
+
+    await _client
+        .from('chat_participants')
+        .update({'last_read_at': DateTime.now().toIso8601String()})
+        .eq('chat_room_id', roomId)
+        .eq('user_id', userId);
+  }
+
   // CHAT ROOMS
   Future<List<ChatRoom>> getUserChatRooms() async {
     try {
@@ -114,6 +194,52 @@ class ChatService {
     }
   }
 
+  Future<ChatRoom> getOrCreateDirectChatRoom({
+    required String otherUserId,
+    required String otherDisplayName,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not authenticated');
+
+    final participantRows = await _client
+        .from('chat_participants')
+        .select('chat_room_id,user_id,left_at')
+        .inFilter('user_id', [userId, otherUserId]);
+
+    final Map<String, Set<String>> roomParticipants = {};
+    for (final row in (participantRows as List)) {
+      final leftAt = row['left_at'];
+      if (leftAt != null) continue;
+      final roomId = row['chat_room_id'] as String?;
+      final participantId = row['user_id'] as String?;
+      if (roomId == null || participantId == null) continue;
+      roomParticipants.putIfAbsent(roomId, () => <String>{}).add(participantId);
+    }
+
+    final candidateRoomIds = roomParticipants.entries
+        .where((entry) => entry.value.contains(userId) && entry.value.contains(otherUserId))
+        .map((entry) => entry.key)
+        .toList();
+
+    if (candidateRoomIds.isNotEmpty) {
+      final rooms = await _client
+          .from('chat_rooms')
+          .select('*')
+          .eq('is_group', false)
+          .inFilter('id', candidateRoomIds);
+
+      if ((rooms as List).isNotEmpty) {
+        return ChatRoom.fromJson(Map<String, dynamic>.from(rooms.first));
+      }
+    }
+
+    return createChatRoom(
+      name: otherDisplayName,
+      participantIds: [userId, otherUserId],
+      isGroup: false,
+    );
+  }
+
   Future<void> joinChatRoom(String roomId) async {
     try {
       final userId = _client.auth.currentUser?.id;
@@ -155,16 +281,26 @@ class ChatService {
           .from('profiles')
           .select('''
             id,
-            username,
             full_name,
             avatar_url,
             email
           ''')
-          .or('username.ilike.%$query%,full_name.ilike.%$query%')
+          .or('full_name.ilike.%$query%,email.ilike.%$query%')
           .neq('id', userId)
           .limit(20);
 
-      return response.map((user) => ChatParticipant.fromJson(user)).toList();
+      return response.map<ChatParticipant>((user) {
+        final id = user['id'] as String;
+        final username = (user['full_name'] as String?) ?? (user['email'] as String?);
+
+        return ChatParticipant(
+          id: id,
+          chatRoomId: '',
+          userId: id,
+          username: username,
+          avatarUrl: user['avatar_url'] as String?,
+        );
+      }).toList();
     } catch (e) {
       throw Exception('Failed to search users: $e');
     }
@@ -177,11 +313,11 @@ class ChatService {
           .from('chat_messages')
           .select('''
             *,
-            profiles:sender_id(username, avatar_url),
-            message_reactions(*, profiles:user_id(username))
+            profiles!chat_messages_sender_id_fkey(full_name, email, avatar_url),
+            message_reactions(*, profiles!message_reactions_user_id_fkey(full_name, email, avatar_url))
           ''')
           .eq('room_id', roomId)
-          .order('created_at', ascending: false)
+          .order('created_at', ascending: true)
           .range(offset, offset + limit - 1);
 
       return response.map((message) {
@@ -189,7 +325,8 @@ class ChatService {
         
         // Add sender info
         if (message['profiles'] != null) {
-          messageData['senderName'] = message['profiles']['username'];
+          messageData['senderName'] =
+              message['profiles']['full_name'] ?? message['profiles']['email'];
           messageData['senderAvatarUrl'] = message['profiles']['avatar_url'];
         }
 
@@ -199,7 +336,8 @@ class ChatService {
               .map((reaction) {
                 final reactionData = Map<String, dynamic>.from(reaction);
                 if (reaction['profiles'] != null) {
-                  reactionData['userName'] = reaction['profiles']['username'];
+                  reactionData['userName'] =
+                      reaction['profiles']['full_name'] ?? reaction['profiles']['email'];
                 }
                 return MessageReaction.fromJson(reactionData);
               })
@@ -240,7 +378,7 @@ class ChatService {
           .insert(messageData)
           .select('''
             *,
-            profiles:sender_id(username, avatar_url)
+            profiles!chat_messages_sender_id_fkey(full_name, email, avatar_url)
           ''')
           .single();
 
@@ -256,7 +394,8 @@ class ChatService {
 
       final messageResult = Map<String, dynamic>.from(response);
       if (response['profiles'] != null) {
-        messageResult['senderName'] = response['profiles']['username'];
+        messageResult['senderName'] =
+            response['profiles']['full_name'] ?? response['profiles']['email'];
         messageResult['senderAvatarUrl'] = response['profiles']['avatar_url'];
       }
 
@@ -333,26 +472,29 @@ class ChatService {
 
       final response = await _client
           .from('friendships')
-          .select('''
-            *,
-            friend:friend_id(id, username, avatar_url)
-          ''')
-          .or('user_id.eq.$userId,friend_id.eq.$userId')
+          .select('id,user_id,friend_id,status,created_at,updated_at')
+          .eq('user_id', userId)
           .eq('status', 'accepted')
           .order('created_at', ascending: false);
 
-      return response.map((friendship) {
-        final friendshipData = Map<String, dynamic>.from(friendship);
-        
-        // Determine which user is the friend
-        final friendData = friendship['friend'];
-        if (friendData != null) {
-          friendshipData['friendName'] = friendData['username'];
-          friendshipData['friendUsername'] = friendData['username'];
-          friendshipData['friendAvatarUrl'] = friendData['avatar_url'];
-        }
+      final rows = (response as List).cast<Map<String, dynamic>>();
+      final friendIds = rows.map((r) => r['friend_id']?.toString()).whereType<String>().toList();
+      final profilesResponse = friendIds.isEmpty
+          ? <Map<String, dynamic>>[]
+          : (await _client
+                  .from('profiles')
+                  .select('id,full_name,email,avatar_url')
+                  .inFilter('id', friendIds) as List)
+              .cast<Map<String, dynamic>>();
 
-        return Friendship.fromJson(friendshipData);
+      final profileById = <String, Map<String, dynamic>>{
+        for (final p in profilesResponse) p['id'].toString(): p,
+      };
+
+      return rows.map((row) {
+        final friendId = row['friend_id']?.toString();
+        final friendProfile = friendId == null ? null : profileById[friendId];
+        return Friendship.fromJson(_toFriendshipJson(row, friendProfile: friendProfile));
       }).toList();
     } catch (e) {
       throw Exception('Failed to fetch friendships: $e');
@@ -366,17 +508,28 @@ class ChatService {
 
       final response = await _client
           .from('friendships')
-          .insert({
+          .upsert({
             'user_id': userId,
             'friend_id': friendId,
-            'status': 'pending',
+            'status': 'accepted',
             'created_at': DateTime.now().toIso8601String(),
             'updated_at': DateTime.now().toIso8601String(),
-          })
-          .select()
+          }, onConflict: 'user_id,friend_id')
+          .select('id,user_id,friend_id,status,created_at,updated_at')
           .single();
 
-      return Friendship.fromJson(response);
+      final friendProfile = await _client
+          .from('profiles')
+          .select('id,full_name,email,avatar_url')
+          .eq('id', friendId)
+          .maybeSingle();
+
+      return Friendship.fromJson(
+        _toFriendshipJson(
+          Map<String, dynamic>.from(response),
+          friendProfile: friendProfile == null ? null : Map<String, dynamic>.from(friendProfile),
+        ),
+      );
     } catch (e) {
       throw Exception('Failed to send friend request: $e');
     }
@@ -461,6 +614,69 @@ class ChatService {
         .subscribe();
   }
 
+  RealtimeChannel subscribeToParticipantChangesForUser(
+      String userId, void Function(Map<String, dynamic> record, String event) onChange) {
+    final channel = _client.channel('participants_$userId');
+    channel.onPostgresChanges(
+      event: PostgresChangeEvent.insert,
+      schema: 'public',
+      table: 'chat_participants',
+      filter: PostgresChangeFilter(
+        type: PostgresChangeFilterType.eq,
+        column: 'user_id',
+        value: userId,
+      ),
+      callback: (payload) {
+        onChange(payload.newRecord, 'insert');
+      },
+    );
+    channel.onPostgresChanges(
+      event: PostgresChangeEvent.update,
+      schema: 'public',
+      table: 'chat_participants',
+      filter: PostgresChangeFilter(
+        type: PostgresChangeFilterType.eq,
+        column: 'user_id',
+        value: userId,
+      ),
+      callback: (payload) {
+        onChange(payload.newRecord, 'update');
+      },
+    );
+    channel.onPostgresChanges(
+      event: PostgresChangeEvent.delete,
+      schema: 'public',
+      table: 'chat_participants',
+      filter: PostgresChangeFilter(
+        type: PostgresChangeFilterType.eq,
+        column: 'user_id',
+        value: userId,
+      ),
+      callback: (payload) {
+        onChange(payload.oldRecord, 'delete');
+      },
+    );
+    channel.subscribe();
+    return channel;
+  }
+
+  RealtimeChannel subscribeToAllNewMessages(Function(Map<String, dynamic>) onInsert) {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not authenticated');
+
+    return _client
+        .channel('all_messages_$userId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'chat_messages',
+          callback: (payload) {
+            onInsert(payload.newRecord);
+          },
+        )
+        .subscribe();
+  }
+
   void unsubscribe(RealtimeChannel channel) {
     _client.removeChannel(channel);
   }
@@ -472,7 +688,7 @@ class ChatService {
           .from('chat_participants')
           .select('''
             *,
-            profiles:user_id(username, avatar_url)
+            profiles:user_id(full_name, email, avatar_url)
           ''')
           .eq('chat_room_id', roomId)
           .or('left_at.is.null,left_at.eq.null');
@@ -480,7 +696,8 @@ class ChatService {
       return response.map((participant) {
         final participantData = Map<String, dynamic>.from(participant);
         if (participant['profiles'] != null) {
-          participantData['username'] = participant['profiles']['username'];
+          participantData['username'] =
+              participant['profiles']['full_name'] ?? participant['profiles']['email'];
           participantData['avatarUrl'] = participant['profiles']['avatar_url'];
         }
         return ChatParticipant.fromJson(participantData);

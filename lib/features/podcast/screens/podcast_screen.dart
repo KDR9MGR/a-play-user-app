@@ -103,24 +103,25 @@ class _PodcastScreenState extends ConsumerState<PodcastScreen> {
             onPlayVideo: _playVideo,
             onAddToWatchlist: _addToWatchlist,
           ),
+          const SizedBox(height: 16),
           ContinueWatchingSection(
             onVideoTap: _playVideoWithProgress,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
           ContentSection(
             title: 'Your Next Watch',
             content: sections.trending,
             onVideoTap: _playVideo,
             maxItems: 10,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
           ContentSection(
             title: 'Trending Now',
             content: sections.action,
             onVideoTap: _playVideo,
             maxItems: 8,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
         ],
       ),
     );

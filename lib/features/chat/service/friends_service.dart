@@ -54,9 +54,9 @@ class FriendsService {
             created_at,
             profiles!follows_following_id_fkey(
               id,
-              username,
               avatar_url,
-              full_name
+              full_name,
+              email
             )
           ''')
           .eq('follower_id', _client.auth.currentUser!.id)
@@ -78,9 +78,9 @@ class FriendsService {
             created_at,
             profiles!follows_follower_id_fkey(
               id,
-              username,
               avatar_url,
-              full_name
+              full_name,
+              email
             )
           ''')
           .eq('following_id', _client.auth.currentUser!.id)
@@ -102,9 +102,9 @@ class FriendsService {
             created_at,
             profiles!friends_friend_id_fkey(
               id,
-              username,
               avatar_url,
-              full_name
+              full_name,
+              email
             )
           ''')
           .eq('user_id', _client.auth.currentUser!.id)
@@ -138,9 +138,9 @@ class FriendsService {
       final currentUserId = _client.auth.currentUser!.id;
       final response = await _client
           .from('profiles')
-          .select('id, username, avatar_url, full_name')
+          .select('id, avatar_url, full_name, email')
           .neq('id', currentUserId) // Exclude current user
-          .or('username.ilike.%$query%,full_name.ilike.%$query%')
+          .or('full_name.ilike.%$query%,email.ilike.%$query%')
           .limit(20);
 
       return List<Map<String, dynamic>>.from(response);

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.0.3+2
+version: 2.0.4+3
 
 environment:
   sdk: '>=3.1.3 <4.0.0'
@@ -39,7 +39,7 @@ dependencies:
   equatable: ^2.0.7
   
   # Navigation
-  go_router: ^13.0.0
+  go_router: ^17.1.0
   
   # Supabase
   supabase_flutter: ^2.5.6
@@ -63,7 +63,8 @@ dependencies:
   flutter_svg: ^2.2.3
   flutter_animate: ^4.3.0
   carousel_slider: ^5.0.0
-  lottie: ^3.3.2
+  lottie:
+    path: local_plugins/lottie
   rive: ^0.14.1
   font_awesome_flutter: ^10.6.0
   unicons: ^3.0.0
@@ -72,7 +73,7 @@ dependencies:
   # Icons
   iconsax: ^0.0.8
   flutter_riverpod: ^2.4.9
-  google_fonts: ^6.2.1
+  google_fonts: ^8.0.1
   video_player: ^2.8.3
   phosphor_flutter: ^2.1.0
   smooth_page_indicator: ^2.0.1
@@ -94,6 +95,7 @@ dependencies:
   # Voice Search
   speech_to_text: ^7.0.0
   url_launcher: ^6.3.1
+  vector_math: ^2.1.4
 
   # Date Formatting
   intl: ^0.20.2
@@ -112,6 +114,8 @@ dependencies:
 
   # Payment
   webview_flutter: ^4.13.1
+  webview_flutter_platform_interface: ^2.14.0
+  webview_flutter_wkwebview: ^3.23.0
 
   # YouTube Player
   youtube_player_flutter:
@@ -120,14 +124,14 @@ dependencies:
   # Connectivity
   connectivity_plus: ^6.1.4
   internet_connection_checker: ^3.0.1
-  package_info_plus: ^8.3.0
-  share_plus: ^11.0.0
+  package_info_plus: ^9.0.0
+  share_plus: ^12.0.1
   crypto: ^3.0.6
   dotted_line: ^3.2.3
   gap: ^3.0.1
   tutorial_coach_mark: ^1.2.11
   onesignal_flutter: ^5.3.4
-  confetti: ^0.7.0
+  confetti: ^0.8.0
   firebase_crashlytics: ^5.0.7
 
 dev_dependencies:
@@ -140,10 +144,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   freezed: ^2.4.7
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
   build_runner: ^2.4.13
   hive_generator: ^2.0.1
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
   json_serializable: ^6.7.1
   riverpod_generator: ^2.3.9
 

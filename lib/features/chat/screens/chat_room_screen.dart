@@ -28,6 +28,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(messageControllerProvider.notifier).loadMessages(widget.chatRoom.id);
+      ref.read(chatServiceProvider).markRoomAsRead(widget.chatRoom.id);
+      ref.invalidate(unreadMessagesCountProvider);
     });
   }
 
@@ -210,23 +212,26 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   }
 
   bool _isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
-        date1.month == date2.month &&
-        date1.day == date2.day;
+    final local1 = date1.toLocal();
+    final local2 = date2.toLocal();
+    return local1.year == local2.year &&
+        local1.month == local2.month &&
+        local1.day == local2.day;
   }
 
   String _formatDate(DateTime date) {
+    final localDate = date.toLocal();
     final now = DateTime.now();
-    final difference = now.difference(date);
+    final difference = now.difference(localDate);
 
     if (difference.inDays == 0) {
       return 'Today';
     } else if (difference.inDays == 1) {
       return 'Yesterday';
     } else if (difference.inDays < 7) {
-      return DateFormat('EEEE').format(date);
+      return DateFormat('EEEE').format(localDate);
     } else {
-      return DateFormat('MMM dd, yyyy').format(date);
+      return DateFormat('MMM dd, yyyy').format(localDate);
     }
   }
 

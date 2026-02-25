@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:a_play/core/config/paystack_config.dart';
 
@@ -126,7 +125,7 @@ class UnifiedPaymentService {
   }
 }
 
-class PaystackWebView extends StatefulWidget {
+class PaystackWebView extends StatelessWidget {
   final String authorizationUrl;
   final String reference;
   final String secretKey;
@@ -143,143 +142,27 @@ class PaystackWebView extends StatefulWidget {
   });
 
   @override
-  State<PaystackWebView> createState() => _PaystackWebViewState();
-}
-
-class _PaystackWebViewState extends State<PaystackWebView> {
-  late final WebViewController _controller;
-  bool _isLoading = true;
-  bool _isVerifying = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeWebView();
-  }
-
-  void _initializeWebView() {
-      _controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(Colors.white)
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onPageStarted: (String url) {
-            debugPrint('Page started loading: $url');
-                setState(() => _isLoading = true);
-              _checkPaymentStatus(url);
-            },
-          onPageFinished: (String url) {
-            debugPrint('Page finished loading: $url');
-                setState(() => _isLoading = false);
-              _checkPaymentStatus(url);
-          },
-          onNavigationRequest: (NavigationRequest request) {
-            debugPrint('Navigation request: ${request.url}');
-            _checkPaymentStatus(request.url);
-            return NavigationDecision.navigate;
-            },
-            onWebResourceError: (WebResourceError error) {
-            debugPrint('WebView error: ${error.description}');
-            widget.onError('Payment error: ${error.description}');
-            },
-          ),
-        )
-        ..loadRequest(Uri.parse(widget.authorizationUrl));
-  }
-
-  void _checkPaymentStatus(String url) {
-    debugPrint('Checking payment status for URL: $url');
-    
-    if (_isVerifying) return;
-
-    if (url.contains('payment-callback') || 
-        url.contains('close') || 
-        url.toLowerCase().contains('success')) {
-        _verifyTransaction();
-    }
-  }
-
-  Future<void> _verifyTransaction() async {
-    if (_isVerifying) return;
-    
-    if (!mounted) return;
-    setState(() => _isVerifying = true);
-
-    try {
-      debugPrint('Verifying transaction...');
-      
-      final response = await http.get(
-        Uri.parse('https://api.paystack.co/transaction/verify/${widget.reference}'),
-        headers: {
-          'Authorization': 'Bearer ${widget.secretKey}',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      debugPrint('Verification response: ${response.body}');
-
-      if (!mounted) return;
-
-      final responseData = jsonDecode(response.body);
-      if (response.statusCode == 200 && 
-          responseData['status'] == true && 
-          responseData['data']['status'] == 'success') {
-        if (!mounted) return;
-              widget.onSuccess();
-        if (mounted) {
-              Navigator.of(context).pop(true);
-            }
-      } else {
-        throw Exception('Payment verification failed');
-      }
-    } catch (e) {
-      debugPrint('Verification error: $e');
-      if (!mounted) return;
-      widget.onError('Payment verification failed: $e');
-      if (mounted) {
-        Navigator.of(context).pop(false);
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isVerifying = false);
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Payment'),
-        leading: _isVerifying ? null : IconButton(
+      appBar: AppBar(
+        title: const Text('Payment'),
+        leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(false),
-                    ),
-              ),
-      body: Stack(
-              children: [
-                WebViewWidget(controller: _controller),
-                if (_isLoading || _isVerifying)
-                  Container(
-              color: Colors.black54,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                    const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                          const SizedBox(height: 16),
-                          Text(
-                      _isVerifying ? 'Verifying payment...' : 'Loading...',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
+          onPressed: () {
+            onError('Payment cancelled');
+            Navigator.of(context).pop(false);
+          },
+        ),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            onError('Payment webview unavailable');
+            Navigator.of(context).pop(false);
+          },
+          child: const Text('Close'),
+        ),
       ),
     );
   }
-} 
+}

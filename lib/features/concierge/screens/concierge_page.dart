@@ -8,7 +8,6 @@ import 'package:iconsax/iconsax.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:a_play/features/chat/screens/chat_list_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ConciergePage extends ConsumerStatefulWidget {
   const ConciergePage({super.key});
@@ -663,9 +662,113 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
                 return;
               }
               if (title.toLowerCase().contains('callback')) {
-                launchUrl(
-                  Uri(scheme: 'tel', path: '+12345678900'),
-                  mode: LaunchMode.externalApplication,
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: AppTheme.surfaceDark,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (_) {
+                    const phone = '+12345678900';
+                    const email = 'support@aplay.com';
+
+                    return Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.white24,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Request a Callback',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Call or email us and we’ll get back to you.',
+                            style: TextStyle(color: Colors.grey[400]),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white12),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Iconsax.call, color: AppTheme.primary, size: 18),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    phone,
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    await Clipboard.setData(const ClipboardData(text: phone));
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Phone number copied')),
+                                      );
+                                    }
+                                  },
+                                  child: const Text('Copy'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text('Call Now'),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: () {},
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(color: Colors.white24),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text('Email Support'),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    );
+                  },
                 );
                 return;
               }

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:a_play/core/widgets/sign_in_dialog.dart';
@@ -174,12 +173,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                         child: Column(
                           children: [
                             TextButton(
-                              onPressed: () async {
-                                final url = Uri.parse('https://www.aplayworld.com/terms-and-conditions');
-                                if (await canLaunchUrl(url)) {
-                                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                                }
-                              },
+                              onPressed: () {},
                               child: Text(
                                 'Terms & Conditions',
                                 style: GoogleFonts.poppins(
@@ -190,12 +184,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                               ),
                             ),
                             TextButton(
-                              onPressed: () async {
-                                final url = Uri.parse('https://www.aplayworld.com/privacy-policy');
-                                if (await canLaunchUrl(url)) {
-                                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                                }
-                              },
+                              onPressed: () {},
                               child: Text(
                                 'Privacy Policy',
                                 style: GoogleFonts.poppins(
@@ -508,8 +497,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         plan.name.toLowerCase().contains('trial');
     final isFreePlan =
         planPrice <= 0 &&
-        !isTrialPlan &&
-        plan.name.toLowerCase().contains('free');
+        !isTrialPlan;
 
     return AnimatedScale(
       scale: isActive ? 1.0 : 0.95,
@@ -766,7 +754,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                                   hasActiveSubscription
                                       ? 'Already Subscribed'
                                       : (isFreePlan
-                                          ? 'Current Plan'
+                                          ? 'Included'
                                           : (isTrialPlan ? 'Start Trial' : 'Get Started')),
                                   style: GoogleFonts.poppins(
                                     fontSize: 16,

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,7 +67,7 @@ class LocationService {
 
   Future<void> saveLocation(LocationModel location) async {
     final prefs = await _prefs;
-    await prefs.setString(_locationKey, location.toJson().toString());
+    await prefs.setString(_locationKey, jsonEncode(location.toJson()));
   }
 
   Future<LocationModel?> getSavedLocation() async {
@@ -74,12 +75,9 @@ class LocationService {
     final locationStr = prefs.getString(_locationKey);
     if (locationStr != null) {
       try {
-        return LocationModel.fromJson(
-          Map<String, dynamic>.from(
-            // ignore: unnecessary_cast
-            (locationStr as Map<String, dynamic>),
-          ),
-        );
+        final decoded = jsonDecode(locationStr);
+        if (decoded is! Map<String, dynamic>) return null;
+        return LocationModel.fromJson(decoded);
       } catch (e) {
         return null;
       }

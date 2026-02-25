@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:a_play/core/theme/app_theme.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../provider/subscription_provider.dart';
 import '../model/subscription_model.dart';
 import '../widgets/paystack_webview.dart';
@@ -187,48 +186,30 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
         Wrap(
           spacing: 12,
           runSpacing: 8,
-          children: [
+          children: const [
             TextButton(
-              onPressed: () => launchUrl(
-                Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula'),
-                mode: LaunchMode.externalApplication,
-              ),
-              child: const Text('Apple EULA'),
+              onPressed: null,
+              child: Text('Apple EULA'),
             ),
             TextButton(
-              onPressed: () => launchUrl(
-                Uri.parse('https://www.aplayworld.com/terms-and-conditions'),
-                mode: LaunchMode.externalApplication,
-              ),
-              child: const Text('Terms & Conditions'),
+              onPressed: null,
+              child: Text('Terms & Conditions'),
             ),
             TextButton(
-              onPressed: () => launchUrl(
-                Uri.parse('https://www.aplayworld.com/privacy-policy'),
-                mode: LaunchMode.externalApplication,
-              ),
-              child: const Text('Privacy Policy'),
+              onPressed: null,
+              child: Text('Privacy Policy'),
             ),
             TextButton(
-              onPressed: () => launchUrl(
-                Uri.parse('https://www.aplayworld.com/refund-policy'),
-                mode: LaunchMode.externalApplication,
-              ),
-              child: const Text('Refund Policy'),
+              onPressed: null,
+              child: Text('Refund Policy'),
             ),
             TextButton(
-              onPressed: () => launchUrl(
-                Uri.parse('https://www.aplayworld.com/faq'),
-                mode: LaunchMode.externalApplication,
-              ),
-              child: const Text('FAQ'),
+              onPressed: null,
+              child: Text('FAQ'),
             ),
             TextButton(
-              onPressed: () => launchUrl(
-                Uri.parse('https://www.aplayworld.com/contact'),
-                mode: LaunchMode.externalApplication,
-              ),
-              child: const Text('Contact'),
+              onPressed: null,
+              child: Text('Contact'),
             ),
           ],
         ),
@@ -630,6 +611,26 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
         _isProcessingPayment = true;
       });
 
+      final planPrice = plan.price ??
+          plan.priceMonthly ??
+          plan.priceYearly ??
+          0.0;
+
+      if (planPrice <= 0) {
+        setState(() {
+          _isProcessingPayment = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Free plan is already available.'),
+              backgroundColor: Colors.blueGrey,
+            ),
+          );
+        }
+        return;
+      }
+
       // Check if user has already applied a referral code
       final hasAppliedReferral = await ref.read(paymentProvider.notifier).hasAppliedReferralCode();
       
@@ -649,10 +650,10 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
 
       // Initialize payment with Paystack
       final paymentData = await ref.read(paymentProvider.notifier).initializePayment(
-            email,
-            plan.price ?? 0.0,
-            plan.id,
-          );
+        email,
+        planPrice,
+        plan.id,
+      );
 
       if (!mounted) return;
 

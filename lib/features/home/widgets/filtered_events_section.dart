@@ -65,8 +65,9 @@ class _FilteredEventsSectionState extends ConsumerState<FilteredEventsSection> {
           ),
           data: (events) {
             final filteredEvents = _filterEventsByTime(events);
-            
-            if (filteredEvents.isEmpty) {
+            final eventsToShow = filteredEvents.isEmpty ? _sortEventsByStartDate(events) : filteredEvents;
+
+            if (eventsToShow.isEmpty) {
               return Container(
                 height: 200,
                 padding: const EdgeInsets.all(16),
@@ -106,9 +107,9 @@ class _FilteredEventsSectionState extends ConsumerState<FilteredEventsSection> {
                   mainAxisSpacing: 12,
                   childAspectRatio: 0.70,
                 ),
-                itemCount: filteredEvents.length > 6 ? 6 : filteredEvents.length, // Limit to 6 events
+                itemCount: eventsToShow.length > 6 ? 6 : eventsToShow.length,
                 itemBuilder: (context, index) {
-                  final event = filteredEvents[index];
+                  final event = eventsToShow[index];
                   return _buildEventCard(event);
                 },
               ),
@@ -145,6 +146,27 @@ class _FilteredEventsSectionState extends ConsumerState<FilteredEventsSection> {
         return false;
       }
     }).toList();
+  }
+
+  List<dynamic> _sortEventsByStartDate(List<dynamic> events) {
+    final sortable = events.map((e) {
+      DateTime? parsed;
+      try {
+        parsed = DateTime.parse(e['start_date']);
+      } catch (_) {}
+      return (event: e, date: parsed);
+    }).toList();
+
+    sortable.sort((a, b) {
+      final ad = a.date;
+      final bd = b.date;
+      if (ad == null && bd == null) return 0;
+      if (ad == null) return 1;
+      if (bd == null) return -1;
+      return ad.compareTo(bd);
+    });
+
+    return sortable.map((e) => e.event).toList();
   }
 
   Widget _buildEventCard(Map<String, dynamic> event) {

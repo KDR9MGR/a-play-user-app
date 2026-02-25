@@ -8,6 +8,171 @@ import '../service/chat_service.dart';
 // Chat Service Provider
 final chatServiceProvider = Provider<ChatService>((ref) => ChatService());
 
+final globalUsersProvider = FutureProvider.family<List<ChatParticipant>, String>((ref, query) async {
+  final chatService = ref.read(chatServiceProvider);
+  if (query.trim().isEmpty) {
+    return chatService.getAllUsers();
+  }
+  return chatService.searchUsers(query.trim());
+});
+
+class UnreadMessagesCountNotifier extends AsyncNotifier<int> {
+  late ChatService _chatService;
+  RealtimeChannel? _messagesChannel;
+  RealtimeChannel? _participantsChannel;
+  String? _userId;
+  final Map<String, DateTime?> _lastReadByRoomId = {};
+  final Set<String> _roomIds = {};
+  KeepAliveLink? _keepAliveLink;
+  bool _disposeRegistered = false;
+
+  @override
+  Future<int> build() async {
+    _chatService = ref.read(chatServiceProvider);
+    _userId = Supabase.instance.client.auth.currentUser?.id;
+    if (_userId == null) return 0;
+
+    if (_keepAliveLink == null) {
+      _keepAliveLink = ref.keepAlive();
+    }
+    if (!_disposeRegistered) {
+      _disposeRegistered = true;
+      ref.onDispose(() {
+        final chan = _messagesChannel;
+        if (chan != null) {
+          _chatService.unsubscribe(chan);
+          _messagesChannel = null;
+        }
+        _keepAliveLink?.close();
+        _keepAliveLink = null;
+      });
+    }
+
+    List<Map<String, dynamic>> participations;
+    try {
+      participations = await _chatService.getUserRoomParticipations();
+    } catch (_) {
+      participations = [];
+    }
+    _roomIds
+      ..clear()
+      ..addAll(
+        participations
+            .map((p) => p['chat_room_id'])
+            .whereType<String>()
+            .toList(),
+      );
+
+    _lastReadByRoomId
+      ..clear()
+      ..addEntries(
+        participations.map((p) {
+          final roomId = p['chat_room_id'] as String?;
+          final lastReadRaw = p['last_read_at'];
+          DateTime? lastReadAt;
+          if (lastReadRaw is String) {
+            lastReadAt = DateTime.tryParse(lastReadRaw);
+          }
+          return MapEntry(roomId ?? '', lastReadAt);
+        }).where((e) => e.key.isNotEmpty),
+      );
+
+    try {
+      final globalRoom = await _chatService.getGlobalChatRoom();
+      if (_roomIds.add(globalRoom.id)) {
+        _lastReadByRoomId.putIfAbsent(globalRoom.id, () => null);
+      }
+    } catch (_) {}
+
+    _messagesChannel = _chatService.subscribeToAllNewMessages((record) {
+      final roomId = record['room_id'] as String?;
+      final senderId = record['sender_id'] as String?;
+      final createdAtRaw = record['created_at'];
+
+      if (roomId == null || senderId == null) return;
+      if (senderId == _userId) return;
+      if (!_roomIds.contains(roomId)) return;
+
+      DateTime? createdAt;
+      if (createdAtRaw is String) {
+        createdAt = DateTime.tryParse(createdAtRaw);
+      }
+      final lastReadAt = _lastReadByRoomId[roomId];
+      if (createdAt != null && lastReadAt != null && !createdAt.isAfter(lastReadAt)) {
+        return;
+      }
+
+      state = state.whenData((current) {
+        if (current >= 100) return 100;
+        return current + 1;
+      });
+    });
+
+    _participantsChannel = _chatService.subscribeToParticipantChangesForUser(_userId!, (record, event) async {
+      final rid = record['chat_room_id'] as String?;
+      if (rid == null) return;
+      if (event == 'delete') {
+        _roomIds.remove(rid);
+        _lastReadByRoomId.remove(rid);
+      } else {
+        final leftAt = record['left_at'];
+        if (leftAt == null) {
+          _roomIds.add(rid);
+          DateTime? lastRead;
+          final lastReadRaw = record['last_read_at'];
+          if (lastReadRaw is String) {
+            lastRead = DateTime.tryParse(lastReadRaw);
+          }
+          _lastReadByRoomId[rid] = lastRead;
+        } else {
+          _roomIds.remove(rid);
+          _lastReadByRoomId.remove(rid);
+        }
+      }
+      final newTotal = await _fetchUnreadCountCapped();
+      state = AsyncValue.data(newTotal);
+    });
+
+    ref.onDispose(() {
+      if (_messagesChannel != null) {
+        _chatService.unsubscribe(_messagesChannel!);
+      }
+      if (_participantsChannel != null) {
+        _chatService.unsubscribe(_participantsChannel!);
+      }
+    });
+
+    return _fetchUnreadCountCapped();
+  }
+
+  Future<int> _fetchUnreadCountCapped() async {
+    final userId = _userId;
+    if (userId == null) return 0;
+
+    var total = 0;
+    for (final roomId in _roomIds) {
+      final remaining = 100 - total;
+      if (remaining <= 0) break;
+
+      final lastReadAt = _lastReadByRoomId[roomId];
+      var query = Supabase.instance.client
+          .from('chat_messages')
+          .select('id,created_at,sender_id')
+          .eq('room_id', roomId)
+          .neq('sender_id', userId);
+
+      if (lastReadAt != null) {
+        query = query.gt('created_at', lastReadAt.toIso8601String());
+      }
+
+      final data = await query.order('created_at', ascending: false).limit(remaining);
+      total += (data as List).length;
+    }
+
+    return total;
+  }
+}
+
 // Chat Rooms Controller
 class ChatRoomsNotifier extends AsyncNotifier<List<ChatRoom>> {
   late ChatService _chatService;
@@ -118,7 +283,8 @@ class ChatMessagesNotifier extends AsyncNotifier<List<ChatMessage>> {
 
   Future<List<ChatMessage>> _fetchMessages(String roomId) async {
     try {
-      return await _chatService.getRoomMessages(roomId);
+      final messages = await _chatService.getRoomMessages(roomId);
+      return _sortMessages(messages);
     } catch (e) {
       throw Exception('Failed to fetch messages: $e');
     }
@@ -135,11 +301,19 @@ class ChatMessagesNotifier extends AsyncNotifier<List<ChatMessage>> {
         // Check if message already exists to avoid duplicates
         final messageExists = messages.any((m) => m.id == newMessage.id);
         if (!messageExists) {
-          return [newMessage, ...messages];
+          return _sortMessages([...messages, newMessage]);
         }
         return messages;
       });
+
+      final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+      if (currentUserId != null && newMessage.senderId != currentUserId) {
+        _chatService.markRoomAsRead(roomId);
+        ref.invalidate(unreadMessagesCountProvider);
+      }
     });
+
+    _chatService.markRoomAsRead(roomId);
   }
 
   Future<void> sendMessage({
@@ -159,10 +333,20 @@ class ChatMessagesNotifier extends AsyncNotifier<List<ChatMessage>> {
       );
 
       // Update local state immediately for better UX
-      state = state.whenData((messages) => [message, ...messages]);
+      state = state.whenData((messages) => _sortMessages([...messages, message]));
     } catch (e) {
       throw Exception('Failed to send message: $e');
     }
+  }
+
+  List<ChatMessage> _sortMessages(List<ChatMessage> messages) {
+    final sorted = [...messages];
+    sorted.sort((a, b) {
+      final timeCompare = a.createdAt.compareTo(b.createdAt);
+      if (timeCompare != 0) return timeCompare;
+      return a.id.compareTo(b.id);
+    });
+    return sorted;
   }
 
   Future<void> editMessage(String messageId, String newContent) async {
@@ -388,4 +572,9 @@ final searchResultsProvider = FutureProvider.family<List<ChatParticipant>, Strin
   
   final chatService = ref.read(chatServiceProvider);
   return await chatService.searchUsers(query);
+});
+
+final unreadMessagesCountProvider =
+    AsyncNotifierProvider<UnreadMessagesCountNotifier, int>(() {
+  return UnreadMessagesCountNotifier();
 });

@@ -19,7 +19,7 @@ class PodcastTabBar extends ConsumerWidget {
     
     return Container(
       color: Colors.transparent,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: categoriesAsync.when(
         data: (categories) => SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -60,18 +60,18 @@ class PodcastTabBar extends ConsumerWidget {
     return GestureDetector(
       onTap: () => onTabSelected(index, categoryId),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white.withValues(alpha: 0.05) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           border: isSelected ? Border.all(color: Colors.white24) : Border.all(color: Colors.white24),
         ),
         child: Text(
           title,
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.white60,
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

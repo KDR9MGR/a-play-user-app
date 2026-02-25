@@ -1,11 +1,7 @@
 library youtube_player_flutter;
 
-import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:async';
-export 'src/utils/youtube_player_controller.dart';
-export 'src/player/youtube_player.dart';
-export 'src/widgets/widgets.dart';
+import 'package:flutter/material.dart';
 
 class YoutubePlayerController {
   String _currentVideoId;
@@ -14,7 +10,6 @@ class YoutubePlayerController {
   YoutubePlayerValue _currentValue = const YoutubePlayerValue();
   YoutubePlayerMetaData _metadata = const YoutubePlayerMetaData();
   final List<VoidCallback> _listeners = [];
-  WebViewController? _webViewController;
 
   YoutubePlayerController({
     required String initialVideoId,
@@ -56,39 +51,27 @@ class YoutubePlayerController {
   }
 
   void play() {
-    _webViewController?.runJavaScript('player.playVideo();');
     _updateValue(_currentValue.copyWith(isPlaying: true));
   }
 
   void pause() {
-    _webViewController?.runJavaScript('player.pauseVideo();');
     _updateValue(_currentValue.copyWith(isPlaying: false));
   }
 
   void load(String videoId) {
     _currentVideoId = videoId;
-    _webViewController?.runJavaScript('player.loadVideoById("$videoId");');
   }
 
-  void mute() {
-    _webViewController?.runJavaScript('player.mute();');
-  }
+  void mute() {}
 
-  void unMute() {
-    _webViewController?.runJavaScript('player.unMute();');
-  }
+  void unMute() {}
 
-  void seekTo(Duration position) {
-    final seconds = position.inSeconds;
-    _webViewController?.runJavaScript('player.seekTo($seconds, true);');
-  }
+  void seekTo(Duration position) {}
 
-  void setWebViewController(WebViewController controller) {
-    _webViewController = controller;
-    // Initialize player state as ready
+  void setWebViewController() {
     Future.delayed(const Duration(milliseconds: 1000), () {
       _updateValue(_currentValue.copyWith(isReady: true));
-      _metadata = const YoutubePlayerMetaData(duration: Duration(minutes: 10)); // Default duration
+      _metadata = const YoutubePlayerMetaData(duration: Duration(minutes: 10));
     });
   }
 
@@ -186,119 +169,33 @@ class YoutubePlayer extends StatefulWidget {
 }
 
 class _YoutubePlayerState extends State<YoutubePlayer> {
-  late WebViewController _webViewController;
   bool _isPlayerReady = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeWebView();
-  }
-
-  void _initializeWebView() {
-    _webViewController = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (String url) {
-            if (!_isPlayerReady) {
-              _isPlayerReady = true;
-              widget.controller.setWebViewController(_webViewController);
-              widget.onReady?.call();
-            }
-          },
-        ),
-      )
-      ..loadHtmlString(_buildYouTubePlayerHtml());
-  }
-
-  String _buildYouTubePlayerHtml() {
-    final videoId = widget.controller.videoId;
-    final autoPlay = widget.controller.flags.autoPlay ? 1 : 0;
-    final mute = widget.controller.flags.mute ? 1 : 0;
-    final loop = widget.controller.flags.loop ? 1 : 0;
-    final controls = widget.controller.flags.hideControls ? 0 : 1;
-    final startTime = widget.controller.flags.startAt;
-
-    return '''
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body { margin: 0; padding: 0; background: #000; }
-            #player { width: 100%; height: 100vh; }
-        </style>
-    </head>
-    <body>
-        <div id="player"></div>
-        <script>
-            var tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            var firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-            var player;
-            function onYouTubeIframeAPIReady() {
-                player = new YT.Player('player', {
-                    height: '100%',
-                    width: '100%',
-                    videoId: '$videoId',
-                    playerVars: {
-                        'autoplay': $autoPlay,
-                        'mute': $mute,
-                        'loop': $loop,
-                        'controls': $controls,
-                        'start': $startTime,
-                        'modestbranding': 1,
-                        'rel': 0,
-                        'showinfo': 0,
-                        'iv_load_policy': 3,
-                        'enablejsapi': 1,
-                        'origin': window.location.origin
-                    },
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange,
-                        'onError': onPlayerError
-                    }
-                });
-            }
-
-            function onPlayerReady(event) {
-                console.log('Player ready');
-            }
-
-            function onPlayerStateChange(event) {
-                if (event.data == YT.PlayerState.ENDED) {
-                    console.log('Video ended');
-                } else if (event.data == YT.PlayerState.PLAYING) {
-                    console.log('Video playing');
-                } else if (event.data == YT.PlayerState.PAUSED) {
-                    console.log('Video paused');
-                }
-            }
-
-            function onPlayerError(event) {
-                console.log('Player error: ' + event.data);
-            }
-
-            // Expose functions to Flutter
-            window.flutter_inappwebview = window.flutter_inappwebview || {};
-            window.flutter_inappwebview.callHandler = window.flutter_inappwebview.callHandler || function() {};
-        </script>
-    </body>
-    </html>
-    ''';
+    _isPlayerReady = true;
+    widget.controller.setWebViewController();
+    widget.onReady?.call();
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = widget.width ?? MediaQuery.of(context).size.width;
     return SizedBox(
-      width: widget.width ?? MediaQuery.of(context).size.width,
+      width: width,
       child: AspectRatio(
         aspectRatio: widget.aspectRatio,
-        child: WebViewWidget(controller: _webViewController),
+        child: Container(
+          color: Colors.black,
+          child: const Center(
+            child: Icon(
+              Icons.play_circle_fill,
+              color: Colors.white,
+              size: 64,
+            ),
+          ),
+        ),
       ),
     );
   }

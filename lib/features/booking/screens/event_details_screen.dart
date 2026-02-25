@@ -13,7 +13,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailsScreen extends ConsumerStatefulWidget {
   final EventModel event;
@@ -85,43 +84,11 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
       return;
     }
 
-    final latitude = eventLocation.latitude;
-    final longitude = eventLocation.longitude;
-    final location = Uri.encodeComponent(widget.event.location);
-
-    // Try multiple URL schemes for better compatibility
-    final List<String> mapUrls = [
-      // Google Maps app (most common on Android)
-      'geo:$latitude,$longitude?q=$latitude,$longitude($location)',
-      // Google Maps web fallback
-      'https://maps.google.com/?q=$latitude,$longitude',
-      // Apple Maps (iOS)
-      'maps://maps.apple.com/?q=$location&ll=$latitude,$longitude',
-      // Generic map intent
-      'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude',
-    ];
-
-    bool launched = false;
-
-    for (String url in mapUrls) {
-      try {
-        final uri = Uri.parse(url);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-          launched = true;
-          break;
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-
-    if (!launched && mounted) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-              'Could not open maps. Please install Google Maps or another map app.'),
-          duration: Duration(seconds: 3),
+          content: Text('Map launching is not available.'),
+          backgroundColor: Colors.red,
         ),
       );
     }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -66,10 +65,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Center(
               child: ElevatedButton.icon(
-                onPressed: () => launchUrl(
-                  Uri.parse('https://www.aplayworld.com/privacy-policy'),
-                  mode: LaunchMode.externalApplication,
-                ),
+                onPressed: null,
                 icon: const Icon(Icons.open_in_new),
                 label: const Text('View Full Policy Online'),
               ),

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:a_play/config/router.dart';
 import 'package:a_play/core/config/supabase_config.dart';
 import 'package:a_play/core/config/env.dart';
@@ -57,33 +56,16 @@ Future<void> main() async {
       ),
     );
 
-    final prefs = await SharedPreferences.getInstance();
+    final supabaseUrl = SupabaseConfig.projectUrl;
+    final supabaseAnonKey = SupabaseConfig.anonKey;
 
-    final envSupabaseUrl = SupabaseConfig.projectUrl;
-    final envSupabaseAnonKey = SupabaseConfig.anonKey;
-
-    final supabaseUrl = envSupabaseUrl.isNotEmpty
-        ? envSupabaseUrl
-        : (prefs.getString('SUPABASE_URL') ??
-            'https://yvnfhsipyfxdmulajbgl.supabase.co');
-
-    final supabaseAnonKey = envSupabaseAnonKey.isNotEmpty
-        ? envSupabaseAnonKey
-        : (prefs.getString('SUPABASE_ANON_KEY') ?? '');
-
-    if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
-      runApp(
-        _SupabaseSetupApp(
-          initialUrl: supabaseUrl,
-          initialAnonKey: supabaseAnonKey,
-          onSave: (url, anonKey) async {
-            await prefs.setString('SUPABASE_URL', url);
-            await prefs.setString('SUPABASE_ANON_KEY', anonKey);
-            await _bootstrapApp(supabaseUrl: url, supabaseAnonKey: anonKey);
-          },
-        ),
+    final missing = <String>[];
+    if (supabaseUrl.isEmpty) missing.add('SUPABASE_URL');
+    if (supabaseAnonKey.isEmpty) missing.add('SUPABASE_ANON_KEY');
+    if (missing.isNotEmpty) {
+      throw Exception(
+        'Missing Supabase configuration (${missing.join(' / ')}).',
       );
-      return;
     }
 
     await _bootstrapApp(supabaseUrl: supabaseUrl, supabaseAnonKey: supabaseAnonKey);
@@ -145,139 +127,6 @@ Future<void> _bootstrapApp({
       child: const APlayApp(),
     ),
   );
-}
-
-class _SupabaseSetupApp extends StatefulWidget {
-  final String initialUrl;
-  final String initialAnonKey;
-  final Future<void> Function(String url, String anonKey) onSave;
-
-  const _SupabaseSetupApp({
-    required this.initialUrl,
-    required this.initialAnonKey,
-    required this.onSave,
-  });
-
-  @override
-  State<_SupabaseSetupApp> createState() => _SupabaseSetupAppState();
-}
-
-class _SupabaseSetupAppState extends State<_SupabaseSetupApp> {
-  late final TextEditingController _urlController;
-  late final TextEditingController _anonKeyController;
-  bool _saving = false;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _urlController = TextEditingController(text: widget.initialUrl);
-    _anonKeyController = TextEditingController(text: widget.initialAnonKey);
-  }
-
-  @override
-  void dispose() {
-    _urlController.dispose();
-    _anonKeyController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (_saving) return;
-
-    final url = _urlController.text.trim();
-    final anonKey = _anonKeyController.text.trim();
-
-    if (url.isEmpty || anonKey.isEmpty) {
-      setState(() => _error = 'Please enter SUPABASE_URL and SUPABASE_ANON_KEY.');
-      return;
-    }
-
-    setState(() {
-      _saving = true;
-      _error = null;
-    });
-
-    try {
-      await widget.onSave(url, anonKey);
-    } catch (e) {
-      setState(() {
-        _saving = false;
-        _error = 'Failed to save Supabase credentials: $e';
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
-      home: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Supabase Setup',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Enter your Supabase Project URL and anon key to start the app.',
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 18),
-                    TextField(
-                      controller: _urlController,
-                      textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'SUPABASE_URL',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _anonKeyController,
-                      decoration: const InputDecoration(
-                        labelText: 'SUPABASE_ANON_KEY',
-                        border: OutlineInputBorder(),
-                      ),
-                      obscureText: true,
-                      onSubmitted: (_) => _submit(),
-                    ),
-                    if (_error != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        _error!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.redAccent),
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _saving ? null : _submit,
-                        child: Text(_saving ? 'Saving...' : 'Save & Continue'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class APlayApp extends ConsumerWidget {

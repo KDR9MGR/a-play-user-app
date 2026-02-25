@@ -192,7 +192,7 @@ class _SignInDialogContent extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
-                  'Continue as Guest',
+                  'Continue Browsing',
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.grey[400],
@@ -354,7 +354,7 @@ class _SignInBottomSheetContent extends StatelessWidget {
             TextButton(
               onPressed: () => Navigator.pop(context, false),
               child: Text(
-                'Continue as Guest',
+                'Continue Browsing',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   color: Colors.grey[400],

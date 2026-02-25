@@ -198,19 +198,45 @@ CREATE INDEX IF NOT EXISTS idx_subscription_events_type
 ALTER TABLE public.subscription_events ENABLE ROW LEVEL SECURITY;
 
 -- Users can read their own events
-CREATE POLICY "Users can read own subscription events"
-  ON public.subscription_events
-  FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'subscription_events'
+      AND polname = 'Users can read own subscription events'
+  ) THEN
+    EXECUTE $DDL$
+      CREATE POLICY "Users can read own subscription events"
+        ON public.subscription_events
+        FOR SELECT
+        TO authenticated
+        USING (auth.uid() = user_id)
+    $DDL$;
+  END IF;
+END $$;
 
 -- Service role can do everything
-CREATE POLICY "Service role has full access to events"
-  ON public.subscription_events
-  FOR ALL
-  TO service_role
-  USING (true)
-  WITH CHECK (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'subscription_events'
+      AND polname = 'Service role has full access to events'
+  ) THEN
+    EXECUTE $DDL$
+      CREATE POLICY "Service role has full access to events"
+        ON public.subscription_events
+        FOR ALL
+        TO service_role
+        USING (true)
+        WITH CHECK (true)
+    $DDL$;
+  END IF;
+END $$;
 
 -- ============================================================================
 -- Comments for Documentation

@@ -6,6 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/colors.dart';
+import '../../chat/controller/chat_controller.dart';
+import '../../location/screens/select_location_screen.dart';
 import '../../location/providers/location_provider.dart';
 import '../../subscription/provider/subscription_provider.dart';
 
@@ -16,6 +18,11 @@ class HomeAppBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final locationState = ref.watch(locationProvider);
     final hasSubscriptionAsync = ref.watch(hasActiveSubscriptionProvider);
+    final unreadCountAsync = ref.watch(unreadMessagesCountProvider);
+    final unreadCount = unreadCountAsync.maybeWhen(
+      data: (value) => value,
+      orElse: () => 0,
+    );
 
     return SliverAppBar(
       floating: true,
@@ -31,6 +38,7 @@ class HomeAppBar extends ConsumerWidget {
           },
           child: SvgPicture.asset(
             'assets/images/app_logo.svg',
+            height: 28,
           ),
         ),
       ),
@@ -39,17 +47,28 @@ class HomeAppBar extends ConsumerWidget {
           alignment: Alignment.centerRight,
           child: GestureDetector(
             onTap: () {
-              context.push('/location');
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const SelectLocationScreen(),
+                ),
+              );
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const Icon(
+                    Icons.location_on_rounded,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 6),
                   Flexible(
                     child: Text(
                       location?.city ?? 'Set Location',
@@ -60,7 +79,11 @@ class HomeAppBar extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Iconsax.arrow_down_1, size: 14),
+                  const Icon(
+                    Iconsax.arrow_down_1,
+                    size: 12,
+                    color: Colors.white,
+                  ),
                 ],
               ),
             ),
@@ -90,7 +113,11 @@ class HomeAppBar extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Iconsax.location_slash, size: 18),
+              const Icon(
+                Iconsax.location_slash,
+                size: 14,
+                color: Colors.white,
+              ),
               const SizedBox(width: 4),
               Text(
                 'Retry',
@@ -105,7 +132,7 @@ class HomeAppBar extends ConsumerWidget {
       centerTitle: false,
       actions: [
         IconButton(
-          icon: const Icon(Iconsax.user, size: 20),
+          icon: const Icon(Iconsax.user, size: 16),
           onPressed: () {
             HapticFeedback.lightImpact();
             context.go('/profile');
@@ -142,7 +169,7 @@ class HomeAppBar extends ConsumerWidget {
                     children: [
                       Icon(
                         hasSubscription ? Iconsax.crown1 : Iconsax.card,
-                        size: 16,
+                        size: 14,
                         color: Colors.white,
                       ),
                       const SizedBox(width: 4),
@@ -201,7 +228,50 @@ class HomeAppBar extends ConsumerWidget {
         ),
         const SizedBox(width: 8),
         IconButton(
-          icon: const Icon(Iconsax.microphone_2),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            context.push('/chat');
+          },
+          icon: SizedBox(
+            width: 48,
+            height: 48,
+            child: Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(
+                  Icons.chat_bubble_outline,
+                  size: 18,
+                  color: Colors.white,
+                ),
+                if (unreadCount > 0)
+                  Positioned(
+                    top: 9,
+                    right: 9,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      decoration: const BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.all(Radius.circular(999)),
+                      ),
+                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                      child: Text(
+                        unreadCount > 99 ? '99+' : unreadCount.toString(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Iconsax.microphone_2, size: 18),
           onPressed: () {
             context.push('/podcast');
           },

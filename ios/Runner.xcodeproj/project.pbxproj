@@ -203,6 +203,7 @@
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
 				37264C44386664583FFC8F00 /* [CP] Check Pods Manifest.lock */,
+				A1B2C3D4E5F60718293A4B5C /* Verify Supabase Config */,
 				9740EEB61CF901F6004384FC /* Run Script */,
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
@@ -368,6 +369,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+		};
+		A1B2C3D4E5F60718293A4B5C /* Verify Supabase Config */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Verify Supabase Config";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"$CONFIGURATION\" != \"Release\" ] && [ \"$CONFIGURATION\" != \"Profile\" ]; then\n  exit 0\nfi\n\npython3 - <<'PY'\nimport base64\nimport os\nimport sys\nfrom pathlib import Path\n\ndef decode_def(s: str) -> str:\n    try:\n        return base64.b64decode(s + '===').decode('utf-8')\n    except Exception:\n        return ''\n\ndef have_anon_key_from_dart_defines() -> bool:\n    dart_defines = os.environ.get('DART_DEFINES', '')\n    if not dart_defines:\n        return False\n    decoded = [decode_def(x.strip()) for x in dart_defines.split(',') if x.strip()]\n    return any(\n        d.startswith('SUPABASE_ANON_KEY=') and d.split('=', 1)[1].strip()\n        for d in decoded\n    )\n\ndef have_anon_key_from_env_file() -> bool:\n    project_dir = os.environ.get('PROJECT_DIR') or os.environ.get('SRCROOT') or ''\n    if not project_dir:\n        return False\n\n    env_path = Path(project_dir).resolve().parent / '.env'\n    if not env_path.exists():\n        return False\n\n    try:\n        content = env_path.read_text(encoding='utf-8')\n    except Exception:\n        return False\n\n    for raw in content.splitlines():\n        line = raw.strip()\n        if not line or line.startswith('#') or '=' not in line:\n            continue\n        k, v = line.split('=', 1)\n        if k.strip() != 'SUPABASE_ANON_KEY':\n            continue\n        value = v.strip().strip('\"').strip(\"'\")\n        if value:\n            return True\n\n    return False\n\ndef main() -> int:\n    if have_anon_key_from_dart_defines() or have_anon_key_from_env_file():\n        return 0\n\n    sys.stderr.write('\\nerror: Missing required Supabase configuration: SUPABASE_ANON_KEY\\n')\n    sys.stderr.write('error: Provide it via --dart-define when archiving/building, or populate the project root .env file.\\n')\n    sys.stderr.write('error: Example: flutter build ipa --release --dart-define=SUPABASE_ANON_KEY=...\\n\\n')\n    return 1\n\nraise SystemExit(main())\nPY\n";
 		};
 		CE85498F99B608DB4022CD3B /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

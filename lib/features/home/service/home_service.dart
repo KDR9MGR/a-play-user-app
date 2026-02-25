@@ -7,11 +7,12 @@ class HomeService {
 
   Future<List<EventModel>> getHomeEvents() async {
     try {
-      final now = DateTime.now().toIso8601String();
+      final now = DateTime.now();
+      final startOfToday = DateTime(now.year, now.month, now.day).toIso8601String();
       final response = await supabase
           .from('events')
           .select()
-          .gt('end_date', now)
+          .gte('start_date', startOfToday)
           .order('start_date', ascending: true)
           .limit(20);
 
@@ -26,16 +27,17 @@ class HomeService {
 
   Future<List<EventModel>> getFeaturedEvents() async {
     try {
-      final now = DateTime.now().toIso8601String();
+      final now = DateTime.now();
+      final startOfToday = DateTime(now.year, now.month, now.day).toIso8601String();
       if (kDebugMode) {
-        print('Fetching featured events after: $now');
+        print('Fetching featured events after: $startOfToday');
       }
       
       final response = await supabase
           .from('events')
           .select()
           .eq('is_featured', true)
-          .gt('end_date', now)
+          .gte('start_date', startOfToday)
           .order('start_date', ascending: true)
           .limit(10);
       

@@ -60,6 +60,17 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
     _initCurrentUser();
   }
 
+  void _validatePasswordOrThrow(String password) {
+    if (password.length < 8) {
+      throw const AuthException('Password must be at least 8 characters');
+    }
+    final hasNumber = RegExp(r'[0-9]').hasMatch(password);
+    final hasSpecial = RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
+    if (!hasNumber || !hasSpecial) {
+      throw const AuthException('Password must include a number and a special character');
+    }
+  }
+
   Future<void> _initCurrentUser() async {
     final user = _client.auth.currentUser;
     if (user != null) {
@@ -238,6 +249,8 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
   }) async {
     try {
       state = const AsyncValue.loading();
+
+      _validatePasswordOrThrow(password);
       
       final response = await _client.auth.signUp(
         email: email,

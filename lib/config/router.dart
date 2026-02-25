@@ -11,8 +11,9 @@ import 'package:a_play/presentation/pages/legal_links_page.dart';
 import 'package:a_play/features/referral/view/referral_screen.dart';
 import 'package:a_play/features/restaurant/screens/restaurant_details_screen.dart';
 import 'package:a_play/features/splash/splash_screen.dart';
-import 'package:a_play/features/subscription/screens/subscription_plans_screen_old.dart';
+import 'package:a_play/features/subscription/screens/subscription_plans_screen.dart';
 import 'package:a_play/features/subscription/screens/subscription_history_screen.dart';
+import 'package:a_play/features/chat/screens/chat_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -120,6 +121,10 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/podcast',
           builder: (context, state) => const PodcastScreen(),
+        ),
+        GoRoute(
+          path: '/chat',
+          builder: (context, state) => const ChatListScreen(),
         ),
         GoRoute(
           path: '/booking-confirmation/:id',

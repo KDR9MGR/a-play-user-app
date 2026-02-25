@@ -46,6 +46,11 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Ensure current_tier exists on existing profiles tables
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS current_tier TEXT DEFAULT 'Free'
+  CHECK (current_tier IN ('Free', 'Gold', 'Platinum', 'Black'));
+
 -- Indexes for profiles
 CREATE INDEX idx_profiles_email ON profiles(email);
 CREATE INDEX idx_profiles_current_tier ON profiles(current_tier);
@@ -127,7 +132,7 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
 );
 
 -- Indexes for user_subscriptions
-CREATE INDEX idx_user_subscriptions_user_id ON user_subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user_id ON user_subscriptions(user_id);
 CREATE INDEX idx_user_subscriptions_plan_id ON user_subscriptions(plan_id);
 CREATE INDEX idx_user_subscriptions_status ON user_subscriptions(status);
 CREATE INDEX idx_user_subscriptions_referral_code ON user_subscriptions(referral_code);

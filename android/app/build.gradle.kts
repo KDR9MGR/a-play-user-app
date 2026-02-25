@@ -1,3 +1,5 @@
+import java.util.Base64
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -20,12 +22,12 @@ android {
     ndkVersion = "28.2.13676358"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -35,8 +37,8 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2000403
+        versionName = "2.0.4"
     }
 
     buildTypes {
@@ -63,4 +65,68 @@ android {
 
 flutter {
     source = "../.."
+}
+
+fun decodeDartDefines(dartDefines: String): List<String> {
+    if (dartDefines.isBlank()) return emptyList()
+    return dartDefines.split(",")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .map { token ->
+            val padded = token + "=".repeat((4 - (token.length % 4)) % 4)
+            try {
+                String(Base64.getDecoder().decode(padded), Charsets.UTF_8)
+            } catch (_: Exception) {
+                ""
+            }
+        }
+        .filter { it.isNotEmpty() }
+}
+
+fun readDotEnvValue(envFile: File, key: String): String? {
+    if (!envFile.exists()) return null
+    for (rawLine in envFile.readLines()) {
+        val line = rawLine.trim()
+        if (line.isEmpty() || line.startsWith("#")) continue
+        val idx = line.indexOf("=")
+        if (idx <= 0) continue
+        val k = line.substring(0, idx).trim()
+        if (k != key) continue
+        return line.substring(idx + 1).trim().trim('"', '\'')
+    }
+    return null
+}
+
+val verifySupabaseConfig by tasks.registering {
+    group = "verification"
+    description = "Fail release builds if required Supabase config is missing."
+
+    doLast {
+        val dartDefines =
+            (project.findProperty("dart-defines") as String?) ?: (System.getenv("DART_DEFINES") ?: "")
+        val decoded = decodeDartDefines(dartDefines)
+        val haveAnonKeyFromDefines =
+            decoded.any { it.startsWith("SUPABASE_ANON_KEY=") && it.substringAfter("=", "").isNotBlank() }
+
+        val envFile = rootProject.projectDir.parentFile.resolve(".env")
+        val anonKeyFromEnv = readDotEnvValue(envFile, "SUPABASE_ANON_KEY")
+        val haveAnonKeyFromEnv = !anonKeyFromEnv.isNullOrBlank()
+
+        if (!haveAnonKeyFromDefines && !haveAnonKeyFromEnv) {
+            throw GradleException(
+                """
+                Missing required Supabase configuration: SUPABASE_ANON_KEY
+
+                Provide it via either:
+                - Dart defines (recommended):
+                  flutter build appbundle --release --dart-define=SUPABASE_ANON_KEY=...
+                - Or a populated .env file at the project root (packaged as an asset)
+                """.trimIndent(),
+            )
+        }
+    }
+}
+
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }.configureEach {
+    dependsOn(verifySupabaseConfig)
 }

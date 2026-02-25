@@ -313,12 +313,13 @@ class HorizontalVenueCardSkeleton extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Container(
-                    height: 10,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[700],
-                      borderRadius: BorderRadius.circular(8),
+                  Expanded(
+                    child: Container(
+                      width: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[700],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ],

@@ -31,7 +31,7 @@ A modern, feature-rich event booking and entertainment platform built with Flutt
 ### 👥 Social Features
 - **User Profiles** - Personalized user experience
 - **Referral System** - Earn rewards by inviting friends
-- **Chat System** - Connect with other users
+- **Chat System** - Connect with other users (no subscription required)
 - **Reviews & Ratings** - Share your experiences
 
 ### 💳 Payment & Rewards
@@ -101,7 +101,7 @@ lib/
 3. **Configure Supabase**
    - Create a Supabase project
    - Update `lib/core/config/supabase_config.dart` with your credentials
-   - Run database migrations
+   - Run database migrations (including free chat access policies)
 
 4. **Configure Firebase (optional)**
    - Add `google-services.json` to `android/app/`
