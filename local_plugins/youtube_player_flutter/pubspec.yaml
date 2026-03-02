@@ -1,0 +1,23 @@
+name: youtube_player_flutter
+description: Stub implementation of YouTube Player for Flutter.
+version: 8.1.2
+homepage: https://github.com/sarbagyastha/youtube_player_flutter
+
+environment:
+  sdk: ">=2.12.0 <4.0.0"
+  flutter: ">=2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  video_player: ^2.9.5
+  webview_flutter: ^4.13.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: np.com.sarbagyastha.youtube_player_flutter
+        pluginClass: YoutubePlayerFlutterPlugin
+      ios:
+        pluginClass: YoutubePlayerFlutterPlugin 

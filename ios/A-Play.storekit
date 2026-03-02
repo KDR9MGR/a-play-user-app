@@ -1,0 +1,163 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "D16C4DA5",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6745157402",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_developerTeamID" : "TUKQ9KBCN8",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 786863796.439255,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21851923",
+      "localizations" : [
+
+      ],
+      "name" : "Premium Subscription Group",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "179.0",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "6756209204",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Early Events Access",
+              "displayName" : "3 Month's Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "SUBM3",
+          "recurringSubscriptionPeriod" : "P3M",
+          "referenceName" : "3 Month",
+          "subscriptionGroupID" : "21851923",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "700.0",
+          "familyShareable" : false,
+          "groupNumber" : 4,
+          "internalID" : "6756209179",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Early Events Access",
+              "displayName" : "Annual Ultimate",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "SUBAU",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual",
+          "subscriptionGroupID" : "21851923",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "60.0",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6756209012",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Fun for a month",
+              "displayName" : "Montly Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "SUBM",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly",
+          "subscriptionGroupID" : "21851923",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "17.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6756209063",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Premium Access to Events",
+              "displayName" : "7 Day Fun",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "SUB7DAY",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Weekly",
+          "subscriptionGroupID" : "21851923",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

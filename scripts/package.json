@@ -1,0 +1,12 @@
+{
+  "name": "a-play-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for A-Play Firebase management",
+  "main": "update_event_seats.js",
+  "scripts": {
+    "update-seats": "node update_event_seats.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.11.0"
+  }
+} 

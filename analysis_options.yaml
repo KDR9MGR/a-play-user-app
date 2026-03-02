@@ -1,0 +1,9 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - local_plugins/**
+    - local_plugins/lottie/example/**
+
+linter:
+  rules: []

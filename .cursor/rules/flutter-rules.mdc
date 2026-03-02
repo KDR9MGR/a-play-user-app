@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+#Rules 
+- Follow the feature first layer approach
+- When I tell you to create new feature with any 'name' then create the folder structure as below 
+
+Step 1 => Create folders , screens , providers , controllers , models , widgets ,service
+Step 2 => Create model fisrt using the freez and run the command using dart 
+step 3 => inside the service folder create service that use supabase to fetch the data and give in form of freezed model that we created using fromJson or toJson
+step 4 => create a provider inside the provider folder and make , provider should always be AsyncNotifier with proper error handling 
+
+step 5 => use the provider in screens folder when there is a need of data
