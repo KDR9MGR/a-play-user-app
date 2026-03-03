@@ -56,8 +56,7 @@ class FeedNotifier extends AsyncNotifier<List<FeedModel>> {
   Future<bool> _isValidImageUrl(String? url) async {
     if (url == null || url.isEmpty) return false;
     
-    // Check if URL starts with http:// or https://
-    if (!url.startsWith('http://') && !url.startsWith('https://')) return false;
+    if (!url.startsWith('https://')) return false;
 
     try {
       // Try to fetch image headers

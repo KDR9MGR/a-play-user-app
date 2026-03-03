@@ -49,12 +49,15 @@ app.*.map.json
 # Environment variables
 .env
 .env.*
+/.dart-defines.json
+/.dart-defines.*.json
 /client_ids.txt
 
 # Secrets / credentials
 **/*.keystore
 **/*.jks
 **/key.properties
+android/key.properties
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 serviceAccountKey*.json
@@ -69,3 +72,6 @@ ios/build/
 
 # Local bare git remote (created by tooling)
 .remote.git/
+
+# Supabase CLI local state
+supabase/.temp/

@@ -1,7 +1,4 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 class SupabaseConfig {
-  static const String defaultProjectUrl = 'https://yvnfhsipyfxdmulajbgl.supabase.co';
   static const String _projectUrlDefine =
       String.fromEnvironment('SUPABASE_URL', defaultValue: '');
   static const String _anonKeyDefine =
@@ -31,17 +28,11 @@ class SupabaseConfig {
   }
 
   static String get projectUrl {
-    final fromEnv = dotenv.env['SUPABASE_URL'];
-    if (fromEnv != null && fromEnv.isNotEmpty) return _normalize(fromEnv);
     if (_projectUrlDefine.isNotEmpty) return _normalize(_projectUrlDefine);
-    return defaultProjectUrl;
+    return '';
   }
 
   static String get anonKey {
-    final fromEnv = dotenv.env['SUPABASE_ANON_KEY'];
-    final envValue = fromEnv == null ? '' : _normalize(fromEnv);
-    if (_looksLikeSupabaseKey(envValue)) return envValue;
-
     final defineValue = _normalize(_anonKeyDefine);
     if (_looksLikeSupabaseKey(defineValue)) return defineValue;
     return '';

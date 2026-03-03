@@ -1,10 +1,17 @@
 import java.util.Base64
+import java.util.Properties
 
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
 val googleServicesJsonExists =
@@ -41,11 +48,35 @@ android {
         versionName = "2.0.4"
     }
 
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                val storeFilePath = keystoreProperties.getProperty("storeFile")
+                if (!storeFilePath.isNullOrBlank()) {
+                    storeFile = rootProject.file(storeFilePath)
+                }
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            if (!keystorePropertiesFile.exists()) {
+                val isReleaseTask = gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = true) }
+                if (isReleaseTask) {
+                    throw GradleException(
+                        """
+                        Missing Android release signing config.
+
+                        Create android/key.properties and configure a release keystore before building release.
+                        """.trimIndent(),
+                    )
+                }
+            }
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -83,20 +114,6 @@ fun decodeDartDefines(dartDefines: String): List<String> {
         .filter { it.isNotEmpty() }
 }
 
-fun readDotEnvValue(envFile: File, key: String): String? {
-    if (!envFile.exists()) return null
-    for (rawLine in envFile.readLines()) {
-        val line = rawLine.trim()
-        if (line.isEmpty() || line.startsWith("#")) continue
-        val idx = line.indexOf("=")
-        if (idx <= 0) continue
-        val k = line.substring(0, idx).trim()
-        if (k != key) continue
-        return line.substring(idx + 1).trim().trim('"', '\'')
-    }
-    return null
-}
-
 val verifySupabaseConfig by tasks.registering {
     group = "verification"
     description = "Fail release builds if required Supabase config is missing."
@@ -105,22 +122,18 @@ val verifySupabaseConfig by tasks.registering {
         val dartDefines =
             (project.findProperty("dart-defines") as String?) ?: (System.getenv("DART_DEFINES") ?: "")
         val decoded = decodeDartDefines(dartDefines)
+        val haveProjectUrlFromDefines =
+            decoded.any { it.startsWith("SUPABASE_URL=") && it.substringAfter("=", "").isNotBlank() }
         val haveAnonKeyFromDefines =
             decoded.any { it.startsWith("SUPABASE_ANON_KEY=") && it.substringAfter("=", "").isNotBlank() }
 
-        val envFile = rootProject.projectDir.parentFile.resolve(".env")
-        val anonKeyFromEnv = readDotEnvValue(envFile, "SUPABASE_ANON_KEY")
-        val haveAnonKeyFromEnv = !anonKeyFromEnv.isNullOrBlank()
-
-        if (!haveAnonKeyFromDefines && !haveAnonKeyFromEnv) {
+        if (!haveProjectUrlFromDefines || !haveAnonKeyFromDefines) {
             throw GradleException(
                 """
-                Missing required Supabase configuration: SUPABASE_ANON_KEY
+                Missing required Supabase configuration: SUPABASE_URL and/or SUPABASE_ANON_KEY
 
-                Provide it via either:
-                - Dart defines (recommended):
-                  flutter build appbundle --release --dart-define=SUPABASE_ANON_KEY=...
-                - Or a populated .env file at the project root (packaged as an asset)
+                Provide it via Dart defines:
+                  flutter build appbundle --release --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
                 """.trimIndent(),
             )
         }

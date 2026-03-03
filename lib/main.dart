@@ -64,7 +64,9 @@ Future<void> main() async {
     if (supabaseAnonKey.isEmpty) missing.add('SUPABASE_ANON_KEY');
     if (missing.isNotEmpty) {
       throw Exception(
-        'Missing Supabase configuration (${missing.join(' / ')}).',
+        'Missing Supabase configuration (${missing.join(' / ')}). '
+        'Pass values at build/run time using --dart-define or --dart-define-from-file. '
+        'For local dev, create a .env file and run: tool/flutter_run.sh',
       );
     }
 
