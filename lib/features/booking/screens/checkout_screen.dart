@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:a_play/core/config/paystack_config.dart';
 import 'package:a_play/features/booking/model/zoneModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,10 +7,9 @@ import 'package:a_play/features/home/model/event_model.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:a_play/core/constants/app_constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final userProvider = StreamProvider<DocumentSnapshot>((ref) {
   final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -93,8 +91,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     setState(() => isLoading = true);
     try {
-      final secretKey = PaystackConfig.secretKey;
-
       final email = user.email;
       final reference = 'aplay_${DateTime.now().millisecondsSinceEpoch}';
 
@@ -102,13 +98,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           'Initializing payment for amount: ${(amount * 100).round()} kobo');
 
       // Initialize transaction
-      final response = await http.post(
-        Uri.parse('https://api.paystack.co/transaction/initialize'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final response = await Supabase.instance.client.functions.invoke(
+        'paystack',
+        body: {
+          'action': 'initialize',
           'email': email,
           'amount': (amount * 100).round(), // Convert to kobo
           'reference': reference,
@@ -131,12 +124,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               }
             ]
           },
-        }),
+        },
       );
 
-      final responseData = jsonDecode(response.body);
-      if (response.statusCode == 200 && responseData['status'] == true) {
-        final authorizationUrl = responseData['data']['authorization_url'];
+      final responseData = (response.data as Map).cast<String, dynamic>();
+      final data = (responseData['data'] as Map?)?.cast<String, dynamic>();
+
+      if (response.status == 200 && responseData['status'] == true) {
+        final authorizationUrl = data?['authorization_url'];
 
         // Navigate to WebView for payment
         if (mounted) {
@@ -146,7 +141,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               builder: (context) => PaystackWebView(
                 authorizationUrl: authorizationUrl,
                 reference: reference,
-                secretKey: secretKey,
                 onSuccess: () async {
                   try {
                     final bookingId = await _saveBooking();
@@ -437,7 +431,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 class PaystackWebView extends StatelessWidget {
   final String authorizationUrl;
   final String reference;
-  final String secretKey;
   final VoidCallback onSuccess;
   final Function(String) onError;
 
@@ -445,7 +438,6 @@ class PaystackWebView extends StatelessWidget {
     super.key,
     required this.authorizationUrl,
     required this.reference,
-    required this.secretKey,
     required this.onSuccess,
     required this.onError,
   });

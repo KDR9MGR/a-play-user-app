@@ -1,18 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:a_play/core/config/paystack_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UnifiedPaymentService {
   static UnifiedPaymentService? _instance;
-  final String _publicKey = PaystackConfig.publicKey;
-  final String _secretKey = PaystackConfig.secretKey;
 
-  UnifiedPaymentService._() {
-    if (_publicKey.isEmpty || _secretKey.isEmpty) {
-      throw Exception('Paystack keys not properly configured');
-    }
-  }
+  UnifiedPaymentService._();
 
   static UnifiedPaymentService get instance {
     _instance ??= UnifiedPaymentService._();
@@ -29,41 +21,31 @@ class UnifiedPaymentService {
       debugPrint('Initializing transaction for amount: ${amount.toString()}');
       debugPrint('Using email: $email');
       debugPrint('Reference: $reference');
-      
-      if (_secretKey.isEmpty) {
-        throw Exception('Paystack secret key not configured');
-      }
 
-      final response = await http.post(
-        Uri.parse('https://api.paystack.co/transaction/initialize'),
-        headers: {
-          'Authorization': 'Bearer $_secretKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final response = await Supabase.instance.client.functions.invoke(
+        'paystack',
+        body: {
+          'action': 'initialize',
           'email': email,
-          'amount': (amount * 100).round(), // Convert to pesewas
+          'amount': (amount * 100).round(),
           'reference': reference,
           'callback_url': 'https://standard.paystack.co/close',
           'currency': 'GHS',
           'channels': ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
           'metadata': metadata,
-        }),
+        },
       );
 
-      debugPrint('Paystack Response: ${response.body}');
-
-      if (response.statusCode != 200) {
-        final errorBody = jsonDecode(response.body);
-        throw Exception('Failed to initialize transaction: ${errorBody['message'] ?? response.body}');
+      if (response.status != 200) {
+        throw Exception('Failed to initialize transaction: ${response.status}');
       }
 
-      final responseData = jsonDecode(response.body);
+      final responseData = (response.data as Map).cast<String, dynamic>();
       if (responseData['status'] != true) {
         throw Exception(responseData['message'] ?? 'Failed to initialize transaction');
       }
 
-      return responseData['data'];
+      return (responseData['data'] as Map).cast<String, dynamic>();
     } catch (e) {
       debugPrint('Payment initialization error: $e');
       throw Exception('Payment initialization failed: $e');
@@ -109,7 +91,6 @@ class UnifiedPaymentService {
           child: PaystackWebView(
             authorizationUrl: transactionData['authorization_url'],
             reference: reference,
-            secretKey: _secretKey,
             onSuccess: onSuccess,
             onError: onError,
           ),
@@ -128,7 +109,6 @@ class UnifiedPaymentService {
 class PaystackWebView extends StatelessWidget {
   final String authorizationUrl;
   final String reference;
-  final String secretKey;
   final Function() onSuccess;
   final Function(String) onError;
 
@@ -136,7 +116,6 @@ class PaystackWebView extends StatelessWidget {
     super.key,
     required this.authorizationUrl,
     required this.reference,
-    required this.secretKey,
     required this.onSuccess,
     required this.onError,
   });

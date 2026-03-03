@@ -1151,7 +1151,6 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           child: PaystackWebView(
             authorizationUrl: authUrl,
             reference: reference,
-            secretKey: ref.read(subscriptionServiceProvider).getPaystackSecretKey(),
             onSuccess: () => Navigator.of(context).pop(true),
             onError: (error) {
               ScaffoldMessenger.of(context).showSnackBar(

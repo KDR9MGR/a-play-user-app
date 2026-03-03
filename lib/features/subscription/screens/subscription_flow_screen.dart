@@ -676,7 +676,6 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
           child: PaystackWebView(
             authorizationUrl: authUrl,
             reference: reference,
-            secretKey: ref.read(subscriptionServiceProvider).getPaystackSecretKey(),
             onSuccess: () {
               Navigator.of(context).pop(true);
             },

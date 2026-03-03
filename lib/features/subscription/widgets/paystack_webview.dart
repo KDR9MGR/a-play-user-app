@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PaystackWebView extends StatefulWidget {
   final String authorizationUrl;
   final String reference;
-  final String secretKey;
   final VoidCallback onSuccess;
   final Function(String) onError;
 
@@ -13,7 +11,6 @@ class PaystackWebView extends StatefulWidget {
     super.key,
     required this.authorizationUrl,
     required this.reference,
-    required this.secretKey,
     required this.onSuccess,
     required this.onError,
   });
@@ -51,18 +48,20 @@ class _PaystackWebViewState extends State<PaystackWebView> {
     setState(() => _isVerifying = true);
 
     try {
-      final response = await http.get(
-        Uri.parse('https://api.paystack.co/transaction/verify/${widget.reference}'),
-        headers: {
-          'Authorization': 'Bearer ${widget.secretKey}',
-          'Content-Type': 'application/json',
+      final response = await Supabase.instance.client.functions.invoke(
+        'paystack',
+        body: {
+          'action': 'verify',
+          'reference': widget.reference,
         },
       );
 
-      final responseData = jsonDecode(response.body);
-      if (response.statusCode == 200 && 
+      final responseData = (response.data as Map).cast<String, dynamic>();
+      final data = (responseData['data'] as Map?)?.cast<String, dynamic>();
+
+      if (response.status == 200 && 
           responseData['status'] == true && 
-          responseData['data']['status'] == 'success') {
+          data?['status'] == 'success') {
         widget.onSuccess();
         if (mounted) {
           Navigator.of(context).pop(true);

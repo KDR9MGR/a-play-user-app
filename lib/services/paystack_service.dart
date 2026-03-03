@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PaystackService {
-  static String get _secretKey => dotenv.env['PAYSTACK_SECRET_KEY'] ?? '';
+  final SupabaseClient _client;
+
+  PaystackService({SupabaseClient? client}) : _client = client ?? Supabase.instance.client;
 
   // Initialize payment
   Future<Map<String, dynamic>> initializeTransaction({
@@ -12,28 +12,22 @@ class PaystackService {
     required int amount, // amount in kobo (Nigerian currency)
     required String reference,
   }) async {
-    final url = Uri.parse('https://api.paystack.co/transaction/initialize');
-    
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_secretKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final response = await _client.functions.invoke(
+        'paystack',
+        body: {
+          'action': 'initialize',
           'email': email,
           'amount': amount,
           'reference': reference,
           'callback_url': 'https://standard.paystack.co/close',
-        }),
+        },
       );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Failed to initialize transaction: ${response.body}');
+      if (response.status != 200) {
+        throw Exception('Failed to initialize transaction: ${response.status}');
       }
+      return (response.data as Map).cast<String, dynamic>();
     } catch (e) {
       throw Exception('Network error: $e');
     }
@@ -41,22 +35,19 @@ class PaystackService {
 
   // Verify transaction
   Future<Map<String, dynamic>> verifyTransaction(String reference) async {
-    final url = Uri.parse('https://api.paystack.co/transaction/verify/$reference');
-    
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_secretKey',
-          'Content-Type': 'application/json',
+      final response = await _client.functions.invoke(
+        'paystack',
+        body: {
+          'action': 'verify',
+          'reference': reference,
         },
       );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Failed to verify transaction: ${response.body}');
+      if (response.status != 200) {
+        throw Exception('Failed to verify transaction: ${response.status}');
       }
+      return (response.data as Map).cast<String, dynamic>();
     } catch (e) {
       throw Exception('Network error: $e');
     }

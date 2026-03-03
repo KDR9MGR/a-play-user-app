@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../model/subscription_model.dart';
@@ -11,7 +8,6 @@ import 'apple_iap_service.dart';
 
 class SubscriptionService {
   late final SupabaseClient _client;
-  final String _paystackSecretKey = PaystackConfig.secretKey;
   final String _paystackPublicKey = PaystackConfig.publicKey;
 
   SubscriptionService() {
@@ -177,14 +173,10 @@ class SubscriptionService {
       // Generate a reference
       final reference = 'SUB_${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4().substring(0, 8)}';
 
-      // Initialize payment with Paystack
-      final response = await http.post(
-        Uri.parse('https://api.paystack.co/transaction/initialize'),
-        headers: {
-          'Authorization': 'Bearer $_paystackSecretKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final response = await _client.functions.invoke(
+        'paystack',
+        body: {
+          'action': 'initialize',
           'email': email,
           'amount': amountInKobo,
           'reference': reference,
@@ -200,20 +192,22 @@ class SubscriptionService {
               }
             ]
           }
-        }),
+        },
       );
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+      if (response.status == 200) {
+        final responseData = (response.data as Map).cast<String, dynamic>();
+        final data = (responseData['data'] as Map?)?.cast<String, dynamic>();
+
         return {
           'status': true,
           'reference': reference,
-          'authorization_url': responseData['data']['authorization_url'],
-          'access_code': responseData['data']['access_code'],
+          'authorization_url': data?['authorization_url'],
+          'access_code': data?['access_code'],
         };
       } else {
         throw Exception(
-            'Failed to initialize payment: ${response.statusCode} - ${response.body}');
+            'Failed to initialize payment: ${response.status}');
       }
     } catch (e) {
       throw Exception('Failed to initialize payment: $e');
@@ -223,16 +217,19 @@ class SubscriptionService {
   // Verify PayStack payment
   Future<PaystackVerification> verifyPaystackPayment(String reference) async {
     try {
-      final response = await http.get(
-        Uri.parse('https://api.paystack.co/transaction/verify/$reference'),
-        headers: {
-          'Authorization': 'Bearer $_paystackSecretKey',
-          'Content-Type': 'application/json',
+      final response = await _client.functions.invoke(
+        'paystack',
+        body: {
+          'action': 'verify',
+          'reference': reference,
         },
       );
 
-      final responseData = jsonDecode(response.body);
-      
+      if (response.status != 200) {
+        throw Exception('Paystack verify returned status ${response.status}');
+      }
+
+      final responseData = (response.data as Map).cast<String, dynamic>();
       return PaystackVerification.fromJson(responseData);
     } catch (e) {
       throw Exception('Failed to verify payment: $e');
@@ -760,11 +757,6 @@ class SubscriptionService {
   // Get Paystack public key
   String getPaystackPublicKey() {
     return _paystackPublicKey;
-  }
-
-  // Get Paystack secret key
-  String getPaystackSecretKey() {
-    return _paystackSecretKey;
   }
 
   // Check if user has already applied a referral code
