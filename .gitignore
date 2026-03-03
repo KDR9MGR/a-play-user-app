@@ -45,8 +45,6 @@ app.*.map.json
 /android/app/release
 /android/app/.cxx/
 /android/app/.cxx/**
-/android/.gradle/
-**/.gradle/
 
 # Environment variables
 .env
@@ -68,8 +66,6 @@ service-account-key*.json
 # Local pub cache and build artifacts
 .local-pub-cache/
 ios/build/
-ios/Pods/
-**/Pods/
 
 # Local bare git remote (created by tooling)
 .remote.git/
