@@ -10,6 +10,7 @@ import 'package:a_play/features/onboarding/screens/onboarding_screen.dart';
 import 'package:a_play/features/podcast/screens/podcast_screen.dart';
 import 'package:a_play/features/authentication/data/models/user_model.dart';
 import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
+import 'package:a_play/features/authentication/presentation/screens/auth_callback_screen.dart';
 import 'package:a_play/features/profile/providers/profile_provider.dart';
 import 'package:a_play/features/profile/screens/profile_screen.dart';
 import 'package:a_play/features/restaurant/screens/restaurant_details_screen.dart';
@@ -35,44 +36,20 @@ class RouterNotifier extends ChangeNotifier {
     });
   }
 
-  Future<String?> call(BuildContext context, GoRouterState state) async {
+  String? call(BuildContext context, GoRouterState state) {
     final isLoggingIn = state.matchedLocation == '/sign-in' ||
         state.matchedLocation == '/sign-up' ||
         state.matchedLocation == '/auth/callback';
     if (state.matchedLocation == '/splash') return null;
 
-    // Routes that guests can access without authentication (Apple App Store requirement 5.1.1)
-    final guestAllowedRoutes = [
-      '/home',
-      '/podcast',
-      '/explore',
-      '/feed',
-      '/location',
-      '/subscription', // Allow guests to view subscription plans (auth required to purchase)
-    ];
-
-    final isGuestAllowedRoute = guestAllowedRoutes.any(
-      (route) => state.matchedLocation == route || state.matchedLocation.startsWith('$route/'),
-    );
+    if (state.matchedLocation == '/auth/callback') return null;
 
     if (!isAuth) {
-      // Allow guest access to browse-only features
-      if (isGuestAllowedRoute || isLoggingIn) return null;
+      if (isLoggingIn) return null;
       return '/sign-in';
     }
 
-    try {
-      final profile = await _ref.read(profileFutureProvider.future);
-      if (!profile.isOnboardingComplete) {
-        return '/onboarding';
-      }
-    } catch (_) {
-      return '/home';
-    }
-
-    if (isLoggingIn) {
-      return '/home';
-    }
+    if (isLoggingIn) return '/home';
     return null;
   }
 
@@ -99,7 +76,7 @@ class RouterNotifier extends ChangeNotifier {
         ),
         GoRoute(
           path: '/auth/callback',
-          builder: (context, state) => const OnboardingScreen(),
+          builder: (context, state) => const AuthCallbackScreen(),
         ),
         GoRoute(
           path: '/home',
