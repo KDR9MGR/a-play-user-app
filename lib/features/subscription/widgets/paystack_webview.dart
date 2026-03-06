@@ -33,9 +33,7 @@ class _PaystackWebViewState extends State<PaystackWebView> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (String url) {
-            if (url.contains('payment-callback') ||
-                url.contains('close') ||
-                url.toLowerCase().contains('success')) {
+            if (url == 'aplay://payment-callback') {
               _verifyTransaction();
             }
           },
@@ -84,11 +82,12 @@ class _PaystackWebViewState extends State<PaystackWebView> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
         widget.onError('Payment cancelled');
         Navigator.of(context).pop(false);
-        return false;
       },
       child: Scaffold(
         appBar: AppBar(
