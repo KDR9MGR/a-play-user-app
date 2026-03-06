@@ -1,17 +1,19 @@
 
 import 'dart:io';
+import 'package:a_play/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-class ProfilePhotoScreen extends StatefulWidget {
+class ProfilePhotoScreen extends ConsumerStatefulWidget {
   final PageController pageController;
   const ProfilePhotoScreen({super.key, required this.pageController});
 
   @override
-  State<ProfilePhotoScreen> createState() => _ProfilePhotoScreenState();
+  ConsumerState<ProfilePhotoScreen> createState() => _ProfilePhotoScreenState();
 }
 
-class _ProfilePhotoScreenState extends State<ProfilePhotoScreen> {
+class _ProfilePhotoScreenState extends ConsumerState<ProfilePhotoScreen> {
   File? _image;
 
   Future<void> _pickImage() async {
@@ -48,7 +50,13 @@ class _ProfilePhotoScreenState extends State<ProfilePhotoScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // TODO: Upload photo
+                if (_image != null) {
+                  ref.read(onboardingControllerProvider.notifier).updateProfile(
+                        ref.read(onboardingControllerProvider).copyWith(
+                              avatarUrl: _image!.path,
+                            ),
+                      );
+                }
                 widget.pageController.nextPage(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.ease,

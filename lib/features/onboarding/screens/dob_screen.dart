@@ -1,16 +1,18 @@
 
+import 'package:a_play/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class DateOfBirthScreen extends StatefulWidget {
+class DateOfBirthScreen extends ConsumerStatefulWidget {
   final PageController pageController;
   const DateOfBirthScreen({super.key, required this.pageController});
 
   @override
-  State<DateOfBirthScreen> createState() => _DateOfBirthScreenState();
+  ConsumerState<DateOfBirthScreen> createState() => _DateOfBirthScreenState();
 }
 
-class _DateOfBirthScreenState extends State<DateOfBirthScreen> {
+class _DateOfBirthScreenState extends ConsumerState<DateOfBirthScreen> {
   DateTime? _selectedDate;
 
   Future<void> _selectDate(BuildContext context) async {
@@ -55,7 +57,13 @@ class _DateOfBirthScreenState extends State<DateOfBirthScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // TODO: Save DOB
+                if (_selectedDate != null) {
+                  ref.read(onboardingControllerProvider.notifier).updateProfile(
+                        ref.read(onboardingControllerProvider).copyWith(
+                              dob: _selectedDate,
+                            ),
+                      );
+                }
                 widget.pageController.nextPage(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.ease,

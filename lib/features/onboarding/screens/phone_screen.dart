@@ -1,15 +1,17 @@
 
+import 'package:a_play/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PhoneScreen extends StatefulWidget {
+class PhoneScreen extends ConsumerStatefulWidget {
   final PageController pageController;
   const PhoneScreen({super.key, required this.pageController});
 
   @override
-  State<PhoneScreen> createState() => _PhoneScreenState();
+  ConsumerState<PhoneScreen> createState() => _PhoneScreenState();
 }
 
-class _PhoneScreenState extends State<PhoneScreen> {
+class _PhoneScreenState extends ConsumerState<PhoneScreen> {
   final _phoneController = TextEditingController();
 
   @override
@@ -40,7 +42,11 @@ class _PhoneScreenState extends State<PhoneScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // TODO: Save phone number
+                ref.read(onboardingControllerProvider.notifier).updateProfile(
+                      ref.read(onboardingControllerProvider).copyWith(
+                            phone: _phoneController.text,
+                          ),
+                    );
                 widget.pageController.nextPage(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.ease,
