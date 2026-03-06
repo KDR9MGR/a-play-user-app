@@ -377,6 +377,22 @@ class SubscriptionService {
         // Ignore if referral service is not available
       }
 
+      // Send subscription confirmation email
+      try {
+        final user = _client.auth.currentUser;
+        if (user != null && user.email != null) {
+          await _client.functions.invoke('send-email', body: {
+            'to': user.email,
+            'subject': 'Your A-Play Subscription Confirmation',
+            'html':
+                '<h1>Subscription Confirmed!</h1><p>Your subscription to ${plan.name} is confirmed.</p>',
+          });
+        }
+      } catch (e) {
+        debugPrint('Failed to send subscription confirmation email: $e');
+        // Do not throw, as subscription creation was successful
+      }
+
       return UserSubscription.fromJson(response);
     } catch (e) {
       throw Exception('Failed to create subscription: $e');

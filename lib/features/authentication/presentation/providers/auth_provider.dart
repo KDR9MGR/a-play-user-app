@@ -274,11 +274,11 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
             ? displayName.trim()
             : (user.userMetadata?['display_name'] as String?) ?? email.split('@').first;
         await _client.functions.invoke(
-          'send-welcome-email',
+          'send-email',
           body: {
-            'email': email,
-            'fullName': resolvedName,
-            'isOrganizer': false,
+            'to': email,
+            'subject': 'Welcome to A-Play',
+            'html': '<h1>Welcome, $resolvedName!</h1><p>Thanks for joining A-Play.</p>',
           },
         );
       } catch (_) {}

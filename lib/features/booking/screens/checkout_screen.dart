@@ -202,6 +202,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       transactionId: transactionId,
       paymentStatus: 'successful',
     );
+
+    // Send booking confirmation email
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null && user.email != null) {
+      await Supabase.instance.client.functions.invoke('send-email', body: {
+        'to': user.email,
+        'subject': 'Your A-Play Booking Confirmation',
+        'html':
+            '<h1>Booking Confirmed!</h1><p>Your booking for ${widget.event.title} is confirmed.</p>',
+      });
+    }
+
     return bookingId;
   }
 

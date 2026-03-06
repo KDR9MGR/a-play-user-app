@@ -30,10 +30,24 @@ serve(async (req) => {
       switch (event.event) {
         case 'charge.success': {
           await supabase.from('profiles').update({ is_premium: true }).eq('id', user.id)
+          await supabase.functions.invoke('send-email', {
+            body: {
+              to: email,
+              subject: 'Your A-Play Subscription Renewal',
+              html: '<h1>Subscription Renewed!</h1><p>Your subscription has been successfully renewed.</p>',
+            },
+          })
           break
         }
         case 'subscription.disable': {
           await supabase.from('profiles').update({ is_premium: false }).eq('id', user.id)
+          await supabase.functions.invoke('send-email', {
+            body: {
+              to: email,
+              subject: 'Your A-Play Subscription Has Been Cancelled',
+              html: '<h1>Subscription Cancelled</h1><p>Your subscription has been cancelled.</p>',
+            },
+          })
           break
         }
       }
