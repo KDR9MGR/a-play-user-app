@@ -136,42 +136,62 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
           ],
         ),
         child: BottomAppBar(
-          height: 60 + bottomPadding,
-          padding: EdgeInsets.only(bottom: bottomPadding),
+          height: 64 + bottomPadding,
+          padding: EdgeInsets.only(bottom: bottomPadding, left: 8, right: 8),
           notchMargin: 8,
           color: AppTheme.surfaceDark,
           shape: const CircularNotchedRectangle(),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _NavBarItem(
-                icon: Iconsax.discover_1,
-                selectedIcon: Iconsax.discover5,
-                label: 'Explore',
-                isSelected: currentIndex == 1,
-                onTap: () => _handleTabTap(1),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _NavBarItem(
+                    icon: Iconsax.discover_1,
+                    selectedIcon: Iconsax.discover5,
+                    label: 'Explore',
+                    isSelected: currentIndex == 1,
+                    onTap: () => _handleTabTap(1),
+                  ),
+                ),
               ),
-              _NavBarItem(
-                icon: Iconsax.ticket,
-                selectedIcon: Iconsax.ticket_star5,
-                label: 'Bookings',
-                isSelected: currentIndex == 2,
-                onTap: () => _handleTabTap(2),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: _NavBarItem(
+                    icon: Iconsax.ticket,
+                    selectedIcon: Iconsax.ticket_star5,
+                    label: 'Bookings',
+                    isSelected: currentIndex == 2,
+                    onTap: () => _handleTabTap(2),
+                  ),
+                ),
               ),
-              const SizedBox(width: 80), // Space for FAB
-              _NavBarItem(
-                icon: Iconsax.crown,
-                selectedIcon: Iconsax.crown5,
-                label: 'Concierge',
-                isSelected: currentIndex == 3,
-                onTap: () => _handleTabTap(3),
+              const SizedBox(width: 72), // Space for FAB footprint
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _NavBarItem(
+                    icon: Iconsax.crown,
+                    selectedIcon: Iconsax.crown5,
+                    label: 'Concierge',
+                    isSelected: currentIndex == 3,
+                    onTap: () => _handleTabTap(3),
+                  ),
+                ),
               ),
-              _NavBarItem(
-                icon: Iconsax.bookmark,
-                selectedIcon: Iconsax.bookmark5,
-                label: 'Feeds',
-                isSelected: currentIndex == 4,
-                onTap: () => _handleTabTap(4),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: _NavBarItem(
+                    icon: Iconsax.bookmark,
+                    selectedIcon: Iconsax.bookmark5,
+                    label: 'Feeds',
+                    isSelected: currentIndex == 4,
+                    onTap: () => _handleTabTap(4),
+                  ),
+                ),
               ),
             ],
           ),
@@ -203,7 +223,7 @@ class _NavBarItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       child: SizedBox(
         height: 56,
-        width: 72,
+        width: 64,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -217,7 +237,7 @@ class _NavBarItem extends StatelessWidget {
               label,
               style: TextStyle(
                 color: isSelected ? AppTheme.primary : Colors.grey,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),

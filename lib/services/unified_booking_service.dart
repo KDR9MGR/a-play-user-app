@@ -20,7 +20,7 @@ class UnifiedBookingService {
 
     final restaurantBookingsResponse = await _supabase
         .from('restaurant_bookings')
-        .select('*, restaurants(*), tables(*)')
+        .select('*, restaurants(*), restaurant_tables(*)')
         .eq('user_id', userId);
 
     final eventBookings = (eventBookingsResponse as List)

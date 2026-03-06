@@ -5,6 +5,7 @@ import 'package:a_play/features/club_booking/screens/club_booking_screen.dart';
 import 'package:a_play/features/club/screens/club_booking_confirmation_screen.dart';
 import 'package:a_play/features/concierge/screens/concierge_request_confirmation_screen.dart';
 import 'package:a_play/features/feed/screen/instagram_feed_page.dart';
+import 'package:a_play/features/chat/screens/chat_list_screen.dart';
 import 'package:a_play/features/navbar.dart';
 import 'package:a_play/features/onboarding/screens/onboarding_screen.dart';
 import 'package:a_play/features/podcast/screens/podcast_screen.dart';
@@ -57,6 +58,10 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/splash',
           builder: (context, state) => const SplashScreen(),
+        ),
+        GoRoute(
+          path: '/chat',
+          builder: (context, state) => const ChatListScreen(),
         ),
         GoRoute(
           path: '/sign-in',
