@@ -23,22 +23,19 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    switch (event.event) {
-      case 'charge.success': {
-        const email = event.data.customer.email
-        const { data: user } = await supabase.from('users').select('id').eq('email', email).single()
-        if (user) {
+    const email = event.data.customer.email
+    const { data: { user } } = await supabase.auth.admin.getUserByEmail(email)
+
+    if (user) {
+      switch (event.event) {
+        case 'charge.success': {
           await supabase.from('profiles').update({ is_premium: true }).eq('id', user.id)
+          break
         }
-        break
-      }
-      case 'subscription.disable': {
-        const email = event.data.customer.email
-        const { data: user } = await supabase.from('users').select('id').eq('email', email).single()
-        if (user) {
+        case 'subscription.disable': {
           await supabase.from('profiles').update({ is_premium: false }).eq('id', user.id)
+          break
         }
-        break
       }
     }
 
