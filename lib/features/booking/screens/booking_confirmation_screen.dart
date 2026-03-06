@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:a_play/core/constants/colors.dart';
+import 'package:a_play/data/models/booking_model.dart';
 import 'package:a_play/features/booking/service/booking_service.dart';
 import 'package:intl/intl.dart';
 import 'package:iconsax/iconsax.dart';
@@ -23,7 +24,7 @@ class BookingConfirmationScreen extends ConsumerStatefulWidget {
 }
 
 class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationScreen> with TickerProviderStateMixin {
-  late Future<Map<String, dynamic>> _bookingFuture;
+  late Future<BookingModel> _bookingFuture;
   late String bookingId;
   bool _initialized = false;
   late AnimationController _animationController;
@@ -96,7 +97,7 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
           automaticallyImplyLeading: false,
           centerTitle: true,
         ),
-        body: FutureBuilder<Map<String, dynamic>>(
+        body: FutureBuilder<BookingModel>(
           future: _bookingFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -147,9 +148,7 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
             }
 
             final booking = snapshot.data!;
-            final event = booking['event'];
-            final zone = booking['zone'];
-            final bookingDate = DateTime.parse(booking['booking_date']);
+            final bookingDate = booking.bookingDate;
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -365,7 +364,7 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                           const SizedBox(height: 28),
                           _buildDetailRow(
                             'Event',
-                            event['title'],
+                            booking.eventTitle,
                             icon: Iconsax.calendar_1,
                           ),
                           _buildDetailRow(
@@ -380,17 +379,17 @@ class _BookingConfirmationScreenState extends ConsumerState<BookingConfirmationS
                           ),
                           _buildDetailRow(
                             'Zone',
-                            zone['name'],
+                            booking.zoneName ?? '',
                             icon: Iconsax.location,
                           ),
                           _buildDetailRow(
                             'Quantity',
-                            '${booking['quantity']} ${booking['quantity'] == 1 ? 'Ticket' : 'Tickets'}',
+                            '${booking.quantity} ${booking.quantity == 1 ? 'Ticket' : 'Tickets'}',
                             icon: Iconsax.people,
                           ),
                           _buildDetailRow(
                             'Status',
-                            booking['status'].toUpperCase(),
+                            booking.status.toUpperCase(),
                             icon: Iconsax.tick_square,
                             valueColor: Colors.green,
                             showDivider: false,

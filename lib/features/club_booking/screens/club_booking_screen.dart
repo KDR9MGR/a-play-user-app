@@ -93,8 +93,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
             builder: (context) => PaystackWebView(
               authorizationUrl: authorizationUrl,
               reference: reference,
-              onSuccess: (reference) {
-                // Create the booking record in the database
+              onSuccess: () {
                 ref.read(bookingControllerProvider.notifier).createBooking(
                       clubId: widget.clubId,
                       tableId: _selectedTableId!,
@@ -106,7 +105,6 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
                       paymentStatus: 'successful',
                     );
 
-                // Navigate to the confirmation screen
                 context.go('/club-booking/${widget.clubId}/confirmation');
               },
               onError: (error) {

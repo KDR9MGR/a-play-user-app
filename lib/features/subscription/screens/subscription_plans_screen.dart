@@ -1151,12 +1151,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           child: PaystackWebView(
             authorizationUrl: authUrl,
             reference: reference,
-            onSuccess: () => Navigator.of(context).pop(true),
+            onSuccess: () {},
             onError: (error) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(error, style: GoogleFonts.poppins()), backgroundColor: Colors.red),
               );
-              Navigator.of(context).pop(false);
             },
           ),
         ),

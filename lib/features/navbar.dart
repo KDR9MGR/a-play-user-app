@@ -1,14 +1,12 @@
 
-import 'package:a_play/core/constants/app_theme.dart';
+import 'package:a_play/core/theme/app_theme.dart';
 import 'package:a_play/features/booking/screens/my_tickets_screen.dart';
 import 'package:a_play/features/concierge/screens/concierge_page.dart';
 import 'package:a_play/features/explore/screens/explore_page.dart';
 import 'package:a_play/features/feed/screen/instagram_feed_page.dart';
-import 'package:a_play/features/home/screens/home_screen_2.dart';
+import 'package:a_play/features/home/screens/home_screen2.dart';
 import 'package:a_play/features/home/widgets/welcome_overlay.dart';
-import 'package:a_play/features/profile/providers/profile_provider.dart';
-import 'package:a_play/features/profile/screens/profile_screen.dart';
-import 'package:a_play/services/auth_service.dart';
+import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
@@ -62,7 +60,7 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
   }
 
   void _handleTabTap(int index) {
-    final isAuth = ref.read(authServiceProvider).currentUser != null;
+    final isAuth = ref.read(authStateProvider).value != null;
     if (!isAuth && (index == 2 || index == 3)) {
       // Guest users can only access Home and Explore
       showDialog(
@@ -211,14 +209,14 @@ class _NavBarItem extends StatelessWidget {
           children: [
             Icon(
               isSelected ? selectedIcon : icon,
-              color: isSelected ? AppTheme.accent : Colors.grey,
+              color: isSelected ? AppTheme.primary : Colors.grey,
               size: 24,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppTheme.accent : Colors.grey,
+                color: isSelected ? AppTheme.primary : Colors.grey,
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),

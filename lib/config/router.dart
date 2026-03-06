@@ -1,20 +1,21 @@
 
 import 'package:a_play/features/booking/screens/booking_confirmation_screen.dart';
 import 'package:a_play/features/booking/screens/my_tickets_screen.dart';
-import 'package:a_play/features/club_booking/screens/club_booking_confirmation_screen.dart';
 import 'package:a_play/features/club_booking/screens/club_booking_screen.dart';
+import 'package:a_play/features/club/screens/club_booking_confirmation_screen.dart';
 import 'package:a_play/features/concierge/screens/concierge_request_confirmation_screen.dart';
 import 'package:a_play/features/feed/screen/instagram_feed_page.dart';
 import 'package:a_play/features/navbar.dart';
 import 'package:a_play/features/onboarding/screens/onboarding_screen.dart';
 import 'package:a_play/features/podcast/screens/podcast_screen.dart';
+import 'package:a_play/features/authentication/data/models/user_model.dart';
+import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:a_play/features/profile/providers/profile_provider.dart';
 import 'package:a_play/features/profile/screens/profile_screen.dart';
 import 'package:a_play/features/restaurant/screens/restaurant_details_screen.dart';
 import 'package:a_play/features/splash/splash_screen.dart';
 import 'package:a_play/features/subscription/screens/subscription_history_screen.dart';
 import 'package:a_play/features/subscription/screens/subscription_plans_screen.dart';
-import 'package:a_play/features/authentication/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,10 +28,9 @@ class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
   bool isAuth;
 
-  RouterNotifier(this._ref) : isAuth = _ref.read(authProvider).currentUser != null {
-    _ref.listen<AsyncValue<User?>>(authStateProvider, (_, next) {
-      final user = next.value;
-      isAuth = user != null;
+  RouterNotifier(this._ref) : isAuth = Supabase.instance.client.auth.currentUser != null {
+    _ref.listen<AsyncValue<UserModel?>>(authStateProvider, (_, next) {
+      isAuth = next.value != null;
       notifyListeners();
     });
   }
@@ -61,16 +61,17 @@ class RouterNotifier extends ChangeNotifier {
       return '/sign-in';
     }
 
-    final profile = await _ref.read(profileFutureProvider.future);
-    if (!profile.isOnboardingComplete) {
-      return '/onboarding';
+    try {
+      final profile = await _ref.read(profileFutureProvider.future);
+      if (!profile.isOnboardingComplete) {
+        return '/onboarding';
+      }
+    } catch (_) {
+      return '/home';
     }
 
     if (isLoggingIn) {
-      if (profile.isOnboardingComplete) {
-        return '/home';
-      }
-      return '/onboarding';
+      return '/home';
     }
     return null;
   }

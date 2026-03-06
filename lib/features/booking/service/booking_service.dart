@@ -10,6 +10,80 @@ final unifiedBookingServiceProvider = Provider((ref) => UnifiedBookingService())
 class BookingService {
   final _supabase = Supabase.instance.client;
 
+  Future<List<BookingModel>> getUserBookings() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final response = await _supabase
+        .from('bookings')
+        .select('''
+          id,
+          user_id,
+          event_id,
+          zone_id,
+          booking_date,
+          quantity,
+          status,
+          created_at,
+          amount,
+          transaction_id,
+          payment_status,
+          events (
+            title,
+            end_date,
+            cover_image
+          ),
+          zones (
+            name
+          )
+        ''')
+        .eq('user_id', user.id)
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .cast<Map<String, dynamic>>()
+        .map((row) => BookingModel.fromJson(row))
+        .toList();
+  }
+
+  Future<BookingModel> getBooking(String bookingId) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final response = await _supabase
+        .from('bookings')
+        .select('''
+          id,
+          user_id,
+          event_id,
+          zone_id,
+          booking_date,
+          quantity,
+          status,
+          created_at,
+          amount,
+          transaction_id,
+          payment_status,
+          events (
+            title,
+            end_date,
+            cover_image
+          ),
+          zones (
+            name
+          )
+        ''')
+        .eq('id', bookingId)
+        .eq('user_id', user.id)
+        .single();
+
+    return BookingModel.fromJson((response as Map).cast<String, dynamic>());
+  }
+
   Future<String> createBooking({
     required String eventId,
     required String zoneId,

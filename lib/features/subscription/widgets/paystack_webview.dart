@@ -6,7 +6,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 class PaystackWebView extends StatefulWidget {
   final String authorizationUrl;
   final String reference;
-  final Function(String) onSuccess;
+  final VoidCallback onSuccess;
   final Function(String) onError;
 
   const PaystackWebView({
@@ -61,7 +61,7 @@ class _PaystackWebViewState extends State<PaystackWebView> {
       if (response.status == 200 &&
           responseData['status'] == true &&
           data?['status'] == 'success') {
-        widget.onSuccess(widget.reference);
+        widget.onSuccess();
         if (mounted) {
           Navigator.of(context).pop(true);
         }

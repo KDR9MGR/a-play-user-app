@@ -7,21 +7,36 @@ class ProfileService {
 
   Future<ProfileModel> getProfile() async {
     return await AuthService.withAuthRetry(() async {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null || userId.isEmpty) {
+        return ProfileModel(id: '', createdAt: DateTime.now());
+      }
+
       final response = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', supabase.auth.currentUser?.id ?? '')
-          .single();
-      return ProfileModel.fromJson(response);
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (response == null) {
+        return ProfileModel(id: userId, createdAt: DateTime.now());
+      }
+
+      return ProfileModel.fromJson((response as Map).cast<String, dynamic>());
     });
   }
 
   Future<void> updateProfile(ProfileModel profile) async {
     return await AuthService.withAuthRetry(() async {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null || userId.isEmpty) {
+        throw Exception('User not authenticated');
+      }
+
       await supabase
           .from('profiles')
           .update(profile.toJson())
-          .eq('id', supabase.auth.currentUser?.id ?? '');
+          .eq('id', userId);
     });
   }
 }

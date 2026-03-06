@@ -676,14 +676,11 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
           child: PaystackWebView(
             authorizationUrl: authUrl,
             reference: reference,
-            onSuccess: () {
-              Navigator.of(context).pop(true);
-            },
+            onSuccess: () {},
             onError: (error) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(error)),
               );
-              Navigator.of(context).pop(false);
             },
           ),
         ),

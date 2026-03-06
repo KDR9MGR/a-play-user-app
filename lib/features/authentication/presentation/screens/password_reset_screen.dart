@@ -1,5 +1,5 @@
 
-import 'package:a_play/features/authentication/providers/auth_provider.dart';
+import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,7 +29,7 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
     });
 
     try {
-      await ref.read(authProvider).resetPasswordForEmail(_emailController.text);
+      await ref.read(authControllerProvider.notifier).resetPassword(_emailController.text.trim());
       setState(() {
         _message = 'Password reset link sent to your email.';
       });

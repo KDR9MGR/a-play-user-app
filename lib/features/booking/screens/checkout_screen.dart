@@ -137,7 +137,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               builder: (context) => PaystackWebView(
                 authorizationUrl: authorizationUrl,
                 reference: reference,
-                onSuccess: (reference) async {
+                onSuccess: () async {
                   try {
                     final bookingId = await _saveBooking(reference);
                     if (mounted) {

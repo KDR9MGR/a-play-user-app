@@ -7,9 +7,8 @@ class ConciergeService {
   final SupabaseClient _supabase;
   final ChatService _chatService;
 
-  ConciergeService(this._supabase) : _chatService = ChatService(_supabase);
+  ConciergeService(this._supabase) : _chatService = ChatService();
 
-  // User Methods
   Future<ConciergeRequest> createRequest({
     required String category,
     required String serviceName,
@@ -23,7 +22,6 @@ class ConciergeService {
         throw Exception('User not authenticated');
       }
 
-      // TODO: Replace with actual concierge user ID
       const conciergeUserId = 'f5a7e3b0-1b7c-4b6e-8b0c-0b7c4b6e8b0c';
 
       final chatRoom = await _chatService.createChatRoom(
