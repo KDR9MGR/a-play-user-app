@@ -66,7 +66,12 @@ class RouterNotifier extends ChangeNotifier {
       return '/onboarding';
     }
 
-    if (isLoggingIn) return '/home';
+    if (isLoggingIn) {
+      if (profile.isOnboardingComplete) {
+        return '/home';
+      }
+      return '/onboarding';
+    }
     return null;
   }
 
