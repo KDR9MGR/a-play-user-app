@@ -1,3 +1,4 @@
+
 import 'package:flutter/foundation.dart';
 
 @immutable
@@ -15,6 +16,8 @@ class BookingModel {
   final String? eventCoverImage;
   final String? zoneName;
   final double? amount;
+  final String? transactionId;
+  final String? paymentStatus;
 
   const BookingModel({
     required this.id,
@@ -30,6 +33,8 @@ class BookingModel {
     this.eventCoverImage,
     this.zoneName,
     this.amount,
+    this.transactionId,
+    this.paymentStatus,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +52,8 @@ class BookingModel {
       eventCoverImage: json['events']?['cover_image'] as String?,
       zoneName: json['zones']?['name'] as String?,
       amount: json['amount'] != null ? (json['amount'] as num).toDouble() : null,
+      transactionId: json['transaction_id'] as String?,
+      paymentStatus: json['payment_status'] as String?,
     );
   }
 
@@ -61,6 +68,8 @@ class BookingModel {
       'status': status,
       'created_at': createdAt.toIso8601String(),
       'amount': amount,
+      'transaction_id': transactionId,
+      'payment_status': paymentStatus,
       'events': {
         'cover_image': eventCoverImage,
         'title': eventTitle,
@@ -92,6 +101,8 @@ class BookingModel {
         other.eventCoverImage == eventCoverImage &&
         other.zoneName == zoneName &&
         other.amount == amount &&
+        other.transactionId == transactionId &&
+        other.paymentStatus == paymentStatus &&
         other.eventTitle == eventTitle &&
         other.eventEndDate == eventEndDate;
   }
@@ -110,8 +121,10 @@ class BookingModel {
       eventCoverImage,
       zoneName,
       amount,
+      transactionId,
+      paymentStatus,
       eventTitle,
       eventEndDate,
     );
   }
-} 
+}

@@ -9,7 +9,16 @@ class SubscriptionChatHelper {
 
   /// Check if current user has an active subscription
   Future<bool> hasActiveSubscription() async {
-    return _client.auth.currentUser?.id != null;
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return false;
+
+    final response = await _client
+        .from('profiles')
+        .select('is_premium')
+        .eq('id', userId)
+        .single();
+
+    return response['is_premium'] as bool? ?? false;
   }
 
   /// Get user's subscription tier

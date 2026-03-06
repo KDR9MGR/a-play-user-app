@@ -1,45 +1,44 @@
+
 import 'package:a_play/features/booking/screens/booking_confirmation_screen.dart';
 import 'package:a_play/features/booking/screens/my_tickets_screen.dart';
+import 'package:a_play/features/club_booking/screens/club_booking_confirmation_screen.dart';
 import 'package:a_play/features/club_booking/screens/club_booking_screen.dart';
+import 'package:a_play/features/concierge/screens/concierge_request_confirmation_screen.dart';
+import 'package:a_play/features/feed/screen/instagram_feed_page.dart';
 import 'package:a_play/features/navbar.dart';
+import 'package:a_play/features/onboarding/screens/onboarding_screen.dart';
 import 'package:a_play/features/podcast/screens/podcast_screen.dart';
-import 'package:a_play/features/profile/screens/about_screen.dart';
-import 'package:a_play/features/profile/screens/edit_profile_page.dart';
-import 'package:a_play/features/profile/screens/privacy_policy_screen.dart';
-import 'package:a_play/features/location/screens/select_location_screen.dart';
-import 'package:a_play/presentation/pages/legal_links_page.dart';
-import 'package:a_play/features/referral/view/referral_screen.dart';
+import 'package:a_play/features/profile/providers/profile_provider.dart';
+import 'package:a_play/features/profile/screens/profile_screen.dart';
 import 'package:a_play/features/restaurant/screens/restaurant_details_screen.dart';
 import 'package:a_play/features/splash/splash_screen.dart';
-import 'package:a_play/features/subscription/screens/subscription_plans_screen.dart';
 import 'package:a_play/features/subscription/screens/subscription_history_screen.dart';
-import 'package:a_play/features/chat/screens/chat_list_screen.dart';
+import 'package:a_play/features/subscription/screens/subscription_plans_screen.dart';
+import 'package:a_play/features/authentication/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart'; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../features/authentication/presentation/providers/auth_provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../features/authentication/presentation/screens/password_reset_screen.dart';
 import '../features/authentication/presentation/screens/sign_in_screen.dart';
 import '../features/authentication/presentation/screens/sign_up_screen.dart';
-import '../features/profile/screens/profile_screen.dart';
 
-// Router notifier
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
-  bool isAuth = false;
+  bool isAuth;
 
-  RouterNotifier(this._ref) {
-    _ref.listen(authStateProvider, (_, next) {
-      final wasAuth = isAuth;
-      isAuth = next.value != null;
-      if (wasAuth != isAuth) {
-        notifyListeners();
-      }
+  RouterNotifier(this._ref) : isAuth = _ref.read(authProvider).currentUser != null {
+    _ref.listen<AsyncValue<User?>>(authStateProvider, (_, next) {
+      final user = next.value;
+      isAuth = user != null;
+      notifyListeners();
     });
   }
 
-  String? call(BuildContext context, GoRouterState state) {
+  Future<String?> call(BuildContext context, GoRouterState state) async {
     final isLoggingIn = state.matchedLocation == '/sign-in' ||
-        state.matchedLocation == '/sign-up';
+        state.matchedLocation == '/sign-up' ||
+        state.matchedLocation == '/auth/callback';
     if (state.matchedLocation == '/splash') return null;
 
     // Routes that guests can access without authentication (Apple App Store requirement 5.1.1)
@@ -47,6 +46,7 @@ class RouterNotifier extends ChangeNotifier {
       '/home',
       '/podcast',
       '/explore',
+      '/feed',
       '/location',
       '/subscription', // Allow guests to view subscription plans (auth required to purchase)
     ];
@@ -60,6 +60,12 @@ class RouterNotifier extends ChangeNotifier {
       if (isGuestAllowedRoute || isLoggingIn) return null;
       return '/sign-in';
     }
+
+    final profile = await _ref.read(profileFutureProvider.future);
+    if (!profile.isOnboardingComplete) {
+      return '/onboarding';
+    }
+
     if (isLoggingIn) return '/home';
     return null;
   }
@@ -78,58 +84,41 @@ class RouterNotifier extends ChangeNotifier {
           builder: (context, state) => const SignUpScreen(),
         ),
         GoRoute(
+          path: '/reset-password',
+          builder: (context, state) => const PasswordResetScreen(),
+        ),
+        GoRoute(
+          path: '/onboarding',
+          builder: (context, state) => const OnboardingScreen(),
+        ),
+        GoRoute(
+          path: '/auth/callback',
+          builder: (context, state) => const OnboardingScreen(),
+        ),
+        GoRoute(
           path: '/home',
           builder: (context, state) => const BottomNavigation(),
         ),
         GoRoute(
-          path: '/location',
-          builder: (context, state) => const SelectLocationScreen(),
+          path: '/feed',
+          builder: (context, state) => const InstagramFeedPage(),
         ),
         GoRoute(
-          path: '/profile',
-          name: 'profile',
+          path: '/location',
           builder: (context, state) => const ProfileScreen(),
-          routes: [
-            GoRoute(
-              path: 'edit',
-              name: 'edit_profile',
-              builder: (context, state) => const EditProfilePage(),
-            ),
-            GoRoute(
-              path: 'privacy-policy',
-              name: 'privacy_policy',
-              builder: (context, state) => const PrivacyPolicyScreen(),
-            ),
-            GoRoute(
-              path: 'legal',
-              name: 'legal_links',
-              builder: (context, state) => const LegalLinksPage(),
-            ),
-            GoRoute(
-              path: 'about',
-              name: 'about',
-              builder: (context, state) => const AboutScreen(),
-            ),
-            GoRoute(
-              path: 'referral',
-              name: 'referral',
-              builder: (context, state) => const ReferralScreen(),
-            ),
-          ],
         ),
-
         GoRoute(
           path: '/podcast',
           builder: (context, state) => const PodcastScreen(),
         ),
         GoRoute(
-          path: '/chat',
-          builder: (context, state) => const ChatListScreen(),
+          path: '/profile',
+          builder: (context, state) => const ProfileScreen(),
         ),
         GoRoute(
           path: '/booking-confirmation/:id',
           builder: (context, state) =>
-              BookingConfirmationScreen(bookingId: state.pathParameters['id']),
+              BookingConfirmationScreen(bookingId: state.pathParameters['id']!),
         ),
         GoRoute(
           path: '/my-tickets',
@@ -139,14 +128,17 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/club-booking',
           name: 'club_booking',
-          builder: (context, state) =>
-              const Scaffold(), // Empty scaffold as parent
+          builder: (context, state) => const BottomNavigation(),
           routes: [
             GoRoute(
               path: ':clubId',
               builder: (context, state) => ClubBookingScreen(
                 clubId: state.pathParameters['clubId'] ?? '',
               ),
+            ),
+            GoRoute(
+              path: ':clubId/confirmation',
+              builder: (context, state) => const ClubBookingConfirmationScreen(),
             ),
           ],
         ),
@@ -162,7 +154,7 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/subscription',
           name: 'subscription',
-          builder: (context, state) => const Scaffold(), // Empty scaffold as parent
+          builder: (context, state) => const BottomNavigation(),
           routes: [
             GoRoute(
               path: 'plans',
@@ -175,6 +167,11 @@ class RouterNotifier extends ChangeNotifier {
               builder: (context, state) => const SubscriptionHistoryScreen(),
             ),
           ],
+        ),
+        // Concierge routes
+        GoRoute(
+          path: '/concierge/confirmation',
+          builder: (context, state) => const ConciergeRequestConfirmationScreen(),
         ),
       ];
 }

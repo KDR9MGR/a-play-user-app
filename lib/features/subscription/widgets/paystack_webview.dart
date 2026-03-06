@@ -1,10 +1,12 @@
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class PaystackWebView extends StatefulWidget {
   final String authorizationUrl;
   final String reference;
-  final VoidCallback onSuccess;
+  final Function(String) onSuccess;
   final Function(String) onError;
 
   const PaystackWebView({
@@ -20,27 +22,26 @@ class PaystackWebView extends StatefulWidget {
 }
 
 class _PaystackWebViewState extends State<PaystackWebView> {
-  bool _isLoading = true;
+  late final WebViewController _controller;
   bool _isVerifying = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeWebView();
-  }
-
-  void _initializeWebView() {
-    setState(() => _isLoading = false);
-  }
-
-  void _checkPaymentStatus(String url) {
-    if (_isVerifying) return;
-
-    if (url.contains('payment-callback') || 
-        url.contains('close') || 
-        url.toLowerCase().contains('success')) {
-      _verifyTransaction();
-    }
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (String url) {
+            if (url.contains('payment-callback') ||
+                url.contains('close') ||
+                url.toLowerCase().contains('success')) {
+              _verifyTransaction();
+            }
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.authorizationUrl));
   }
 
   Future<void> _verifyTransaction() async {
@@ -59,10 +60,10 @@ class _PaystackWebViewState extends State<PaystackWebView> {
       final responseData = (response.data as Map).cast<String, dynamic>();
       final data = (responseData['data'] as Map?)?.cast<String, dynamic>();
 
-      if (response.status == 200 && 
-          responseData['status'] == true && 
+      if (response.status == 200 &&
+          responseData['status'] == true &&
           data?['status'] == 'success') {
-        widget.onSuccess();
+        widget.onSuccess(widget.reference);
         if (mounted) {
           Navigator.of(context).pop(true);
         }
@@ -104,12 +105,8 @@ class _PaystackWebViewState extends State<PaystackWebView> {
         ),
         body: Stack(
           children: [
-            Center(
-              child: Text(
-                _isVerifying ? 'Verifying payment...' : 'Payment page unavailable',
-              ),
-            ),
-            if (_isLoading || _isVerifying)
+            WebViewWidget(controller: _controller),
+            if (_isVerifying)
               Container(
                 color: Colors.black54,
                 child: const Center(

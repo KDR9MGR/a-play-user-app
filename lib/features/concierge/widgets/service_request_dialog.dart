@@ -1,7 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:a_play/services/concierge_service.dart';
 
-class ServiceRequestDialog extends StatefulWidget {
+import 'package:a_play/features/chat/model/chat_room_model.dart';
+import 'package:a_play/features/chat/screens/chat_room_screen.dart';
+import 'package:a_play/features/chat/service/chat_service.dart';
+import 'package:a_play/features/concierge/providers/concierge_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+class ServiceRequestDialog extends ConsumerStatefulWidget {
   final String serviceType;
   final String serviceName;
   final List<String> features;
@@ -14,19 +20,19 @@ class ServiceRequestDialog extends StatefulWidget {
   });
 
   @override
-  State<ServiceRequestDialog> createState() => _ServiceRequestDialogState();
+  ConsumerState<ServiceRequestDialog> createState() => _ServiceRequestDialogState();
 }
 
-class _ServiceRequestDialogState extends State<ServiceRequestDialog> {
+class _ServiceRequestDialogState extends ConsumerState<ServiceRequestDialog> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
-  List<bool> _selectedFeatures = [];
+  late List<bool> _selectedFeatures;
   bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedFeatures = List.generate(widget.features.length, (index) => false);
+    _selectedFeatures = List<bool>.filled(widget.features.length, false);
   }
 
   @override
@@ -48,20 +54,20 @@ class _ServiceRequestDialogState extends State<ServiceRequestDialog> {
           .map((entry) => entry.value)
           .toList();
 
-      await ConciergeService().submitRequest(
-        serviceType: widget.serviceType,
+      final request = await ref.read(createConciergeRequestProvider(
+        category: widget.serviceType,
         serviceName: widget.serviceName,
-        requestDetails: {
-          'description': _descriptionController.text,
+        description: _descriptionController.text,
+        additionalDetails: {
           'selectedFeatures': selectedFeatures,
         },
-      );
+      ).future);
+
+      final chatRoom = await ref.read(chatServiceProvider).getChatRoom(request.chatRoomId!);
 
       if (mounted) {
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Request submitted successfully')),
-        );
+        context.push('/chat/${chatRoom.id}', extra: chatRoom);
       }
     } catch (e) {
       if (mounted) {
@@ -78,80 +84,53 @@ class _ServiceRequestDialogState extends State<ServiceRequestDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Request ${widget.serviceName}',
-                style: Theme.of(context).textTheme.titleLarge,
+    return AlertDialog(
+      title: Text(widget.serviceName),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Select Required Features:',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              ...widget.features.asMap().entries.map((entry) {
-                return CheckboxListTile(
-                  title: Text(entry.value),
-                  value: _selectedFeatures[entry.key],
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _selectedFeatures[entry.key] = value ?? false;
-                    });
-                  },
-                );
-              }),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Additional Details',
-                  hintText: 'Please provide any specific requirements...',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please provide some details about your request';
-                  }
-                  return null;
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a description';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            ...widget.features.asMap().entries.map((entry) {
+              return CheckboxListTile(
+                title: Text(entry.value),
+                value: _selectedFeatures[entry.key],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedFeatures[entry.key] = value!;
+                  });
                 },
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitRequest,
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Submit Request'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+              );
+            }),
+          ],
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _isSubmitting ? null : _submitRequest,
+          child: _isSubmitting
+              ? const CircularProgressIndicator()
+              : const Text('Submit'),
+        ),
+      ],
     );
   }
-} 
+}

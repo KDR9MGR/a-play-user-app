@@ -1,35 +1,37 @@
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:a_play/features/club_booking/service/club_booking_service.dart';
+import 'package:a_play/features/home/model/club_model.dart';
 import 'package:a_play/features/club_booking/model/table_model.dart';
 import 'package:a_play/features/club_booking/model/booking_model.dart';
-import 'package:a_play/features/home/model/club_model.dart';
-import 'package:a_play/features/club_booking/service/club_booking_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Club details provider
+// Provider for ClubBookingService
+final clubBookingServiceProvider = Provider((ref) => ClubBookingService());
+
+// Provider for selected date
+final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
+
+// Provider for selected time range
+final timeRangeProvider = StateProvider<(DateTime, DateTime)>((ref) {
+  final now = DateTime.now();
+  return (now, now.add(const Duration(hours: 2)));
+});
+
+// Provider for club details
 final clubDetailsControllerProvider = AsyncNotifierProvider<ClubDetailsController, Club?>(
   () => ClubDetailsController(),
 );
 
-// Club tables provider
+// Provider for club tables
 final clubTablesControllerProvider = AsyncNotifierProvider<ClubTablesController, List<TableModel>>(
   () => ClubTablesController(),
 );
 
-// Booking provider
+// Provider for booking
 final bookingControllerProvider = AsyncNotifierProvider<BookingController, BookingModel?>(
   () => BookingController(),
 );
-
-// Selected date provider
-final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
-
-// Time range provider
-final timeRangeProvider = StateProvider<(DateTime, DateTime)>((ref) {
-  final now = DateTime.now();
-  final startTime = DateTime(now.year, now.month, now.day, 19, 0); // 7:00 PM
-  final endTime = DateTime(now.year, now.month, now.day, 21, 0);   // 9:00 PM
-  return (startTime, endTime);
-});
 
 // Controller for club details
 class ClubDetailsController extends AsyncNotifier<Club?> {
@@ -72,6 +74,8 @@ class BookingController extends AsyncNotifier<BookingModel?> {
     required DateTime startTime,
     required DateTime endTime,
     required double totalPrice,
+    required String transactionId,
+    required String paymentStatus,
   }) async {
     state = const AsyncLoading();
     
@@ -89,6 +93,8 @@ class BookingController extends AsyncNotifier<BookingModel?> {
       startTime: startTime,
       endTime: endTime,
       totalPrice: totalPrice,
+      transactionId: transactionId,
+      paymentStatus: paymentStatus,
     ));
   }
   

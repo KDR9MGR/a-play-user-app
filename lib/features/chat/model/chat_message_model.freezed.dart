@@ -21,15 +21,25 @@ ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$ChatMessage {
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'content')
   String get content => throw _privateConstructorUsedError;
+  @JsonKey(name: 'sender_id')
   String get senderId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'room_id')
   String get roomId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'receiver_id')
   String? get receiverId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'message_type')
   String get messageType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'attachment_url')
   String? get attachmentUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'reply_to')
   String? get replyTo => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_edited')
   bool get isEdited => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
   DateTime get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updated_at')
   DateTime get updatedAt =>
       throw _privateConstructorUsedError; // Additional fields for UI
   String? get senderName => throw _privateConstructorUsedError;
@@ -50,16 +60,16 @@ abstract class $ChatMessageCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String content,
-      String senderId,
-      String roomId,
-      String? receiverId,
-      String messageType,
-      String? attachmentUrl,
-      String? replyTo,
-      bool isEdited,
-      DateTime createdAt,
-      DateTime updatedAt,
+      @JsonKey(name: 'content') String content,
+      @JsonKey(name: 'sender_id') String senderId,
+      @JsonKey(name: 'room_id') String roomId,
+      @JsonKey(name: 'receiver_id') String? receiverId,
+      @JsonKey(name: 'message_type') String messageType,
+      @JsonKey(name: 'attachment_url') String? attachmentUrl,
+      @JsonKey(name: 'reply_to') String? replyTo,
+      @JsonKey(name: 'is_edited') bool isEdited,
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'updated_at') DateTime updatedAt,
       String? senderName,
       String? senderAvatarUrl,
       List<MessageReaction> reactions});
@@ -164,16 +174,16 @@ abstract class _$$ChatMessageImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      String content,
-      String senderId,
-      String roomId,
-      String? receiverId,
-      String messageType,
-      String? attachmentUrl,
-      String? replyTo,
-      bool isEdited,
-      DateTime createdAt,
-      DateTime updatedAt,
+      @JsonKey(name: 'content') String content,
+      @JsonKey(name: 'sender_id') String senderId,
+      @JsonKey(name: 'room_id') String roomId,
+      @JsonKey(name: 'receiver_id') String? receiverId,
+      @JsonKey(name: 'message_type') String messageType,
+      @JsonKey(name: 'attachment_url') String? attachmentUrl,
+      @JsonKey(name: 'reply_to') String? replyTo,
+      @JsonKey(name: 'is_edited') bool isEdited,
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'updated_at') DateTime updatedAt,
       String? senderName,
       String? senderAvatarUrl,
       List<MessageReaction> reactions});
@@ -271,16 +281,16 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
 class _$ChatMessageImpl implements _ChatMessage {
   const _$ChatMessageImpl(
       {required this.id,
-      required this.content,
-      required this.senderId,
-      required this.roomId,
-      this.receiverId,
-      this.messageType = 'text',
-      this.attachmentUrl,
-      this.replyTo,
-      this.isEdited = false,
-      required this.createdAt,
-      required this.updatedAt,
+      @JsonKey(name: 'content') required this.content,
+      @JsonKey(name: 'sender_id') required this.senderId,
+      @JsonKey(name: 'room_id') required this.roomId,
+      @JsonKey(name: 'receiver_id') this.receiverId,
+      @JsonKey(name: 'message_type') this.messageType = 'text',
+      @JsonKey(name: 'attachment_url') this.attachmentUrl,
+      @JsonKey(name: 'reply_to') this.replyTo,
+      @JsonKey(name: 'is_edited') this.isEdited = false,
+      @JsonKey(name: 'created_at') required this.createdAt,
+      @JsonKey(name: 'updated_at') required this.updatedAt,
       this.senderName,
       this.senderAvatarUrl,
       final List<MessageReaction> reactions = const []})
@@ -292,26 +302,34 @@ class _$ChatMessageImpl implements _ChatMessage {
   @override
   final String id;
   @override
+  @JsonKey(name: 'content')
   final String content;
   @override
+  @JsonKey(name: 'sender_id')
   final String senderId;
   @override
+  @JsonKey(name: 'room_id')
   final String roomId;
   @override
+  @JsonKey(name: 'receiver_id')
   final String? receiverId;
   @override
-  @JsonKey()
+  @JsonKey(name: 'message_type')
   final String messageType;
   @override
+  @JsonKey(name: 'attachment_url')
   final String? attachmentUrl;
   @override
+  @JsonKey(name: 'reply_to')
   final String? replyTo;
   @override
-  @JsonKey()
+  @JsonKey(name: 'is_edited')
   final bool isEdited;
   @override
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
   @override
+  @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
 // Additional fields for UI
   @override
@@ -399,16 +417,16 @@ class _$ChatMessageImpl implements _ChatMessage {
 abstract class _ChatMessage implements ChatMessage {
   const factory _ChatMessage(
       {required final String id,
-      required final String content,
-      required final String senderId,
-      required final String roomId,
-      final String? receiverId,
-      final String messageType,
-      final String? attachmentUrl,
-      final String? replyTo,
-      final bool isEdited,
-      required final DateTime createdAt,
-      required final DateTime updatedAt,
+      @JsonKey(name: 'content') required final String content,
+      @JsonKey(name: 'sender_id') required final String senderId,
+      @JsonKey(name: 'room_id') required final String roomId,
+      @JsonKey(name: 'receiver_id') final String? receiverId,
+      @JsonKey(name: 'message_type') final String messageType,
+      @JsonKey(name: 'attachment_url') final String? attachmentUrl,
+      @JsonKey(name: 'reply_to') final String? replyTo,
+      @JsonKey(name: 'is_edited') final bool isEdited,
+      @JsonKey(name: 'created_at') required final DateTime createdAt,
+      @JsonKey(name: 'updated_at') required final DateTime updatedAt,
       final String? senderName,
       final String? senderAvatarUrl,
       final List<MessageReaction> reactions}) = _$ChatMessageImpl;
@@ -419,24 +437,34 @@ abstract class _ChatMessage implements ChatMessage {
   @override
   String get id;
   @override
+  @JsonKey(name: 'content')
   String get content;
   @override
+  @JsonKey(name: 'sender_id')
   String get senderId;
   @override
+  @JsonKey(name: 'room_id')
   String get roomId;
   @override
+  @JsonKey(name: 'receiver_id')
   String? get receiverId;
   @override
+  @JsonKey(name: 'message_type')
   String get messageType;
   @override
+  @JsonKey(name: 'attachment_url')
   String? get attachmentUrl;
   @override
+  @JsonKey(name: 'reply_to')
   String? get replyTo;
   @override
+  @JsonKey(name: 'is_edited')
   bool get isEdited;
   @override
+  @JsonKey(name: 'created_at')
   DateTime get createdAt;
   @override
+  @JsonKey(name: 'updated_at')
   DateTime get updatedAt;
   @override // Additional fields for UI
   String? get senderName;
@@ -457,9 +485,12 @@ MessageReaction _$MessageReactionFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$MessageReaction {
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'message_id')
   String get messageId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
   String get emoji => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
   DateTime get createdAt =>
       throw _privateConstructorUsedError; // Additional fields for UI
   String? get userName => throw _privateConstructorUsedError;
@@ -478,10 +509,10 @@ abstract class $MessageReactionCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String messageId,
-      String userId,
+      @JsonKey(name: 'message_id') String messageId,
+      @JsonKey(name: 'user_id') String userId,
       String emoji,
-      DateTime createdAt,
+      @JsonKey(name: 'created_at') DateTime createdAt,
       String? userName});
 }
 
@@ -544,10 +575,10 @@ abstract class _$$MessageReactionImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      String messageId,
-      String userId,
+      @JsonKey(name: 'message_id') String messageId,
+      @JsonKey(name: 'user_id') String userId,
       String emoji,
-      DateTime createdAt,
+      @JsonKey(name: 'created_at') DateTime createdAt,
       String? userName});
 }
 
@@ -603,10 +634,10 @@ class __$$MessageReactionImplCopyWithImpl<$Res>
 class _$MessageReactionImpl implements _MessageReaction {
   const _$MessageReactionImpl(
       {required this.id,
-      required this.messageId,
-      required this.userId,
+      @JsonKey(name: 'message_id') required this.messageId,
+      @JsonKey(name: 'user_id') required this.userId,
       required this.emoji,
-      required this.createdAt,
+      @JsonKey(name: 'created_at') required this.createdAt,
       this.userName});
 
   factory _$MessageReactionImpl.fromJson(Map<String, dynamic> json) =>
@@ -615,12 +646,15 @@ class _$MessageReactionImpl implements _MessageReaction {
   @override
   final String id;
   @override
+  @JsonKey(name: 'message_id')
   final String messageId;
   @override
+  @JsonKey(name: 'user_id')
   final String userId;
   @override
   final String emoji;
   @override
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
 // Additional fields for UI
   @override
@@ -670,10 +704,10 @@ class _$MessageReactionImpl implements _MessageReaction {
 abstract class _MessageReaction implements MessageReaction {
   const factory _MessageReaction(
       {required final String id,
-      required final String messageId,
-      required final String userId,
+      @JsonKey(name: 'message_id') required final String messageId,
+      @JsonKey(name: 'user_id') required final String userId,
       required final String emoji,
-      required final DateTime createdAt,
+      @JsonKey(name: 'created_at') required final DateTime createdAt,
       final String? userName}) = _$MessageReactionImpl;
 
   factory _MessageReaction.fromJson(Map<String, dynamic> json) =
@@ -682,12 +716,15 @@ abstract class _MessageReaction implements MessageReaction {
   @override
   String get id;
   @override
+  @JsonKey(name: 'message_id')
   String get messageId;
   @override
+  @JsonKey(name: 'user_id')
   String get userId;
   @override
   String get emoji;
   @override
+  @JsonKey(name: 'created_at')
   DateTime get createdAt;
   @override // Additional fields for UI
   String? get userName;

@@ -42,7 +42,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             password: _passwordController.text,
             displayName: _nameController.text.trim(),
           );
-      if (mounted) context.go('/');
+      if (mounted) context.go('/onboarding');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +59,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     try {
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
-      if (mounted) context.go('/');
+      if (mounted) context.go('/onboarding');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

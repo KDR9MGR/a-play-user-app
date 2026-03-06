@@ -17,6 +17,8 @@ _$BookingModelImpl _$$BookingModelImplFromJson(Map<String, dynamic> json) =>
       endTime: DateTime.parse(json['endTime'] as String),
       totalPrice: (json['totalPrice'] as num).toDouble(),
       status: json['status'] as String? ?? 'pending',
+      transactionId: json['transactionId'] as String?,
+      paymentStatus: json['paymentStatus'] as String?,
     );
 
 Map<String, dynamic> _$$BookingModelImplToJson(_$BookingModelImpl instance) =>
@@ -30,4 +32,6 @@ Map<String, dynamic> _$$BookingModelImplToJson(_$BookingModelImpl instance) =>
       'endTime': instance.endTime.toIso8601String(),
       'totalPrice': instance.totalPrice,
       'status': instance.status,
+      'transactionId': instance.transactionId,
+      'paymentStatus': instance.paymentStatus,
     };

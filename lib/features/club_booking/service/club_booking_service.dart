@@ -57,6 +57,8 @@ class ClubBookingService {
     required DateTime startTime,
     required DateTime endTime,
     required double totalPrice,
+    required String transactionId,
+    required String paymentStatus,
   }) async {
     try {
       const uuid = Uuid();
@@ -71,7 +73,9 @@ class ClubBookingService {
         'start_time': startTime.toIso8601String(),
         'end_time': endTime.toIso8601String(),
         'total_price': totalPrice,
-        'status': 'pending',
+        'status': 'confirmed',
+        'transaction_id': transactionId,
+        'payment_status': paymentStatus,
       };
       
       await _client

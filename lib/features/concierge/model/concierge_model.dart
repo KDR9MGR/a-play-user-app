@@ -26,6 +26,7 @@ class ConciergeRequest with _$ConciergeRequest {
     @JsonKey(name: 'is_urgent') @Default(false) bool isUrgent,
     @JsonKey(name: 'requested_at') DateTime? requestedAt, 
     @JsonKey(name: 'additional_details') Map<String, dynamic>? additionalDetails,
+    @JsonKey(name: 'chat_room_id') String? chatRoomId,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,
   }) = _ConciergeRequest;

@@ -78,6 +78,8 @@ class BookingController extends AsyncNotifier<BookingModel?> {
     required DateTime startTime,
     required DateTime endTime,
     required double totalPrice,
+    required String transactionId,
+    required String paymentStatus,
   }) async {
     state = const AsyncLoading();
 
@@ -106,6 +108,8 @@ class BookingController extends AsyncNotifier<BookingModel?> {
           startTime: startTime,
           endTime: endTime,
           totalPrice: totalPrice,
+          transactionId: transactionId,
+          paymentStatus: paymentStatus,
         );
       });
     } catch (e) {

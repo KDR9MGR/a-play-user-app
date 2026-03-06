@@ -1,10 +1,13 @@
+
+import 'package:a_play/features/chat/service/chat_service.dart';
 import 'package:a_play/features/concierge/model/concierge_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ConciergeService {
   final SupabaseClient _supabase;
+  final ChatService _chatService;
 
-  ConciergeService(this._supabase);
+  ConciergeService(this._supabase) : _chatService = ChatService(_supabase);
 
   // User Methods
   Future<ConciergeRequest> createRequest({
@@ -15,12 +18,27 @@ class ConciergeService {
     Map<String, dynamic>? additionalDetails,
   }) async {
     try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // TODO: Replace with actual concierge user ID
+      const conciergeUserId = 'f5a7e3b0-1b7c-4b6e-8b0c-0b7c4b6e8b0c';
+
+      final chatRoom = await _chatService.createChatRoom(
+        name: 'Concierge Request: $serviceName',
+        participantIds: [user.id, conciergeUserId],
+        isGroup: false,
+      );
+
       final response = await _supabase.from('concierge_requests').insert({
         'category': category,
         'service_name': serviceName,
         'description': description,
         'is_urgent': isUrgent,
         'additional_details': additionalDetails,
+        'chat_room_id': chatRoom.id,
       }).select().single();
 
       return ConciergeRequest.fromJson(response);

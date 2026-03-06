@@ -35,6 +35,8 @@ mixin _$ConciergeRequest {
   @JsonKey(name: 'additional_details')
   Map<String, dynamic>? get additionalDetails =>
       throw _privateConstructorUsedError;
+  @JsonKey(name: 'chat_room_id')
+  String? get chatRoomId => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   DateTime get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
@@ -63,6 +65,7 @@ abstract class $ConciergeRequestCopyWith<$Res> {
       @JsonKey(name: 'requested_at') DateTime? requestedAt,
       @JsonKey(name: 'additional_details')
       Map<String, dynamic>? additionalDetails,
+      @JsonKey(name: 'chat_room_id') String? chatRoomId,
       @JsonKey(name: 'created_at') DateTime createdAt,
       @JsonKey(name: 'updated_at') DateTime updatedAt});
 }
@@ -89,6 +92,7 @@ class _$ConciergeRequestCopyWithImpl<$Res, $Val extends ConciergeRequest>
     Object? isUrgent = null,
     Object? requestedAt = freezed,
     Object? additionalDetails = freezed,
+    Object? chatRoomId = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -129,6 +133,10 @@ class _$ConciergeRequestCopyWithImpl<$Res, $Val extends ConciergeRequest>
           ? _value.additionalDetails
           : additionalDetails // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>?,
+      chatRoomId: freezed == chatRoomId
+          ? _value.chatRoomId
+          : chatRoomId // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -160,6 +168,7 @@ abstract class _$$ConciergeRequestImplCopyWith<$Res>
       @JsonKey(name: 'requested_at') DateTime? requestedAt,
       @JsonKey(name: 'additional_details')
       Map<String, dynamic>? additionalDetails,
+      @JsonKey(name: 'chat_room_id') String? chatRoomId,
       @JsonKey(name: 'created_at') DateTime createdAt,
       @JsonKey(name: 'updated_at') DateTime updatedAt});
 }
@@ -184,6 +193,7 @@ class __$$ConciergeRequestImplCopyWithImpl<$Res>
     Object? isUrgent = null,
     Object? requestedAt = freezed,
     Object? additionalDetails = freezed,
+    Object? chatRoomId = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -224,6 +234,10 @@ class __$$ConciergeRequestImplCopyWithImpl<$Res>
           ? _value._additionalDetails
           : additionalDetails // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>?,
+      chatRoomId: freezed == chatRoomId
+          ? _value.chatRoomId
+          : chatRoomId // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -250,6 +264,7 @@ class _$ConciergeRequestImpl implements _ConciergeRequest {
       @JsonKey(name: 'requested_at') this.requestedAt,
       @JsonKey(name: 'additional_details')
       final Map<String, dynamic>? additionalDetails,
+      @JsonKey(name: 'chat_room_id') this.chatRoomId,
       @JsonKey(name: 'created_at') required this.createdAt,
       @JsonKey(name: 'updated_at') required this.updatedAt})
       : _additionalDetails = additionalDetails;
@@ -291,6 +306,9 @@ class _$ConciergeRequestImpl implements _ConciergeRequest {
   }
 
   @override
+  @JsonKey(name: 'chat_room_id')
+  final String? chatRoomId;
+  @override
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
   @override
@@ -299,7 +317,7 @@ class _$ConciergeRequestImpl implements _ConciergeRequest {
 
   @override
   String toString() {
-    return 'ConciergeRequest(id: $id, userId: $userId, category: $category, serviceName: $serviceName, description: $description, status: $status, isUrgent: $isUrgent, requestedAt: $requestedAt, additionalDetails: $additionalDetails, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'ConciergeRequest(id: $id, userId: $userId, category: $category, serviceName: $serviceName, description: $description, status: $status, isUrgent: $isUrgent, requestedAt: $requestedAt, additionalDetails: $additionalDetails, chatRoomId: $chatRoomId, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -322,6 +340,8 @@ class _$ConciergeRequestImpl implements _ConciergeRequest {
                 other.requestedAt == requestedAt) &&
             const DeepCollectionEquality()
                 .equals(other._additionalDetails, _additionalDetails) &&
+            (identical(other.chatRoomId, chatRoomId) ||
+                other.chatRoomId == chatRoomId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -341,6 +361,7 @@ class _$ConciergeRequestImpl implements _ConciergeRequest {
       isUrgent,
       requestedAt,
       const DeepCollectionEquality().hash(_additionalDetails),
+      chatRoomId,
       createdAt,
       updatedAt);
 
@@ -371,6 +392,7 @@ abstract class _ConciergeRequest implements ConciergeRequest {
           @JsonKey(name: 'requested_at') final DateTime? requestedAt,
           @JsonKey(name: 'additional_details')
           final Map<String, dynamic>? additionalDetails,
+          @JsonKey(name: 'chat_room_id') final String? chatRoomId,
           @JsonKey(name: 'created_at') required final DateTime createdAt,
           @JsonKey(name: 'updated_at') required final DateTime updatedAt}) =
       _$ConciergeRequestImpl;
@@ -401,6 +423,9 @@ abstract class _ConciergeRequest implements ConciergeRequest {
   @override
   @JsonKey(name: 'additional_details')
   Map<String, dynamic>? get additionalDetails;
+  @override
+  @JsonKey(name: 'chat_room_id')
+  String? get chatRoomId;
   @override
   @JsonKey(name: 'created_at')
   DateTime get createdAt;

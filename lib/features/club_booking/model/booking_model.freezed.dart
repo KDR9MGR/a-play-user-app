@@ -29,6 +29,8 @@ mixin _$BookingModel {
   DateTime get endTime => throw _privateConstructorUsedError;
   double get totalPrice => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
+  String? get transactionId => throw _privateConstructorUsedError;
+  String? get paymentStatus => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -51,7 +53,9 @@ abstract class $BookingModelCopyWith<$Res> {
       DateTime startTime,
       DateTime endTime,
       double totalPrice,
-      String status});
+      String status,
+      String? transactionId,
+      String? paymentStatus});
 }
 
 /// @nodoc
@@ -76,6 +80,8 @@ class _$BookingModelCopyWithImpl<$Res, $Val extends BookingModel>
     Object? endTime = null,
     Object? totalPrice = null,
     Object? status = null,
+    Object? transactionId = freezed,
+    Object? paymentStatus = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -114,6 +120,14 @@ class _$BookingModelCopyWithImpl<$Res, $Val extends BookingModel>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as String,
+      transactionId: freezed == transactionId
+          ? _value.transactionId
+          : transactionId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      paymentStatus: freezed == paymentStatus
+          ? _value.paymentStatus
+          : paymentStatus // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -135,7 +149,9 @@ abstract class _$$BookingModelImplCopyWith<$Res>
       DateTime startTime,
       DateTime endTime,
       double totalPrice,
-      String status});
+      String status,
+      String? transactionId,
+      String? paymentStatus});
 }
 
 /// @nodoc
@@ -158,6 +174,8 @@ class __$$BookingModelImplCopyWithImpl<$Res>
     Object? endTime = null,
     Object? totalPrice = null,
     Object? status = null,
+    Object? transactionId = freezed,
+    Object? paymentStatus = freezed,
   }) {
     return _then(_$BookingModelImpl(
       id: null == id
@@ -196,6 +214,14 @@ class __$$BookingModelImplCopyWithImpl<$Res>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as String,
+      transactionId: freezed == transactionId
+          ? _value.transactionId
+          : transactionId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      paymentStatus: freezed == paymentStatus
+          ? _value.paymentStatus
+          : paymentStatus // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -212,7 +238,9 @@ class _$BookingModelImpl implements _BookingModel {
       required this.startTime,
       required this.endTime,
       required this.totalPrice,
-      this.status = 'pending'});
+      this.status = 'pending',
+      this.transactionId,
+      this.paymentStatus});
 
   factory _$BookingModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$BookingModelImplFromJson(json);
@@ -236,10 +264,14 @@ class _$BookingModelImpl implements _BookingModel {
   @override
   @JsonKey()
   final String status;
+  @override
+  final String? transactionId;
+  @override
+  final String? paymentStatus;
 
   @override
   String toString() {
-    return 'BookingModel(id: $id, userId: $userId, clubId: $clubId, tableId: $tableId, bookingDate: $bookingDate, startTime: $startTime, endTime: $endTime, totalPrice: $totalPrice, status: $status)';
+    return 'BookingModel(id: $id, userId: $userId, clubId: $clubId, tableId: $tableId, bookingDate: $bookingDate, startTime: $startTime, endTime: $endTime, totalPrice: $totalPrice, status: $status, transactionId: $transactionId, paymentStatus: $paymentStatus)';
   }
 
   @override
@@ -258,13 +290,28 @@ class _$BookingModelImpl implements _BookingModel {
             (identical(other.endTime, endTime) || other.endTime == endTime) &&
             (identical(other.totalPrice, totalPrice) ||
                 other.totalPrice == totalPrice) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.transactionId, transactionId) ||
+                other.transactionId == transactionId) &&
+            (identical(other.paymentStatus, paymentStatus) ||
+                other.paymentStatus == paymentStatus));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, userId, clubId, tableId,
-      bookingDate, startTime, endTime, totalPrice, status);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      userId,
+      clubId,
+      tableId,
+      bookingDate,
+      startTime,
+      endTime,
+      totalPrice,
+      status,
+      transactionId,
+      paymentStatus);
 
   @JsonKey(ignore: true)
   @override
@@ -290,7 +337,9 @@ abstract class _BookingModel implements BookingModel {
       required final DateTime startTime,
       required final DateTime endTime,
       required final double totalPrice,
-      final String status}) = _$BookingModelImpl;
+      final String status,
+      final String? transactionId,
+      final String? paymentStatus}) = _$BookingModelImpl;
 
   factory _BookingModel.fromJson(Map<String, dynamic> json) =
       _$BookingModelImpl.fromJson;
@@ -313,6 +362,10 @@ abstract class _BookingModel implements BookingModel {
   double get totalPrice;
   @override
   String get status;
+  @override
+  String? get transactionId;
+  @override
+  String? get paymentStatus;
   @override
   @JsonKey(ignore: true)
   _$$BookingModelImplCopyWith<_$BookingModelImpl> get copyWith =>

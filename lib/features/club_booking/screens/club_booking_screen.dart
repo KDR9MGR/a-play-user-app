@@ -1,9 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:a_play/features/club_booking/provider/club_booking_provider.dart';
 import 'package:a_play/features/club_booking/model/table_model.dart';
-import 'package:intl/intl.dart';
+import 'package:a_play/features/subscription/widgets/paystack_webview.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class ClubBookingScreen extends ConsumerStatefulWidget {
   final String clubId;
@@ -45,33 +49,86 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
         pricePerHour: 0,
       ),
     );
-    
+
     final timeRange = ref.read(timeRangeProvider);
     final hours = timeRange.$2.difference(timeRange.$1).inMinutes / 60.0;
     _totalPrice = selectedTable.pricePerHour * hours;
     setState(() {});
   }
 
-  void _submitBooking() {
+  Future<void> _submitBooking() async {
     if (_selectedTableId == null) return;
-    
+
     final selectedDate = ref.read(selectedDateProvider);
     final timeRange = ref.read(timeRangeProvider);
-    
+
     _calculateTotalPrice();
-    
-    ref.read(bookingControllerProvider.notifier).createBooking(
-      clubId: widget.clubId,
-      tableId: _selectedTableId!,
-      bookingDate: selectedDate,
-      startTime: timeRange.$1,
-      endTime: timeRange.$2,
-      totalPrice: _totalPrice,
-    );
-    
-    setState(() {
-      _isBookingConfirmed = true;
-    });
+
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      // Handle user not authenticated
+      return;
+    }
+
+    final reference = const Uuid().v4();
+
+    try {
+      final response = await Supabase.instance.client.functions.invoke(
+        'paystack',
+        body: {
+          'action': 'initialize',
+          'email': user.email,
+          'amount': (_totalPrice * 100).toInt(), // Amount in kobo
+          'reference': reference,
+        },
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      final authorizationUrl = data['data']['authorization_url'];
+
+      if (mounted) {
+        final paymentResult = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaystackWebView(
+              authorizationUrl: authorizationUrl,
+              reference: reference,
+              onSuccess: (reference) {
+                // Create the booking record in the database
+                ref.read(bookingControllerProvider.notifier).createBooking(
+                      clubId: widget.clubId,
+                      tableId: _selectedTableId!,
+                      bookingDate: selectedDate,
+                      startTime: timeRange.$1,
+                      endTime: timeRange.$2,
+                      totalPrice: _totalPrice,
+                      transactionId: reference,
+                      paymentStatus: 'successful',
+                    );
+
+                // Navigate to the confirmation screen
+                context.go('/club-booking/${widget.clubId}/confirmation');
+              },
+              onError: (error) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(error)),
+                );
+              },
+            ),
+          ),
+        );
+
+        if (paymentResult == true) {
+          setState(() {
+            _isBookingConfirmed = true;
+          });
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override
@@ -83,7 +140,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
     final booking = ref.watch(bookingControllerProvider);
     final formattedDate = DateFormat('EEE, d MMMM').format(selectedDate);
     final formattedTime = '${DateFormat('h:mm a').format(timeRange.$1)} - ${DateFormat('h:mm a').format(timeRange.$2)}';
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
@@ -150,7 +207,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
               ],
             ),
           ),
-          
+
           // Main Content
           Expanded(
             child: _isBookingConfirmed
@@ -161,7 +218,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
       ),
     );
   }
-  
+
   Widget _buildTableSelectionContent(
     AsyncValue<List<TableModel>> tables,
     DateTime selectedDate,
@@ -181,14 +238,14 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
                   ),
                 );
               }
-              
+
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: tablesList.length,
                 itemBuilder: (context, index) {
                   final table = tablesList[index];
                   final isSelected = _selectedTableId == table.id;
-                  
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
@@ -225,7 +282,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
                                 children: [
                                   Icon(
                                     Icons.table_bar,
-                                    color: Colors.white.withValues(alpha: 0.7),
+                                    color: Colors.white.withOpacity(0.7),
                                     size: 24,
                                   ),
                                   const SizedBox(height: 4),
@@ -240,9 +297,9 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
                                 ],
                               ),
                             ),
-                            
+
                             const SizedBox(width: 16),
-                            
+
                             // Table Details
                             Expanded(
                               child: Column(
@@ -272,22 +329,22 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
                                 ],
                               ),
                             ),
-                            
+
                             // Selection Indicator
                             if (table.isAvailable)
                               Icon(
-                                isSelected 
-                                  ? Icons.radio_button_checked 
-                                  : Icons.radio_button_unchecked,
-                                color: isSelected 
-                                  ? Theme.of(context).primaryColor 
-                                  : Colors.white,
+                                isSelected
+                                    ? Icons.radio_button_checked
+                                    : Icons.radio_button_unchecked,
+                                color: isSelected
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.white,
                               )
                             else
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withValues(alpha: 0.2),
+                                  color: Colors.red.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(color: Colors.red),
                                 ),
@@ -316,7 +373,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
             ),
           ),
         ),
-        
+
         // Bottom Section
         Container(
           padding: const EdgeInsets.all(16),
@@ -353,7 +410,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // Book Button
               SizedBox(
                 width: double.infinity,
@@ -399,7 +456,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
       ),
     );
   }
-  
+
   Widget _buildSuccessContent(dynamic bookingData) {
     return Column(
       children: [
@@ -407,7 +464,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.2),
+            color: Colors.green.withOpacity(0.2),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -487,7 +544,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.2),
+            color: Colors.red.withOpacity(0.2),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -543,7 +600,7 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
       ],
     );
   }
-  
+
   Widget _buildDetailRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -570,4 +627,4 @@ class _ClubBookingScreenState extends ConsumerState<ClubBookingScreen> {
       ],
     );
   }
-} 
+}

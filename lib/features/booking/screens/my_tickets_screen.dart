@@ -1,5 +1,10 @@
+
 import 'package:a_play/data/models/booking_model.dart';
+import 'package:a_play/data/models/unified_booking_model.dart';
 import 'package:a_play/features/booking/providers/bookin_history_provider.dart';
+import 'package:a_play/features/booking/service/booking_service.dart';
+import 'package:a_play/features/restaurant/model/restaurant_booking_model.dart';
+import 'package:a_play/services/unified_booking_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +13,11 @@ import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:a_play/core/constants/colors.dart';
 
-//ConsumerStatefulWidget
+final myBookingsProvider = FutureProvider<List<UnifiedBookingModel>>((ref) async {
+  final unifiedBookingService = ref.watch(unifiedBookingServiceProvider);
+  return unifiedBookingService.getMyBookings();
+});
+
 class MyTicketsScreen extends ConsumerStatefulWidget {
   const MyTicketsScreen({super.key});
 
@@ -23,7 +32,7 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    ref.read(bookingHistoryProvider.future);
+    ref.read(myBookingsProvider.future);
   }
 
   @override
@@ -32,24 +41,16 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
     super.dispose();
   }
 
-  List<BookingModel> _filterTickets(List<BookingModel> tickets, bool isActive) {
-    final now = DateTime.now();
-    return tickets.where((ticket) {
-      final isExpired = DateTime.parse(ticket.eventEndDate).isBefore(now);
-      return isActive ? !isExpired : isExpired;
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bookingProvider = ref.watch(bookingHistoryProvider);
-    
+    final myBookings = ref.watch(myBookingsProvider);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          'My Tickets',
+          'My Bookings',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
@@ -59,7 +60,7 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
         actions: [
           IconButton(
             icon: const Icon(Iconsax.refresh, size: 22),
-            onPressed: () => ref.refresh(bookingHistoryProvider),
+            onPressed: () => ref.refresh(myBookingsProvider),
           ),
         ],
         bottom: TabBar(
@@ -77,7 +78,7 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
                 children: [
                   Icon(Iconsax.ticket, size: 18),
                   SizedBox(width: 8),
-                  Text('Active'),
+                  Text('Events'),
                 ],
               ),
             ),
@@ -85,9 +86,9 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Iconsax.ticket_expired, size: 18),
+                  Icon(Icons.restaurant, size: 18),
                   SizedBox(width: 8),
-                  Text('Expired'),
+                  Text('Restaurants'),
                 ],
               ),
             ),
@@ -97,251 +98,38 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Active Tickets Tab
-          bookingProvider.when(
+          // Event Bookings
+          myBookings.when(
             data: (bookings) {
-              final activeTickets = _filterTickets(bookings, true);
-              if (activeTickets.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Iconsax.ticket_expired5,
-                    size: 70,
-                    color: Color(0xFF303030),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                        'No Active Tickets',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.5,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Text(
-                          'You don\'t have any active tickets at the moment',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.grey.shade400,
-                            height: 1.4,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.orange,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Explore Events',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-          return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: activeTickets.length,
-                itemBuilder: (context, index) => TicketCard(booking: activeTickets[index]),
-              );
-            },
-        error: (error, stack) {
-          // Check if error is authentication-related
-          final isAuthError = error.toString().contains('AUTH_REQUIRED');
-
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  isAuthError ? Iconsax.lock_1 : Iconsax.warning_2,
-                  size: 70,
-                  color: isAuthError ? AppColors.orange : const Color(0xFFFF3B30),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  isAuthError ? 'Sign in Required' : 'Failed to Load Tickets',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Text(
-                    isAuthError
-                      ? 'Please sign in to view your tickets and booking history'
-                      : 'Unable to load your tickets. Please try again.',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey.shade400,
-                      height: 1.4,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: isAuthError
-                    ? () => Navigator.pushNamed(context, '/sign-in')
-                    : () => ref.refresh(bookingHistoryProvider),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.orange,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  icon: Icon(isAuthError ? Iconsax.login : Iconsax.refresh),
-                  label: Text(isAuthError ? 'Sign In' : 'Retry'),
-                ),
-              ],
-            ),
-          );
-        },
-            loading: () => const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.orange,
-              ),
-            ),
-          ),
-
-          // Expired Tickets Tab
-          bookingProvider.when(
-            data: (bookings) {
-              final expiredTickets = _filterTickets(bookings, false);
-              if (expiredTickets.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Iconsax.ticket_expired5,
-                        size: 70,
-                        color: Color(0xFF303030),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'No Expired Tickets',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.5,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                          'You don\'t have any expired tickets',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey.shade400,
-                        height: 1.4,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-                    ],
-                  ),
-                );
+              final eventBookings = bookings.where((b) => b.type == BookingType.event).toList();
+              if (eventBookings.isEmpty) {
+                return const Center(child: Text('No event bookings yet.'));
               }
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: expiredTickets.length,
-                itemBuilder: (context, index) => TicketCard(booking: expiredTickets[index]),
+                itemCount: eventBookings.length,
+                itemBuilder: (context, index) => TicketCard(booking: eventBookings[index].eventBooking!),
               );
             },
-            error: (error, stack) {
-              // Check if error is authentication-related
-              final isAuthError = error.toString().contains('AUTH_REQUIRED');
+            error: (error, stack) => Center(child: Text('Error: $error')),
+            loading: () => const Center(child: CircularProgressIndicator()),
+          ),
 
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      isAuthError ? Iconsax.lock_1 : Iconsax.warning_2,
-                      size: 70,
-                      color: isAuthError ? AppColors.orange : const Color(0xFFFF3B30),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      isAuthError ? 'Sign in Required' : 'Failed to Load Tickets',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Text(
-                        isAuthError
-                          ? 'Please sign in to view your tickets and booking history'
-                          : 'Unable to load your tickets. Please try again.',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey.shade400,
-                          height: 1.4,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: isAuthError
-                        ? () => Navigator.pushNamed(context, '/sign-in')
-                        : () => ref.refresh(bookingHistoryProvider),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.orange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                      ),
-                      icon: Icon(isAuthError ? Iconsax.login : Iconsax.refresh),
-                      label: Text(isAuthError ? 'Sign In' : 'Retry'),
-                    ),
-                  ],
-                ),
+          // Restaurant Bookings
+          myBookings.when(
+            data: (bookings) {
+              final restaurantBookings = bookings.where((b) => b.type == BookingType.restaurant).toList();
+              if (restaurantBookings.isEmpty) {
+                return const Center(child: Text('No restaurant bookings yet.'));
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: restaurantBookings.length,
+                itemBuilder: (context, index) => RestaurantBookingCard(booking: restaurantBookings[index].restaurantBooking!),
               );
             },
-            loading: () => const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.orange,
-              ),
-            ),
+            error: (error, stack) => Center(child: Text('Error: $error')),
+            loading: () => const Center(child: CircularProgressIndicator()),
           ),
         ],
       ),
@@ -359,64 +147,55 @@ class TicketCard extends StatelessWidget {
     final formattedDate = DateFormat('EEE, MMM d').format(booking.bookingDate);
     final formattedTime = DateFormat('h:mm a').format(booking.bookingDate);
     final isActive = booking.status.toLowerCase() == 'confirmed';
-    
+
     return Container(
-        margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(16),
-        ),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16),
+      ),
       clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-          // Top section with image and details
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Event poster
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
                 child: SizedBox(
                   width: 100,
                   height: 150,
                   child: booking.eventCoverImage != null
-                    ? CachedNetworkImage( 
-                        imageUrl: booking.eventCoverImage!,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, error, stackTrace) => Container(
-                          color: AppColors.orange.withValues(alpha: 0.2),
+                      ? CachedNetworkImage(
+                          imageUrl: booking.eventCoverImage!,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, error, stackTrace) => Container(
+                            color: AppColors.orange.withOpacity(0.2),
+                            child: const Icon(
+                              Iconsax.gallery,
+                              size: 30,
+                              color: AppColors.orange,
+                            ),
+                          ),
+                        )
+                      : Container(
+                          color: AppColors.orange.withOpacity(0.2),
                           child: const Icon(
                             Iconsax.gallery,
                             size: 30,
                             color: AppColors.orange,
                           ),
                         ),
-                      )
-                    : Image.network(
-                        booking.eventCoverImage!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                      color: AppColors.orange.withValues(alpha: 0.2),
-                          child: const Icon(
-                            Iconsax.gallery,
-                            size: 30,
-                            color: AppColors.orange,
-                          ),
-                        ),
-                      ),
                 ),
               ),
-              
-              // Event details
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Status chip
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -426,22 +205,19 @@ class TicketCard extends StatelessWidget {
                           color: _getStatusColor(booking.status),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                              child: Text(
+                        child: Text(
                           _getStatusText(booking.status),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  
                       const SizedBox(height: 8),
-                      
-                      // Event ID (replace with title when available)
-                        Text(
+                      Text(
                         booking.eventTitle,
-                          overflow: TextOverflow.ellipsis,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -449,13 +225,9 @@ class TicketCard extends StatelessWidget {
                         ),
                         maxLines: 2,
                       ),
-                      
                       const SizedBox(height: 8),
-                        
-                        // Date and time
-                        Row(
-                          children: [
-                         
+                      Row(
+                        children: [
                           Expanded(
                             child: Text(
                               '$formattedDate • $formattedTime',
@@ -464,18 +236,14 @@ class TicketCard extends StatelessWidget {
                                 fontSize: 12,
                                 color: Colors.grey[400],
                               ),
-                              ),
                             ),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 4),
-                        
-                      // Zone
-                      if (booking.zoneName != null) 
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      if (booking.zoneName != null)
                         Row(
                           children: [
-                       
                             Text(
                               booking.zoneName!,
                               style: TextStyle(
@@ -485,22 +253,19 @@ class TicketCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        
-                        const SizedBox(height: 4),
-                        
-                      // Quantity
-                        Row(
-                          children: [
-                            const Icon(
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(
                             Iconsax.ticket,
-                              size: 14,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
+                            size: 14,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
                             '${booking.quantity} ticket${booking.quantity > 1 ? 's' : ''}',
-                              style: TextStyle(
-                                fontSize: 12,
+                            style: TextStyle(
+                              fontSize: 12,
                               color: Colors.grey[400],
                             ),
                           ),
@@ -510,8 +275,6 @@ class TicketCard extends StatelessWidget {
                   ),
                 ),
               ),
-              
-              // Right side with QR code (if active)
               if (isActive)
                 Padding(
                   padding: const EdgeInsets.all(12),
@@ -521,42 +284,36 @@ class TicketCard extends StatelessWidget {
                       data: booking.id,
                       version: QrVersions.auto,
                       size: 70,
-                      backgroundColor:  AppColors.cardDark,
+                      backgroundColor: AppColors.cardDark,
                       foregroundColor: AppColors.white,
                     ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        
-          // Bottom section with amount and ID
-                                Container(
+                  ),
+                ),
+            ],
+          ),
+          Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(16),  
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(16),
               border: Border(
-               
                 top: BorderSide(
-                  color: Colors.grey.withValues(alpha: 0.1),
+                  color: Colors.grey.withOpacity(0.1),
                   width: 1,
                 ),
               ),
-                            ),
-                            child: Row(
+            ),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                // Booking ID
+              children: [
                 Text(
                   'ID: ${booking.id.substring(0, 8).toUpperCase()}',
-                                    style: TextStyle(
-                                      fontSize: 12,
+                  style: TextStyle(
+                    fontSize: 12,
                     color: Colors.grey[400],
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                
-                // Amount
                 if (booking.amount != null)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -564,22 +321,22 @@ class TicketCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.orange.withValues(alpha: 0.2),
+                      color: AppColors.orange.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       'GH₵ ${booking.amount!.toStringAsFixed(2)}',
                       style: const TextStyle(
                         color: AppColors.orange,
-                                fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                         fontSize: 12,
-                              ),
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
                   ),
-                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -618,3 +375,40 @@ class TicketCard extends StatelessWidget {
   }
 }
 
+class RestaurantBookingCard extends ConsumerWidget {
+  final RestaurantBooking booking;
+
+  const RestaurantBookingCard({super.key, required this.booking});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formattedDate = DateFormat('EEE, MMM d').format(booking.bookingDate);
+    final formattedTime = DateFormat('h:mm a').format(booking.startTime);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(booking.restaurantName ?? 'Restaurant', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('Date: $formattedDate'),
+            Text('Time: $formattedTime'),
+            Text('Party Size: ${booking.partySize}'),
+            Text('Status: ${booking.status}'),
+            if (booking.status == 'confirmed')
+              ElevatedButton(
+                onPressed: () async {
+                  await ref.read(unifiedBookingServiceProvider).cancelRestaurantBooking(booking.id);
+                  ref.refresh(myBookingsProvider);
+                },
+                child: const Text('Cancel'),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -297,6 +297,11 @@ class SubscriptionService {
         throw Exception('User not authenticated');
       }
 
+      final verification = await verifyPaystackPayment(paymentReference);
+      if (verification.status != true || (verification.data?['status'] as String?) != 'success') {
+        throw Exception('Payment verification failed');
+      }
+
       // Get the plan details
       final planResponse = await _client
           .from('subscription_plans')

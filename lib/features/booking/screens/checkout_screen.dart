@@ -1,21 +1,17 @@
+
 import 'dart:async';
 import 'package:a_play/features/booking/model/zoneModel.dart';
+import 'package:a_play/features/profile/providers/profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:a_play/core/constants/colors.dart';
 import 'package:a_play/features/home/model/event_model.dart';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:a_play/features/booking/service/booking_service.dart';
+import 'package:go_router/go_router.dart';
+import 'package:a_play/features/subscription/widgets/paystack_webview.dart';
 import 'package:intl/intl.dart';
 import 'package:a_play/core/constants/app_constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-final userProvider = StreamProvider<DocumentSnapshot>((ref) {
-  final userId = FirebaseAuth.instance.currentUser?.uid;
-  if (userId == null) throw Exception('User not authenticated');
-  return FirebaseFirestore.instance.collection('users').doc(userId).snapshots();
-});
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final EventModel event;
@@ -80,7 +76,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> initializePayment(double amount) async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
     if (user == null || user.email == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -141,23 +137,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               builder: (context) => PaystackWebView(
                 authorizationUrl: authorizationUrl,
                 reference: reference,
-                onSuccess: () async {
+                onSuccess: (reference) async {
                   try {
-                    final bookingId = await _saveBooking();
+                    final bookingId = await _saveBooking(reference);
                     if (mounted) {
-                      // Replace all screens with the ticket screen
-                      // Navigator.of(context).pushAndRemoveUntil(
-                      //   MaterialPageRoute(
-                      //     builder: (context) => TicketSuccessScreen(
-                      //       event: widget.event,
-                      //       zone: widget.zone,
-                      //       ticketCount: widget.ticketCount,
-                      //       bookingId: bookingId,
-                      //       totalAmount: widget.totalAmount,
-                      //     ),
-                      //   ),
-                      //   (route) => route.isFirst, // Keep only the first route
-                      // );
+                      context.go('/booking-confirmation/$bookingId');
                     }
                   } catch (e) {
                     if (mounted) {
@@ -205,30 +189,25 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
   }
 
-  Future<String> _saveBooking() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+  Future<String> _saveBooking(String transactionId) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId == null) throw Exception('User not authenticated');
 
-    final booking = {
-      'eventId': widget.event.id,
-      'userId': userId,
-      'zone': widget.zone.name,
-      'ticketCount': widget.ticketCount,
-      'status': 'confirmed',
-      'date': widget.event.startDate,
-      'createdAt': FieldValue.serverTimestamp(),
-      'totalAmount': calculateTotal(
-          ref.read(userProvider).value?.get('isPremium') ?? false),
-    };
-
-    // Create booking
-    final docRef =
-        await FirebaseFirestore.instance.collection('bookings').add(booking);
-    return docRef.id;
+    final bookingService = BookingService();
+    final bookingId = await bookingService.createBooking(
+      eventId: widget.event.id,
+      zoneId: widget.zone.id!,
+      bookingDate: widget.event.startDate,
+      quantity: widget.ticketCount,
+      transactionId: transactionId,
+      paymentStatus: 'successful',
+    );
+    return bookingId;
   }
 
   @override
   Widget build(BuildContext context) {
+    final profile = ref.watch(profileFutureProvider);
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -242,7 +221,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.grey[900]?.withValues(alpha: 0.5),
+              color: Colors.grey[900]?.withOpacity(0.5),
               border: Border(
                 bottom: BorderSide(
                   color: Colors.grey[800]!,
@@ -320,10 +299,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[900]?.withValues(alpha: 0.3),
+                      color: Colors.grey[900]?.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.grey[800]!.withValues(alpha: 0.5),
+                        color: Colors.grey[800]!.withOpacity(0.5),
                         width: 1,
                       ),
                     ),
@@ -360,26 +339,33 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           ],
                         ),
                         const Divider(height: 24, color: Colors.white24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Total',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              '${AppConstants.currency}${widget.totalAmount.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                        profile.when(
+                          data: (profileData) {
+                            final total = calculateTotal(profileData.isPremium);
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Total',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  '${AppConstants.currency}${total.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                          loading: () => const CircularProgressIndicator(),
+                          error: (error, stack) => Text('Error: $error'),
                         ),
                       ],
                     ),
@@ -423,42 +409,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class PaystackWebView extends StatelessWidget {
-  final String authorizationUrl;
-  final String reference;
-  final VoidCallback onSuccess;
-  final Function(String) onError;
-
-  const PaystackWebView({
-    super.key,
-    required this.authorizationUrl,
-    required this.reference,
-    required this.onSuccess,
-    required this.onError,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Payment'),
-        leading: CloseButton(
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            onError('Payment webview unavailable');
-            Navigator.of(context).pop(false);
-          },
-          child: const Text('Close'),
-        ),
       ),
     );
   }

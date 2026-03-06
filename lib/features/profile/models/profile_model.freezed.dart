@@ -32,6 +32,10 @@ mixin _$ProfileModel {
   bool get isPremium => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_organizer')
   bool get isOrganizer => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_onboarding_complete')
+  bool get isOnboardingComplete => throw _privateConstructorUsedError;
+  DateTime? get dob => throw _privateConstructorUsedError;
+  List<String>? get interests => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -52,7 +56,10 @@ abstract class $ProfileModelCopyWith<$Res> {
       String? phone,
       @JsonKey(name: 'created_at') DateTime createdAt,
       @JsonKey(name: 'is_premium') bool isPremium,
-      @JsonKey(name: 'is_organizer') bool isOrganizer});
+      @JsonKey(name: 'is_organizer') bool isOrganizer,
+      @JsonKey(name: 'is_onboarding_complete') bool isOnboardingComplete,
+      DateTime? dob,
+      List<String>? interests});
 }
 
 /// @nodoc
@@ -75,6 +82,9 @@ class _$ProfileModelCopyWithImpl<$Res, $Val extends ProfileModel>
     Object? createdAt = null,
     Object? isPremium = null,
     Object? isOrganizer = null,
+    Object? isOnboardingComplete = null,
+    Object? dob = freezed,
+    Object? interests = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -105,6 +115,18 @@ class _$ProfileModelCopyWithImpl<$Res, $Val extends ProfileModel>
           ? _value.isOrganizer
           : isOrganizer // ignore: cast_nullable_to_non_nullable
               as bool,
+      isOnboardingComplete: null == isOnboardingComplete
+          ? _value.isOnboardingComplete
+          : isOnboardingComplete // ignore: cast_nullable_to_non_nullable
+              as bool,
+      dob: freezed == dob
+          ? _value.dob
+          : dob // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      interests: freezed == interests
+          ? _value.interests
+          : interests // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
     ) as $Val);
   }
 }
@@ -124,7 +146,10 @@ abstract class _$$ProfileModelImplCopyWith<$Res>
       String? phone,
       @JsonKey(name: 'created_at') DateTime createdAt,
       @JsonKey(name: 'is_premium') bool isPremium,
-      @JsonKey(name: 'is_organizer') bool isOrganizer});
+      @JsonKey(name: 'is_organizer') bool isOrganizer,
+      @JsonKey(name: 'is_onboarding_complete') bool isOnboardingComplete,
+      DateTime? dob,
+      List<String>? interests});
 }
 
 /// @nodoc
@@ -145,6 +170,9 @@ class __$$ProfileModelImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? isPremium = null,
     Object? isOrganizer = null,
+    Object? isOnboardingComplete = null,
+    Object? dob = freezed,
+    Object? interests = freezed,
   }) {
     return _then(_$ProfileModelImpl(
       id: null == id
@@ -175,6 +203,18 @@ class __$$ProfileModelImplCopyWithImpl<$Res>
           ? _value.isOrganizer
           : isOrganizer // ignore: cast_nullable_to_non_nullable
               as bool,
+      isOnboardingComplete: null == isOnboardingComplete
+          ? _value.isOnboardingComplete
+          : isOnboardingComplete // ignore: cast_nullable_to_non_nullable
+              as bool,
+      dob: freezed == dob
+          ? _value.dob
+          : dob // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      interests: freezed == interests
+          ? _value._interests
+          : interests // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
     ));
   }
 }
@@ -189,7 +229,12 @@ class _$ProfileModelImpl implements _ProfileModel {
       this.phone,
       @JsonKey(name: 'created_at') required this.createdAt,
       @JsonKey(name: 'is_premium') this.isPremium = false,
-      @JsonKey(name: 'is_organizer') this.isOrganizer = false});
+      @JsonKey(name: 'is_organizer') this.isOrganizer = false,
+      @JsonKey(name: 'is_onboarding_complete')
+      this.isOnboardingComplete = false,
+      this.dob,
+      final List<String>? interests})
+      : _interests = interests;
 
   factory _$ProfileModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProfileModelImplFromJson(json);
@@ -213,10 +258,24 @@ class _$ProfileModelImpl implements _ProfileModel {
   @override
   @JsonKey(name: 'is_organizer')
   final bool isOrganizer;
+  @override
+  @JsonKey(name: 'is_onboarding_complete')
+  final bool isOnboardingComplete;
+  @override
+  final DateTime? dob;
+  final List<String>? _interests;
+  @override
+  List<String>? get interests {
+    final value = _interests;
+    if (value == null) return null;
+    if (_interests is EqualUnmodifiableListView) return _interests;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
 
   @override
   String toString() {
-    return 'ProfileModel(id: $id, fullName: $fullName, avatarUrl: $avatarUrl, phone: $phone, createdAt: $createdAt, isPremium: $isPremium, isOrganizer: $isOrganizer)';
+    return 'ProfileModel(id: $id, fullName: $fullName, avatarUrl: $avatarUrl, phone: $phone, createdAt: $createdAt, isPremium: $isPremium, isOrganizer: $isOrganizer, isOnboardingComplete: $isOnboardingComplete, dob: $dob, interests: $interests)';
   }
 
   @override
@@ -235,13 +294,28 @@ class _$ProfileModelImpl implements _ProfileModel {
             (identical(other.isPremium, isPremium) ||
                 other.isPremium == isPremium) &&
             (identical(other.isOrganizer, isOrganizer) ||
-                other.isOrganizer == isOrganizer));
+                other.isOrganizer == isOrganizer) &&
+            (identical(other.isOnboardingComplete, isOnboardingComplete) ||
+                other.isOnboardingComplete == isOnboardingComplete) &&
+            (identical(other.dob, dob) || other.dob == dob) &&
+            const DeepCollectionEquality()
+                .equals(other._interests, _interests));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, fullName, avatarUrl, phone,
-      createdAt, isPremium, isOrganizer);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      fullName,
+      avatarUrl,
+      phone,
+      createdAt,
+      isPremium,
+      isOrganizer,
+      isOnboardingComplete,
+      dob,
+      const DeepCollectionEquality().hash(_interests));
 
   @JsonKey(ignore: true)
   @override
@@ -259,14 +333,16 @@ class _$ProfileModelImpl implements _ProfileModel {
 
 abstract class _ProfileModel implements ProfileModel {
   const factory _ProfileModel(
-          {required final String id,
-          @JsonKey(name: 'full_name') final String? fullName,
-          @JsonKey(name: 'avatar_url') final String? avatarUrl,
-          final String? phone,
-          @JsonKey(name: 'created_at') required final DateTime createdAt,
-          @JsonKey(name: 'is_premium') final bool isPremium,
-          @JsonKey(name: 'is_organizer') final bool isOrganizer}) =
-      _$ProfileModelImpl;
+      {required final String id,
+      @JsonKey(name: 'full_name') final String? fullName,
+      @JsonKey(name: 'avatar_url') final String? avatarUrl,
+      final String? phone,
+      @JsonKey(name: 'created_at') required final DateTime createdAt,
+      @JsonKey(name: 'is_premium') final bool isPremium,
+      @JsonKey(name: 'is_organizer') final bool isOrganizer,
+      @JsonKey(name: 'is_onboarding_complete') final bool isOnboardingComplete,
+      final DateTime? dob,
+      final List<String>? interests}) = _$ProfileModelImpl;
 
   factory _ProfileModel.fromJson(Map<String, dynamic> json) =
       _$ProfileModelImpl.fromJson;
@@ -290,6 +366,13 @@ abstract class _ProfileModel implements ProfileModel {
   @override
   @JsonKey(name: 'is_organizer')
   bool get isOrganizer;
+  @override
+  @JsonKey(name: 'is_onboarding_complete')
+  bool get isOnboardingComplete;
+  @override
+  DateTime? get dob;
+  @override
+  List<String>? get interests;
   @override
   @JsonKey(ignore: true)
   _$$ProfileModelImplCopyWith<_$ProfileModelImpl> get copyWith =>

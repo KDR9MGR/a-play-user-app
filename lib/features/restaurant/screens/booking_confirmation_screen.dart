@@ -61,6 +61,18 @@ class BookingConfirmationScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             
             Text(
+              'This is a free reservation. No payment is required.',
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 16,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            
+            const SizedBox(height: 8),
+            
+            Text(
               'Your table reservation has been confirmed',
               style: TextStyle(
                 color: Colors.grey[400],

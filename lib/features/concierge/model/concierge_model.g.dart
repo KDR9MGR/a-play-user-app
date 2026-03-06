@@ -21,6 +21,7 @@ _$ConciergeRequestImpl _$$ConciergeRequestImplFromJson(
           ? null
           : DateTime.parse(json['requested_at'] as String),
       additionalDetails: json['additional_details'] as Map<String, dynamic>?,
+      chatRoomId: json['chat_room_id'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -37,6 +38,7 @@ Map<String, dynamic> _$$ConciergeRequestImplToJson(
       'is_urgent': instance.isUrgent,
       'requested_at': instance.requestedAt?.toIso8601String(),
       'additional_details': instance.additionalDetails,
+      'chat_room_id': instance.chatRoomId,
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
     };
