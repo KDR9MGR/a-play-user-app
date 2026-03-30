@@ -1,0 +1,19 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+Generate Flutter code using Riverpod and Firebase Firestore. Follow clean architecture and modular structure:
+
+- All UI widgets go under `/features/{feature}/screens/` 
+- Business logic should use Riverpod providers inside `/features/{feature}/provider/`
+- Data services like Firebase access go inside `/features/{feature}/data/`
+- All reusable widgets should be in `/core/widgets/`
+- Each Dart file should have one main purpose (no mixing UI and logic).
+- Use StateNotifier or AsyncNotifier for state management.
+- Avoid putting multiple classes/functions in one file.
+
+

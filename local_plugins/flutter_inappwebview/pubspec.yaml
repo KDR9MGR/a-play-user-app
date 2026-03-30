@@ -1,0 +1,17 @@
+name: flutter_inappwebview
+description: A new Flutter plugin to support WebView functionality.
+version: 5.7.2+3
+homepage: https://github.com/pichillilorenzo/flutter_inappwebview
+
+environment:
+  sdk: ">=2.12.0 <4.0.0"
+  flutter: ">=2.0.0"
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.pichillilorenzo.flutter_inappwebview
+        pluginClass: InAppWebViewFlutterPlugin
+      ios:
+        pluginClass: InAppWebViewFlutterPlugin 

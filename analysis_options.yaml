@@ -1,0 +1,20 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - local_plugins/**
+    - local_plugins/lottie/example/**
+  errors:
+    # Suppress false positive for Freezed models with @JsonKey on factory parameters
+    invalid_annotation_target: ignore
+    # Allow print statements during development (will convert to debugPrint)
+    avoid_print: info
+    # Allow BuildContext across async gaps with proper mounted checks
+    use_build_context_synchronously: info
+    # Suppress library name warnings for local plugins
+    unnecessary_library_name: ignore
+
+linter:
+  rules:
+    # Disable overly strict rules
+    - avoid_print: false

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Table Booking Confirmation - A-Play</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #CE1126 50%, #FCD116 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .booking-card {
+            background: linear-gradient(135deg, #0A0E21 0%, #1a1f3a 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        .booking-card::before {
+            content: '✨';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 40px;
+            opacity: 0.3;
+        }
+        .club-title {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #FCD116;
+        }
+        .vip-badge {
+            display: inline-block;
+            background-color: #FCD116;
+            color: #1a1a2e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .booking-info {
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+        }
+        .booking-info-label {
+            font-weight: bold;
+            min-width: 140px;
+            color: #FCD116;
+        }
+        .booking-info-value {
+            color: #ffffff;
+        }
+        .price-highlight {
+            background-color: rgba(252, 209, 22, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .price-highlight .price {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FCD116;
+        }
+        .price-highlight .label {
+            color: #ffffff;
+            font-size: 14px;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 20px 0;
+        }
+        .details-section {
+            background-color: #f9f9f9;
+            border-left: 4px solid #CE1126;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .details-title {
+            font-weight: bold;
+            color: #CE1126;
+            margin-bottom: 10px;
+        }
+        .footer {
+            background-color: #0A0E21;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #FCD116;
+            text-decoration: none;
+        }
+        .social-links {
+            margin: 15px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #FCD116;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #CE1126;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .important-notice {
+            background-color: #2a1a4a;
+            border-left: 4px solid #FCD116;
+            padding: 15px;
+            margin: 15px 0;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎊 VIP Table Booked!</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Hello {{userName}},
+            </div>
+
+            <p>Your VIP table at <strong>{{clubName}}</strong> has been confirmed. Get ready for an unforgettable night!</p>
+
+            <!-- Booking Card -->
+            <div class="booking-card">
+                <div class="club-title">
+                    {{clubName}}
+                    {{#if isVIP}}
+                    <span class="vip-badge">VIP</span>
+                    {{/if}}
+                </div>
+
+                <div class="booking-info">
+                    <span class="booking-info-label">📅 Date:</span>
+                    <span class="booking-info-value">{{bookingDate}}</span>
+                </div>
+
+                <div class="booking-info">
+                    <span class="booking-info-label">🕐 Start Time:</span>
+                    <span class="booking-info-value">{{startTime}}</span>
+                </div>
+
+                <div class="booking-info">
+                    <span class="booking-info-label">⏰ End Time:</span>
+                    <span class="booking-info-value">{{endTime}}</span>
+                </div>
+
+                <div class="booking-info">
+                    <span class="booking-info-label">🪑 Table:</span>
+                    <span class="booking-info-value">{{tableName}}</span>
+                </div>
+
+                <div class="booking-info">
+                    <span class="booking-info-label">📍 Location:</span>
+                    <span class="booking-info-value">{{tableLocation}}</span>
+                </div>
+
+                <div class="booking-info">
+                    <span class="booking-info-label">🔖 Reference:</span>
+                    <span class="booking-info-value">{{bookingReference}}</span>
+                </div>
+
+                <div class="price-highlight">
+                    <div class="label">Total Paid</div>
+                    <div class="price">GH₵ {{totalPrice}}</div>
+                </div>
+            </div>
+
+            <!-- Club Details -->
+            <div class="details-section">
+                <div class="details-title">📍 Club Location</div>
+                <p style="margin: 5px 0;"><strong>{{clubName}}</strong></p>
+                <p style="margin: 5px 0; color: #666;">{{clubAddress}}</p>
+                <p style="margin: 10px 0;">
+                    <strong>📞 Phone:</strong> {{clubPhone}}
+                </p>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="important-notice">
+                <strong>✨ VIP Experience Details:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Your table will be ready 15 minutes before your booking time</li>
+                    <li>Please arrive before your start time to avoid losing your reservation</li>
+                    <li>Show this confirmation at the entrance for priority entry</li>
+                    <li>Valid ID required at entrance (21+ only)</li>
+                    <li>Dress code: Smart casual / Upscale attire</li>
+                    <li>Table reservations are non-refundable</li>
+                </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <p style="text-align: center;">
+                <a href="https://aplay.gh/my-bookings" class="btn">View in App</a>
+            </p>
+
+            <p style="text-align: center; color: #666;">
+                Questions? Contact the club at <a href="tel:{{clubPhone}}" style="color: #CE1126;">{{clubPhone}}</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>A-Play</strong> - Ghana's Premier Nightlife Platform</p>
+
+            <div class="social-links">
+                <a href="https://facebook.com/aplaygh">Facebook</a> |
+                <a href="https://instagram.com/aplaygh">Instagram</a> |
+                <a href="https://twitter.com/aplaygh">Twitter</a>
+            </div>
+
+            <p style="font-size: 12px; color: #999;">
+                © 2026 A-Play. All rights reserved.<br>
+                You received this email because you booked a table through A-Play.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

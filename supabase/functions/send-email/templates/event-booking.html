@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Booking Confirmation - A-Play</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #CE1126 0%, #FCD116 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .ticket-card {
+            background: linear-gradient(135deg, #0A0E21 0%, #1a1f3a 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            color: #ffffff;
+        }
+        .ticket-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #FCD116;
+        }
+        .ticket-info {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        .ticket-info-label {
+            font-weight: bold;
+            min-width: 120px;
+            color: #FCD116;
+        }
+        .ticket-info-value {
+            color: #ffffff;
+        }
+        .qr-code-section {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+        }
+        .qr-code-section img {
+            max-width: 200px;
+            height: auto;
+        }
+        .qr-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 20px 0;
+        }
+        .details-section {
+            background-color: #f9f9f9;
+            border-left: 4px solid #CE1126;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .details-title {
+            font-weight: bold;
+            color: #CE1126;
+            margin-bottom: 10px;
+        }
+        .price-summary {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+        .price-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #CE1126;
+            border-top: 2px solid #CE1126;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        .footer {
+            background-color: #0A0E21;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #FCD116;
+            text-decoration: none;
+        }
+        .social-links {
+            margin: 15px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #FCD116;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #CE1126;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .important-notice {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎉 Event Ticket Confirmed!</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Hello {{userName}},
+            </div>
+
+            <p>Great news! Your booking for <strong>{{eventName}}</strong> has been confirmed. We can't wait to see you there!</p>
+
+            <!-- Ticket Card -->
+            <div class="ticket-card">
+                <div class="ticket-title">{{eventName}}</div>
+
+                <div class="ticket-info">
+                    <span class="ticket-info-label">📅 Date:</span>
+                    <span class="ticket-info-value">{{eventDate}}</span>
+                </div>
+
+                <div class="ticket-info">
+                    <span class="ticket-info-label">🕐 Time:</span>
+                    <span class="ticket-info-value">{{eventTime}}</span>
+                </div>
+
+                <div class="ticket-info">
+                    <span class="ticket-info-label">📍 Venue:</span>
+                    <span class="ticket-info-value">{{venueName}}</span>
+                </div>
+
+                <div class="ticket-info">
+                    <span class="ticket-info-label">🎫 Zone:</span>
+                    <span class="ticket-info-value">{{zoneName}}</span>
+                </div>
+
+                <div class="ticket-info">
+                    <span class="ticket-info-label">👥 Quantity:</span>
+                    <span class="ticket-info-value">{{quantity}} ticket(s)</span>
+                </div>
+
+                <div class="ticket-info">
+                    <span class="ticket-info-label">🔖 Reference:</span>
+                    <span class="ticket-info-value">{{bookingReference}}</span>
+                </div>
+            </div>
+
+            <!-- QR Code -->
+            <div class="qr-code-section">
+                <h3 style="margin-top: 0;">Your Entry Ticket</h3>
+                <img src="{{qrCodeImage}}" alt="QR Code">
+                <p class="qr-label">Show this QR code at the venue entrance</p>
+            </div>
+
+            <!-- Venue Details -->
+            <div class="details-section">
+                <div class="details-title">📍 Venue Information</div>
+                <p style="margin: 5px 0;"><strong>{{venueName}}</strong></p>
+                <p style="margin: 5px 0; color: #666;">{{venueAddress}}</p>
+            </div>
+
+            <!-- Price Summary -->
+            <div class="price-summary">
+                <h3 style="margin-top: 0;">Payment Summary</h3>
+                <div class="price-row">
+                    <span>Ticket Price ({{quantity}}x):</span>
+                    <span>GH₵ {{unitPrice}}</span>
+                </div>
+                <div class="price-row price-total">
+                    <span>Total Paid:</span>
+                    <span>GH₵ {{totalPrice}}</span>
+                </div>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="important-notice">
+                <strong>⚠️ Important:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Please arrive at least 30 minutes before the event starts</li>
+                    <li>Have your QR code ready for quick check-in</li>
+                    <li>Tickets are non-transferable and non-refundable</li>
+                    <li>Valid ID may be required at the entrance</li>
+                </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <p style="text-align: center;">
+                <a href="https://aplay.gh/my-tickets" class="btn">View in App</a>
+            </p>
+
+            <p style="text-align: center; color: #666;">
+                Need help? Contact us at <a href="mailto:support@aplay.gh" style="color: #CE1126;">support@aplay.gh</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>A-Play</strong> - Ghana's Premier Event Booking Platform</p>
+
+            <div class="social-links">
+                <a href="https://facebook.com/aplaygh">Facebook</a> |
+                <a href="https://instagram.com/aplaygh">Instagram</a> |
+                <a href="https://twitter.com/aplaygh">Twitter</a>
+            </div>
+
+            <p style="font-size: 12px; color: #999;">
+                © 2026 A-Play. All rights reserved.<br>
+                You received this email because you booked an event on A-Play.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

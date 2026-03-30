@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modified to match custom splash screen background -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Black background to match custom splash screen -->
+    <item android:drawable="@android:color/black" />
+
+    <!-- You can add your app logo here if needed -->
+    <!-- <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/launch_image" />
+    </item> -->
+</layer-list>

@@ -1,0 +1,67 @@
+# Uncomment this line to define a global platform for your project
+platform :ios, '15.0'
+
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks! :linkage => :dynamic
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+  end
+
+  rive_ios_lib_path = '$(PODS_ROOT)/../.symlinks/plugins/rive_native/native/build/iphoneos/bin/release'
+  rive_sim_lib_path = '$(PODS_ROOT)/../.symlinks/plugins/rive_native/native/build/iphoneos/bin/emulator'
+  rive_ios_force_load = "-Wl,-force_load,#{rive_ios_lib_path}/librive_native.a"
+  rive_sim_force_load = "-Wl,-force_load,#{rive_sim_lib_path}/librive_native.a"
+  rive_libs = '-lrive -lrive_pls_renderer -lrive_yoga -lrive_harfbuzz -lrive_sheenbidi -lrive_decoders -llibpng -lzlib -llibjpeg -llibwebp -lminiaudio -lluau_vm'
+
+  installer.aggregate_targets.each do |aggregate_target|
+    next unless aggregate_target.name == 'Pods-Runner'
+
+    aggregate_target.xcconfigs.each do |config_name, xcconfig|
+      xcconfig.attributes['LIBRARY_SEARCH_PATHS[sdk=iphoneos*]'] ||= '$(inherited)'
+      xcconfig.attributes['LIBRARY_SEARCH_PATHS[sdk=iphoneos*]'] << " \"#{rive_ios_lib_path}\""
+      xcconfig.attributes['LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]'] ||= '$(inherited)'
+      xcconfig.attributes['LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]'] << " \"#{rive_sim_lib_path}\""
+
+      xcconfig.attributes['OTHER_LDFLAGS[sdk=iphoneos*]'] ||= '$(inherited)'
+      xcconfig.attributes['OTHER_LDFLAGS[sdk=iphoneos*]'] << " #{rive_ios_force_load} #{rive_libs}"
+      xcconfig.attributes['OTHER_LDFLAGS[sdk=iphonesimulator*]'] ||= '$(inherited)'
+      xcconfig.attributes['OTHER_LDFLAGS[sdk=iphonesimulator*]'] << " #{rive_sim_force_load} #{rive_libs}"
+
+      xcconfig.save_as(aggregate_target.xcconfig_path(config_name))
+    end
+  end
+end

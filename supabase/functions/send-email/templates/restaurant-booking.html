@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Reservation Confirmation - A-Play</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #CE1126 0%, #FCD116 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .reservation-card {
+            background: linear-gradient(135deg, #0A0E21 0%, #1a1f3a 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            color: #ffffff;
+        }
+        .restaurant-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #FCD116;
+        }
+        .reservation-info {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        .reservation-info-label {
+            font-weight: bold;
+            min-width: 140px;
+            color: #FCD116;
+        }
+        .reservation-info-value {
+            color: #ffffff;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 20px 0;
+        }
+        .details-section {
+            background-color: #f9f9f9;
+            border-left: 4px solid #CE1126;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .details-title {
+            font-weight: bold;
+            color: #CE1126;
+            margin-bottom: 10px;
+        }
+        .special-requests {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            color: #856404;
+        }
+        .footer {
+            background-color: #0A0E21;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #FCD116;
+            text-decoration: none;
+        }
+        .social-links {
+            margin: 15px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #FCD116;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #CE1126;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .important-notice {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🍽️ Reservation Confirmed!</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Hello {{userName}},
+            </div>
+
+            <p>Your table reservation at <strong>{{restaurantName}}</strong> has been confirmed. We look forward to serving you!</p>
+
+            <!-- Reservation Card -->
+            <div class="reservation-card">
+                <div class="restaurant-title">{{restaurantName}}</div>
+
+                <div class="reservation-info">
+                    <span class="reservation-info-label">📅 Date:</span>
+                    <span class="reservation-info-value">{{bookingDate}}</span>
+                </div>
+
+                <div class="reservation-info">
+                    <span class="reservation-info-label">🕐 Time:</span>
+                    <span class="reservation-info-value">{{bookingTime}}</span>
+                </div>
+
+                <div class="reservation-info">
+                    <span class="reservation-info-label">🪑 Table:</span>
+                    <span class="reservation-info-value">{{tableName}}</span>
+                </div>
+
+                <div class="reservation-info">
+                    <span class="reservation-info-label">👥 Party Size:</span>
+                    <span class="reservation-info-value">{{partySize}} guest(s)</span>
+                </div>
+
+                <div class="reservation-info">
+                    <span class="reservation-info-label">🔖 Reference:</span>
+                    <span class="reservation-info-value">{{bookingReference}}</span>
+                </div>
+            </div>
+
+            <!-- Special Requests -->
+            {{#if specialRequests}}
+            <div class="special-requests">
+                <strong>📝 Special Requests:</strong>
+                <p style="margin: 10px 0;">{{specialRequests}}</p>
+            </div>
+            {{/if}}
+
+            <!-- Restaurant Details -->
+            <div class="details-section">
+                <div class="details-title">📍 Restaurant Location</div>
+                <p style="margin: 5px 0;"><strong>{{restaurantName}}</strong></p>
+                <p style="margin: 5px 0; color: #666;">{{restaurantAddress}}</p>
+                <p style="margin: 10px 0;">
+                    <strong>📞 Phone:</strong> {{restaurantPhone}}
+                </p>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="important-notice">
+                <strong>ℹ️ Important Information:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Please arrive on time for your reservation</li>
+                    <li>Tables are held for 15 minutes past reservation time</li>
+                    <li>To cancel or modify, contact the restaurant at least 2 hours in advance</li>
+                    <li>You may be asked to show this confirmation upon arrival</li>
+                </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <p style="text-align: center;">
+                <a href="https://aplay.gh/my-bookings" class="btn">View in App</a>
+            </p>
+
+            <p style="text-align: center; color: #666;">
+                Need to make changes? Contact the restaurant at <a href="tel:{{restaurantPhone}}" style="color: #CE1126;">{{restaurantPhone}}</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>A-Play</strong> - Ghana's Premier Dining & Entertainment Platform</p>
+
+            <div class="social-links">
+                <a href="https://facebook.com/aplaygh">Facebook</a> |
+                <a href="https://instagram.com/aplaygh">Instagram</a> |
+                <a href="https://twitter.com/aplaygh">Twitter</a>
+            </div>
+
+            <p style="font-size: 12px; color: #999;">
+                © 2026 A-Play. All rights reserved.<br>
+                You received this email because you made a reservation through A-Play.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
