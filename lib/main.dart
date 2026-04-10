@@ -16,6 +16,7 @@ import 'package:a_play/core/widgets/auth_error_handler.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:a_play/features/subscription/service/platform_subscription_service.dart';
 import 'package:a_play/core/services/realtime_sync_service.dart';
+import 'package:a_play/core/services/notification_service.dart';
 import 'package:a_play/firebase_options.dart';
 
 // Initialize app state provider
@@ -116,6 +117,15 @@ Future<void> _bootstrapApp({
     anonKey: supabaseAnonKey,
     debug: kDebugMode,
   );
+
+  // Initialize OneSignal for push notifications
+  final oneSignalAppId = Env.oneSignalAppId;
+  if (oneSignalAppId.isNotEmpty) {
+    await NotificationService().initialize(appId: oneSignalAppId);
+    debugPrint('✅ OneSignal initialized with App ID: ${oneSignalAppId.substring(0, 8)}...');
+  } else {
+    debugPrint('⚠️ OneSignal App ID not found - push notifications disabled');
+  }
 
   final platformService = PlatformSubscriptionService();
   await platformService.initialize();

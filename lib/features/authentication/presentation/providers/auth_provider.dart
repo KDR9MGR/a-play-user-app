@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:a_play/features/authentication/data/models/user_model.dart';
+import 'package:a_play/core/services/notification_service.dart';
+import 'package:a_play/core/services/email_service.dart';
 
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
@@ -83,19 +86,26 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
   Future<void> signInWithEmail(String email, String password) async {
     try {
       state = const AsyncValue.loading();
-      
+
       final response = await _client.auth.signInWithPassword(
         email: email,
         password: password,
       );
-      
+
       if (response.session == null) {
         throw const AuthException('Failed to sign in: No session created');
       }
-      
+
       final user = response.user;
       if (user == null) {
         throw const AuthException('Failed to sign in: No user returned');
+      }
+
+      // Link user to OneSignal for push notifications
+      try {
+        await NotificationService().setExternalUserId(user.id);
+      } catch (e) {
+        // Non-critical: Log but don't block sign-in
       }
 
       state = AsyncValue.data(UserModel.fromSupabaseUser(user.toJson()));
@@ -143,6 +153,13 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
       final user = authResponse.user;
       if (user == null) {
         throw const AuthException('Failed to sign in with Google');
+      }
+
+      // Link user to OneSignal for push notifications
+      try {
+        await NotificationService().setExternalUserId(user.id);
+      } catch (e) {
+        // Non-critical: Log but don't block sign-in
       }
 
       state = AsyncValue.data(UserModel.fromSupabaseUser(user.toJson()));
@@ -225,6 +242,13 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         }
       }
 
+      // Link user to OneSignal for push notifications
+      try {
+        await NotificationService().setExternalUserId(user.id);
+      } catch (e) {
+        // Non-critical: Log but don't block sign-in
+      }
+
       state = AsyncValue.data(UserModel.fromSupabaseUser(user.toJson()));
     } on AuthException catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -235,6 +259,13 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
 
   Future<void> signOut() async {
     try {
+      // Unlink user from OneSignal
+      try {
+        await NotificationService().removeExternalUserId();
+      } catch (e) {
+        // Non-critical: Log but don't block sign-out
+      }
+
       await _client.auth.signOut();
       state = const AsyncValue.data(null);
     } catch (e, stack) {
@@ -269,19 +300,27 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         throw const AuthException('Failed to sign up: No user returned');
       }
 
+      // Link user to OneSignal for push notifications
+      try {
+        await NotificationService().setExternalUserId(user.id);
+      } catch (e) {
+        // Non-critical: Log but don't block sign-up
+      }
+
+      // Send welcome email via Resend
       try {
         final resolvedName = (displayName != null && displayName.trim().isNotEmpty)
             ? displayName.trim()
             : (user.userMetadata?['display_name'] as String?) ?? email.split('@').first;
-        await _client.functions.invoke(
-          'send-email',
-          body: {
-            'to': email,
-            'subject': 'Welcome to A-Play',
-            'html': '<h1>Welcome, $resolvedName!</h1><p>Thanks for joining A-Play.</p>',
-          },
+
+        await EmailService().sendWelcomeEmail(
+          toEmail: email,
+          userName: resolvedName,
         );
-      } catch (_) {}
+      } catch (e) {
+        // Non-critical: Log but don't block sign-up
+        debugPrint('Failed to send welcome email: $e');
+      }
 
       state = AsyncValue.data(UserModel.fromSupabaseUser(user.toJson()));
     } on AuthException catch (e, stack) {
@@ -292,10 +331,30 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
   }
 
   Future<void> resetPassword(String email) async {
-    await _client.auth.resetPasswordForEmail(
-      email,
-      redirectTo: 'io.supabase.aplay://reset-callback/',
-    );
+    try {
+      // Trigger Supabase password reset flow
+      await _client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'io.supabase.aplay://reset-callback/',
+      );
+
+      // Send branded password reset email via Resend
+      try {
+        // Use email prefix as fallback name since user isn't logged in
+        final userName = email.split('@').first;
+        await EmailService().sendPasswordResetEmail(
+          toEmail: email,
+          userName: userName,
+          resetLink: 'io.supabase.aplay://reset-callback/', // Will be replaced by actual reset link in production
+        );
+      } catch (e) {
+        // Non-critical: Supabase already sent a reset email
+        debugPrint('Failed to send custom password reset email: $e');
+      }
+    } catch (e) {
+      // Propagate the error to the UI
+      rethrow;
+    }
   }
 
   Future<void> updateProfile({

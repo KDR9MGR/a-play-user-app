@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.0.4+3
+version: 2.0.5+4
 
 environment:
   sdk: '>=3.1.3 <4.0.0'
@@ -99,8 +99,9 @@ dependencies:
   # Date Formatting
   intl: ^0.20.2
   
-  # In-App Purchase
-  in_app_purchase: ^3.1.13
+  # In-App Purchase (Updated for iOS 18 StoreKit compatibility)
+  in_app_purchase: ^3.2.0
+  in_app_purchase_storekit: ^0.4.8+1
 
   # JSON Serialization
   json_annotation: ^4.8.1
@@ -133,6 +134,9 @@ dependencies:
   confetti: ^0.8.0
   firebase_crashlytics: ^5.0.7
 
+  # Environment Variables
+  flutter_dotenv: ^5.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -163,6 +167,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - .env
     - assets/icons/
     - assets/images/
     - assets/fonts/

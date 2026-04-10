@@ -2,6 +2,7 @@
 import 'package:a_play/config/feature_flags.dart';
 import 'package:a_play/data/models/booking_model.dart';
 import 'package:a_play/data/models/unified_booking_model.dart';
+import 'package:a_play/features/booking/screens/cancel_booking_screen.dart';
 import 'package:a_play/features/booking/service/booking_service.dart';
 import 'package:a_play/features/restaurant/model/restaurant_booking_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -147,6 +148,14 @@ class TicketCard extends StatelessWidget {
   final BookingModel booking;
 
   const TicketCard({super.key, required this.booking});
+
+  void _showTicketDetails(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => _TicketDetailsScreen(booking: booking),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -360,6 +369,297 @@ class TicketCard extends StatelessWidget {
         return Colors.grey[500]!;
       default:
         return Colors.grey[500]!;
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+        return 'CONFIRMED';
+      case 'active':
+        return 'ACTIVE';
+      case 'used':
+        return 'USED';
+      case 'expired':
+        return 'EXPIRED';
+      case 'cancelled':
+        return 'CANCELLED';
+      default:
+        return status.toUpperCase();
+    }
+  }
+}
+
+/// Ticket Details Screen with Cancel Button
+class _TicketDetailsScreen extends StatelessWidget {
+  final BookingModel booking;
+
+  const _TicketDetailsScreen({required this.booking});
+
+  @override
+  Widget build(BuildContext context) {
+    final eventDate = DateTime.parse(booking.eventEndDate);
+    final formattedDate = DateFormat('EEEE, MMMM d, yyyy').format(eventDate);
+    final formattedTime = DateFormat('h:mm a').format(eventDate);
+    final isActive = booking.status.toLowerCase() == 'confirmed' && eventDate.isAfter(DateTime.now());
+    final canCancel = isActive && eventDate.difference(DateTime.now()).inHours > 0;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Ticket Details',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Iconsax.arrow_left),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // QR Code Card
+            if (isActive)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    QrImageView(
+                      data: booking.id,
+                      version: QrVersions.auto,
+                      size: 200,
+                      backgroundColor: Colors.white,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Scan at venue for entry',
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            const SizedBox(height: 24),
+
+            // Event Details Card
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.cardDark,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Status Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(booking.status),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      _getStatusText(booking.status),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Event Name
+                  Text(
+                    booking.eventTitle,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Details
+                  _buildDetailRow(Iconsax.calendar, 'Date', formattedDate),
+                  const SizedBox(height: 12),
+                  _buildDetailRow(Iconsax.clock, 'Time', formattedTime),
+                  const SizedBox(height: 12),
+                  if (booking.zoneName != null)
+                    _buildDetailRow(Iconsax.location, 'Zone', booking.zoneName!),
+                  if (booking.zoneName != null) const SizedBox(height: 12),
+                  _buildDetailRow(
+                    Iconsax.ticket,
+                    'Quantity',
+                    '${booking.quantity} ticket${booking.quantity > 1 ? 's' : ''}',
+                  ),
+                  const SizedBox(height: 12),
+                  if (booking.amount != null)
+                    _buildDetailRow(
+                      Iconsax.money,
+                      'Total Amount',
+                      'GHS ${booking.amount!.toStringAsFixed(2)}',
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Booking ID
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.cardDark.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white24),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Booking ID',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    booking.id.substring(0, 8).toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            if (canCancel) ...[
+              const SizedBox(height: 24),
+
+              // Cancel Booking Button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CancelBookingScreen(booking: booking),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Iconsax.close_circle, size: 20),
+                  label: const Text('Cancel Booking'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
+            if (!canCancel && booking.status == 'confirmed') ...[
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade900.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange.shade700),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Iconsax.info_circle, color: Colors.orange.shade400, size: 20),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Event has started. Cancellation is no longer available.',
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.orange),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+      case 'active':
+        return Colors.green;
+      case 'used':
+        return Colors.blue;
+      case 'expired':
+        return Colors.red;
+      case 'cancelled':
+        return Colors.grey;
+      default:
+        return Colors.grey;
     }
   }
 
