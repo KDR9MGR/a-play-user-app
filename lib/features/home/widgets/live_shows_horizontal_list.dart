@@ -4,7 +4,6 @@ import 'package:a_play/core/theme/app_theme.dart';
 import 'package:a_play/features/home/model/live_show_model.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:a_play/features/home/widgets/lounges_horizontal_list.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class LiveShowsHorizontalList extends ConsumerWidget {
   final List<LiveShow> liveShows;
@@ -30,10 +29,11 @@ class LiveShowsHorizontalList extends ConsumerWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.parisienne(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
+                  letterSpacing: -0.5,
                 ),
               ),
               if (liveShows.length > 5)
@@ -99,12 +99,21 @@ class LiveShowsHorizontalList extends ConsumerWidget {
             size: 48,
             color: Colors.grey[600],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             'No live shows available',
             style: TextStyle(
               color: Colors.grey[400],
               fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Check back soon for updates',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 13,
             ),
           ),
         ],
@@ -128,7 +137,7 @@ class HorizontalLiveShowCard extends StatelessWidget {
       child: Container(
         width: MediaQuery.of(context).size.width * 0.3,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,7 +149,7 @@ class HorizontalLiveShowCard extends StatelessWidget {
                   Container(
                     height: MediaQuery.of(context).size.height * 0.22,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                       image: show.logoUrl != null
                           ? DecorationImage(
                               image: NetworkImage(show.logoUrl!),
@@ -162,10 +171,13 @@ class HorizontalLiveShowCard extends StatelessWidget {
                   Positioned(
                     top: 16,
                     left: 16,
-                    child: SvgPicture.asset(
-                      'assets/images/app_logo.svg',
-                      height: 16,
-                      width: 16,
+                    child: Opacity(
+                      opacity: 0.65,
+                      child: SvgPicture.asset(
+                        'assets/images/app_logo.svg',
+                        height: 16,
+                        width: 16,
+                      ),
                     ),
                   ),
                 ],

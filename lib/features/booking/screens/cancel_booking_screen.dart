@@ -1,6 +1,6 @@
 import 'package:a_play/core/constants/colors.dart';
 import 'package:a_play/data/models/booking_model.dart';
-import 'package:a_play/features/booking/service/booking_service.dart';
+import 'package:a_play/features/booking/providers/bookin_history_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -68,7 +68,7 @@ class _CancelBookingScreenState extends ConsumerState<CancelBookingScreen> {
       refundPolicy = 'Event already started - No refund';
     }
 
-    final ticketPrice = widget.booking.totalAmount ?? 0.0;
+    final ticketPrice = widget.booking.amount ?? 0.0;
     final serviceFee = ticketPrice * 0.029 + 1; // PayStack fee: 2.9% + GHS 1
     final refundAmount = (ticketPrice - serviceFee) * refundPercentage;
 
@@ -155,17 +155,19 @@ class _CancelBookingScreenState extends ConsumerState<CancelBookingScreen> {
         ),
       );
 
-      // Navigate back to my bookings
-      context.go('/my-tickets');
+      // Navigate back and refresh bookings
+      if (mounted) {
+        context.go('/my-tickets');
+      }
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to cancel booking: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to cancel booking: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -254,7 +256,7 @@ class _CancelBookingScreenState extends ConsumerState<CancelBookingScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _buildDetailRow('Event', widget.booking.eventName ?? 'N/A'),
+                  _buildDetailRow('Event', widget.booking.eventTitle),
                   _buildDetailRow(
                     'Date',
                     DateFormat('EEE, MMM d, yyyy').format(
@@ -264,7 +266,7 @@ class _CancelBookingScreenState extends ConsumerState<CancelBookingScreen> {
                   _buildDetailRow('Booking ID', widget.booking.id ?? 'N/A'),
                   _buildDetailRow(
                     'Total Paid',
-                    'GHS ${widget.booking.totalAmount?.toStringAsFixed(2) ?? '0.00'}',
+                    'GHS ${widget.booking.amount?.toStringAsFixed(2) ?? '0.00'}',
                   ),
                 ],
               ),

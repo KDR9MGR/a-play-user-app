@@ -108,8 +108,8 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
         ],
       ),
       floatingActionButton: _showWelcomeOverlay ? null : Container(
-        height: 64,
-        width: 64,
+        height: 56,
+        width: 56,
         margin: const EdgeInsets.only(top: 30),
         child: FloatingActionButton(
           foregroundColor: Colors.white,
@@ -118,7 +118,7 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
           backgroundColor: Theme.of(context).colorScheme.primary,
           child: Icon(
             currentIndex == 0 ? Iconsax.home_25 : Iconsax.home_2,
-            size: 28,
+            size: 26,
             color: Colors.white,
           ),
           onPressed: () => ref.read(navigationIndexProvider.notifier).state = 0,
@@ -168,7 +168,7 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
                   ),
                 ),
               ),
-              const SizedBox(width: 72), // Space for FAB footprint
+              const SizedBox(width: 64), // Space for FAB footprint
               Expanded(
                 child: Align(
                   alignment: Alignment.centerLeft,

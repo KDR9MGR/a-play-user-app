@@ -29,9 +29,10 @@ class HomeAppBar extends ConsumerWidget {
       snap: true,
       backgroundColor: AppColors.background,
       elevation: 0,
+      toolbarHeight: 64,
       leadingWidth: 100,
       leading: Padding(
-        padding: const EdgeInsets.only(left: 16.0),
+        padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
         child: GestureDetector(
           onTap: () {
             context.go('/profile');

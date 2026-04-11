@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SectionTitle extends StatelessWidget {
   final String title;
@@ -15,45 +14,52 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: padding,
       child: Row(
         children: [
           Expanded(
             child: Container(
-              margin: const EdgeInsets.only(
-                right: 16
-              ),
+              margin: const EdgeInsets.only(right: 16),
               height: 1,
-              decoration:  BoxDecoration(
+              decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                  gradient: LinearGradient(
-                begin: Alignment.centerRight,
-                end: Alignment.centerLeft,
-                colors: [Colors.white.withAlpha(80), Colors.white.withAlpha(0)],
-              )),
+                gradient: LinearGradient(
+                  begin: Alignment.centerRight,
+                  end: Alignment.centerLeft,
+                  colors: [
+                    Colors.white.withAlpha(120), // Increased opacity for better visibility
+                    Colors.white.withAlpha(0)
+                  ],
+                ),
+              ),
             ),
           ),
           Text(
             title,
-            style: GoogleFonts.parisienne(
-              fontSize: 24,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontSize: 22,
               fontWeight: FontWeight.w600,
               color: Colors.white,
+              letterSpacing: -0.5,
             ),
           ),
-           Expanded(
+          Expanded(
             child: Container(
-              margin: const EdgeInsets.only(
-                left: 16
-              ),
+              margin: const EdgeInsets.only(left: 16),
               height: 1,
-              decoration:  BoxDecoration(
-                  gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [Colors.white.withAlpha(80), Colors.white.withAlpha(0)],
-              )),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.white.withAlpha(120), // Increased opacity for better visibility
+                    Colors.white.withAlpha(0)
+                  ],
+                ),
+              ),
             ),
           ),
         ],

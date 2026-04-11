@@ -69,22 +69,36 @@ class _FilteredEventsSectionState extends ConsumerState<FilteredEventsSection> {
 
             if (eventsToShow.isEmpty) {
               return Container(
-                height: 200,
+                height: 240,
                 padding: const EdgeInsets.all(16),
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.event_busy, color: Colors.grey[600], size: 48),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Text(
                         'No events found',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                        style: TextStyle(color: Colors.grey[400], fontSize: 16, fontWeight: FontWeight.w500),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
                         'Try selecting a different time filter',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.tonal(
+                        onPressed: () {
+                          // Navigate to explore page to browse all events
+                          final scaffoldContext = ScaffoldMessenger.of(context);
+                          scaffoldContext.showSnackBar(
+                            const SnackBar(
+                              content: Text('Tap the Explore tab to browse all events'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        child: const Text('Browse All Events'),
                       ),
                     ],
                   ),

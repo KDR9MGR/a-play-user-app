@@ -41,9 +41,8 @@ class SearchBarSection extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(4.0),
-            child: IconButton.filled(
+            child: IconButton.filledTonal(
               padding: const EdgeInsets.all(8.0),
-              color: theme.colorScheme.onSurface,
               onPressed: () {
                 showModalBottomSheet(
                   context: context,
@@ -51,10 +50,8 @@ class SearchBarSection extends StatelessWidget {
                   builder: (context) => const FilterModal(),
                 );
               },
-              icon: Icon(
+              icon: const Icon(
                 Iconsax.filter,
-                color: theme.colorScheme.onSurface,
-                
               ),
             ),
           ),

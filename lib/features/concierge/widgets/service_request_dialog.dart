@@ -1,7 +1,4 @@
 
-import 'package:a_play/features/chat/model/chat_room_model.dart';
-import 'package:a_play/features/chat/screens/chat_room_screen.dart';
-import 'package:a_play/features/chat/service/chat_service.dart';
 import 'package:a_play/features/concierge/providers/concierge_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,11 +60,12 @@ class _ServiceRequestDialogState extends ConsumerState<ServiceRequestDialog> {
         },
       ).future);
 
-      final chatRoom = await ref.read(chatServiceProvider).getChatRoom(request.chatRoomId!);
-
       if (mounted) {
         Navigator.of(context).pop(true);
-        context.push('/chat/${chatRoom.id}', extra: chatRoom);
+        // Navigate to chat room if one was created
+        if (request.chatRoomId != null) {
+          context.push('/chat/${request.chatRoomId}');
+        }
       }
     } catch (e) {
       if (mounted) {

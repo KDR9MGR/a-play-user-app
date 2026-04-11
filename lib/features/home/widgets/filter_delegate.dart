@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class FilterDelegate extends SliverPersistentHeaderDelegate {
@@ -31,28 +32,34 @@ class FilterDelegate extends SliverPersistentHeaderDelegate {
 
   Widget _buildFilterButton(BuildContext context, String filter, String label) {
     final isSelected = selectedFilter == filter;
-    return GestureDetector(
-      onTap: () {
-        onFilterChanged(filter);
+
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          HapticFeedback.lightImpact();
+          onFilterChanged(filter);
+        }
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? Colors.white : Colors.grey[600]!,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.black : Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.black : Colors.white.withAlpha(230),
+        fontSize: 13,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
       ),
+      backgroundColor: Colors.transparent,
+      selectedColor: Colors.white,
+      side: BorderSide(
+        color: isSelected ? Colors.white : Colors.white.withAlpha(100),
+        width: isSelected ? 2 : 1,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      elevation: 0,
+      pressElevation: 0,
+      showCheckmark: false,
     );
   }
 
