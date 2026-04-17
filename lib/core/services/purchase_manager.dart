@@ -195,14 +195,15 @@ class PurchaseManager extends ChangeNotifier {
     final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
 
     try {
-      // For subscriptions, use buyNonConsumable
+      // For iOS subscriptions, buyNonConsumable is the correct method
+      // The in_app_purchase package uses buyNonConsumable for both one-time and subscription purchases
       final bool success = await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
-      if (!success) {
-        final errorMsg = 'Failed to initiate purchase for: $productId';
-        if (kDebugMode) print('PurchaseManager: $errorMsg');
-        onPurchaseError?.call(errorMsg);
-      } else {
-        if (kDebugMode) print('PurchaseManager: Purchase initiated successfully for: $productId');
+      if (kDebugMode) {
+        print('PurchaseManager: Purchase initiation result: $success for product: $productId');
+        if (success) {
+          print('PurchaseManager: ⚠️  WAITING FOR PAYMENT CONFIRMATION');
+          print('PurchaseManager: Please look for the payment dialog and tap [Buy] to complete purchase');
+        }
       }
     } catch (e) {
       final errorMsg = 'Purchase failed for $productId: $e';
@@ -271,7 +272,13 @@ class PurchaseManager extends ChangeNotifier {
 
       switch (purchaseDetails.status) {
         case PurchaseStatus.pending:
-          if (kDebugMode) print('PurchaseManager: Purchase pending: ${purchaseDetails.productID}');
+          if (kDebugMode) {
+            print('PurchaseManager: Purchase pending: ${purchaseDetails.productID}');
+            print('PurchaseManager: pendingCompletePurchase: ${purchaseDetails.pendingCompletePurchase}');
+            print('PurchaseManager: ⚠️  PURCHASE IS WAITING FOR USER ACTION');
+            print('PurchaseManager: Look for the StoreKit payment confirmation dialog');
+            print('PurchaseManager: Tap [Buy] in the dialog to complete the purchase');
+          }
           break;
         case PurchaseStatus.purchased:
           if (kDebugMode) print('PurchaseManager: Purchase completed, processing...');

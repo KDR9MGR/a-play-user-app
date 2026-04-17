@@ -21,6 +21,7 @@ import 'package:a_play/features/splash/splash_screen.dart';
 import 'package:a_play/features/subscription/screens/subscription_history_screen.dart';
 import 'package:a_play/features/subscription/screens/subscription_plans_screen.dart';
 import 'package:a_play/features/subscription/screens/trial_offer_screen.dart';
+import 'package:a_play/features/subscription/view/subscription_screen_new.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -235,7 +236,17 @@ class RouterNotifier extends ChangeNotifier {
               name: 'subscription_history',
               builder: (context, state) => const SubscriptionHistoryScreen(),
             ),
+            GoRoute(
+              path: 'new',
+              name: 'subscription_new',
+              builder: (context, state) => const SubscriptionScreenNew(),
+            ),
           ],
+        ),
+        GoRoute(
+          path: '/subscription-new',
+          name: 'subscription_screen_new',
+          builder: (context, state) => const SubscriptionScreenNew(),
         ),
         // Concierge routes
         GoRoute(

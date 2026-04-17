@@ -9,7 +9,7 @@
       }
     ]
   },
-  "identifier" : "E5E0DF1D",
+  "identifier" : "74F13405",
   "nonRenewingSubscriptions" : [
 
   ],
@@ -21,25 +21,28 @@
     "_askToBuyEnabled" : true,
     "_billingGracePeriodEnabled" : false,
     "_billingIssuesEnabled" : true,
+    "_compatibilityTimeRate" : {
+      "3" : 6
+    },
     "_developerTeamID" : "TUKQ9KBCN8",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 785547492.67748797,
+    "_lastSynchronizedDate" : 798125085.43260896,
     "_locale" : "en_US",
-    "_renewalBillingIssuesEnabled" : true,
+    "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "GHA",
     "_storeKitErrors" : [
 
     ],
-    "_timeRate" : 0
+    "_timeRate" : 1001
   },
   "subscriptionGroups" : [
     {
-      "id" : "21809726",
+      "id" : "21877888",
       "localizations" : [
 
       ],
-      "name" : "Go Pro",
+      "name" : "Premium",
       "subscriptions" : [
         {
           "adHocOffers" : [
@@ -48,22 +51,22 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "550",
+          "displayPrice" : "36.99",
           "familyShareable" : false,
-          "groupNumber" : 2,
-          "internalID" : "6754169897",
+          "groupNumber" : 3,
+          "internalID" : "6757355885",
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "3 Months Benefits As premium user",
-              "displayName" : "3 Months Premium",
+              "description" : "Premium Access to All Fun",
+              "displayName" : "3 Month's Premium",
               "locale" : "en_US"
             }
           ],
           "productID" : "3SUB",
           "recurringSubscriptionPeriod" : "P3M",
-          "referenceName" : "3 Months Premium",
-          "subscriptionGroupID" : "21809726",
+          "referenceName" : "3 Month",
+          "subscriptionGroupID" : "21877888",
           "type" : "RecurringSubscription",
           "winbackOffers" : [
 
@@ -76,22 +79,22 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "2200",
+          "displayPrice" : "146.99",
           "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "6754815444",
+          "groupNumber" : 4,
+          "internalID" : "6757356046",
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Premium Access to Events",
-              "displayName" : "1 Year Premium",
+              "description" : "Premium Access to All Fun",
+              "displayName" : "Fun for a year",
               "locale" : "en_US"
             }
           ],
           "productID" : "365day",
           "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "1 Year Premium",
-          "subscriptionGroupID" : "21809726",
+          "referenceName" : "365-D",
+          "subscriptionGroupID" : "21877888",
           "type" : "RecurringSubscription",
           "winbackOffers" : [
 
@@ -104,50 +107,50 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "190",
+          "displayPrice" : "3.99",
           "familyShareable" : false,
-          "groupNumber" : 3,
-          "internalID" : "6754169848",
+          "groupNumber" : 1,
+          "internalID" : "6757355931",
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Early Events Access",
-              "displayName" : "1 Month Premium",
-              "locale" : "en_US"
-            }
-          ],
-          "productID" : "1month",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "1 Month Premium",
-          "subscriptionGroupID" : "21809726",
-          "type" : "RecurringSubscription",
-          "winbackOffers" : [
-
-          ]
-        },
-        {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "50",
-          "familyShareable" : false,
-          "groupNumber" : 4,
-          "internalID" : "6754169882",
-          "introductoryOffer" : null,
-          "localizations" : [
-            {
-              "description" : "Fun Week",
-              "displayName" : "1 Week Premium",
+              "description" : "Premium Access to All Fun",
+              "displayName" : "7 Day Fun",
               "locale" : "en_US"
             }
           ],
           "productID" : "7day",
           "recurringSubscriptionPeriod" : "P1W",
-          "referenceName" : "1 Week Premium",
-          "subscriptionGroupID" : "21809726",
+          "referenceName" : "A-week",
+          "subscriptionGroupID" : "21877888",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "12.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6757356059",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Premium Access to All Fun",
+              "displayName" : "A Month Fun",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "1month",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Premium",
+          "subscriptionGroupID" : "21877888",
           "type" : "RecurringSubscription",
           "winbackOffers" : [
 

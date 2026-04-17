@@ -76,7 +76,7 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "../A-Play.storekit">
+         identifier = "../Runner/A-Play.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
