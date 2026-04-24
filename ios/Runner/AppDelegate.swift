@@ -4,7 +4,7 @@ import StoreKit
 import GoogleMaps
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -18,10 +18,20 @@ import GoogleMaps
       print("⚠️ AppDelegate: Google Maps API key not found in Info.plist")
     }
 
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
     // Set up platform channel for App Store receipt
-    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+    guard let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "app.aplay/receipt") else {
+      print("❌ AppDelegate: Failed to get registrar for receipt channel")
+      return
+    }
+
     let receiptChannel = FlutterMethodChannel(name: "app.aplay/receipt",
-                                              binaryMessenger: controller.binaryMessenger)
+                                              binaryMessenger: registrar.messenger())
 
     receiptChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
@@ -53,8 +63,5 @@ import GoogleMaps
         result(FlutterMethodNotImplemented)
       }
     })
-
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

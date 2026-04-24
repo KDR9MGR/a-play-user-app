@@ -17,6 +17,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:a_play/features/subscription/service/platform_subscription_service.dart';
 import 'package:a_play/core/services/realtime_sync_service.dart';
 import 'package:a_play/core/services/notification_service.dart';
+import 'package:a_play/core/services/iap_service.dart';
 import 'package:a_play/firebase_options.dart';
 
 // Initialize app state provider
@@ -32,14 +33,16 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    FlutterError.onError = (details) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
-    };
+    if (!kIsWeb) {
+      FlutterError.onError = (details) {
+        FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+      };
 
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+    }
 
     await Connectivity().checkConnectivity();
 
@@ -73,7 +76,9 @@ Future<void> main() async {
 
     await _bootstrapApp(supabaseUrl: supabaseUrl, supabaseAnonKey: supabaseAnonKey);
   }, (error, stackTrace) {
-    FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
+    if (!kIsWeb) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
+    }
 
     if (kDebugMode) {
       debugPrint('Error in main: $error');
@@ -120,15 +125,26 @@ Future<void> _bootstrapApp({
 
   // Initialize OneSignal for push notifications
   final oneSignalAppId = Env.oneSignalAppId;
-  if (oneSignalAppId.isNotEmpty) {
+  if (oneSignalAppId.isNotEmpty && !kIsWeb) {
     await NotificationService().initialize(appId: oneSignalAppId);
     debugPrint('✅ OneSignal initialized with App ID: ${oneSignalAppId.substring(0, 8)}...');
+  } else if (kIsWeb) {
+    debugPrint('ℹ️ OneSignal disabled on Web for now');
   } else {
     debugPrint('⚠️ OneSignal App ID not found - push notifications disabled');
   }
 
   final platformService = PlatformSubscriptionService();
   await platformService.initialize();
+
+  // Initialize new IAP service for subscription sync
+  if (!kIsWeb) {
+    debugPrint('Initializing IAP Service for subscription sync...');
+    await IAPService.instance.initialize();
+    debugPrint('✅ IAP Service initialized');
+  } else {
+    debugPrint('ℹ️ IAP Service skipped on Web');
+  }
 
   final realtimeService = RealtimeSyncService();
   await realtimeService.initialize();

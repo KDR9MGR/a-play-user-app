@@ -19,7 +19,6 @@ import 'package:a_play/features/restaurant/screens/restaurant_details_screen.dar
 import 'package:a_play/features/restaurant/screens/restaurant_payment_screen.dart';
 import 'package:a_play/features/splash/splash_screen.dart';
 import 'package:a_play/features/subscription/screens/subscription_history_screen.dart';
-import 'package:a_play/features/subscription/screens/subscription_plans_screen.dart';
 import 'package:a_play/features/subscription/screens/trial_offer_screen.dart';
 import 'package:a_play/features/subscription/view/subscription_screen_new.dart';
 import 'package:flutter/material.dart';
@@ -229,7 +228,7 @@ class RouterNotifier extends ChangeNotifier {
             GoRoute(
               path: 'plans',
               name: 'subscription_plans',
-              builder: (context, state) => const SubscriptionPlansScreen(),
+              builder: (context, state) => const SubscriptionScreenNew(),
             ),
             GoRoute(
               path: 'history',

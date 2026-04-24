@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../features/subscription/service/subscription_sync_service.dart';
 
 /// Clean, simple IAP Service for iOS subscriptions
 /// Handles all StoreKit interactions for A-Play subscriptions
@@ -63,7 +65,7 @@ class IAPService {
     }
 
     // Set up iOS payment queue delegate
-    if (Platform.isIOS) {
+    if (!kIsWeb && Platform.isIOS) {
       final iosPlatform = _iap.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
       await iosPlatform.setDelegate(PaymentQueueDelegate());
       debugPrint('IAPService: iOS payment queue delegate set');
@@ -82,8 +84,30 @@ class IAPService {
     // Load products
     await _loadProducts();
 
+    // CRITICAL: Check for existing subscriptions on startup
+    // This syncs StoreKit state with the app
+    debugPrint('IAPService: Checking for existing subscriptions...');
+    await _checkExistingSubscriptions();
+
     _isInitialized = true;
     debugPrint('IAPService: Initialization complete');
+  }
+
+  /// Check for existing subscriptions in StoreKit
+  /// This is called on app startup to sync existing subscriptions
+  Future<void> _checkExistingSubscriptions() async {
+    if (kIsWeb || !Platform.isIOS) return;
+
+    try {
+      debugPrint('IAPService: Querying past purchases...');
+
+      // Query past purchases to find active subscriptions
+      await _iap.restorePurchases();
+
+      debugPrint('IAPService: Past purchases check complete');
+    } catch (e) {
+      debugPrint('IAPService: Error checking existing subscriptions: $e');
+    }
   }
 
   /// Load subscription products from the store
@@ -221,10 +245,23 @@ class IAPService {
     onPurchaseCancelled?.call();
   }
 
-  void _handleRestored(PurchaseDetails details) {
+  void _handleRestored(PurchaseDetails details) async {
     debugPrint('IAPService: ↻ Purchase RESTORED');
     debugPrint('IAPService: Product: ${details.productID}');
 
+    // CRITICAL: Auto-sync restored purchase to database
+    // This handles the case where user has subscription in StoreKit but not in database
+    try {
+      debugPrint('IAPService: Auto-syncing restored purchase to database...');
+      final syncService = SubscriptionSyncService();
+      await syncService.syncFromStoreKit(details.productID);
+      debugPrint('IAPService: ✓ Restored purchase synced to database');
+    } catch (e) {
+      debugPrint('IAPService: ✗ Failed to sync restored purchase: $e');
+      // Don't fail silently - this is critical for subscription sync
+    }
+
+    // Also trigger callback if UI is listening
     final product = _products.where((p) => p.id == details.productID).firstOrNull;
     if (product != null) {
       onPurchaseSuccess?.call(product);
@@ -252,6 +289,124 @@ class IAPService {
   /// Get product details by ID
   ProductDetails? getProduct(String productId) {
     return _products.where((p) => p.id == productId).firstOrNull;
+  }
+
+  /// Check current StoreKit transactions and sync with database
+  /// Call this when user views subscription screen to detect cancellations
+  Future<Map<String, dynamic>> checkActiveSubscriptions() async {
+    debugPrint('IAPService: Checking active StoreKit transactions...');
+
+    if (kIsWeb || !Platform.isIOS) {
+      return {'hasActive': false, 'products': []};
+    }
+
+    try {
+      // Get all transactions from StoreKit
+      final transactions = await SKPaymentQueueWrapper().transactions();
+      debugPrint('IAPService: Found ${transactions.length} StoreKit transactions');
+
+      final activeProducts = <String>[];
+
+      for (var transaction in transactions) {
+        debugPrint('IAPService: Transaction ${transaction.transactionIdentifier}');
+        debugPrint('IAPService:   State: ${transaction.transactionState}');
+        debugPrint('IAPService:   Product: ${transaction.payment.productIdentifier}');
+
+        // Check if this is an active subscription transaction
+        if (transaction.transactionState == SKPaymentTransactionStateWrapper.purchased ||
+            transaction.transactionState == SKPaymentTransactionStateWrapper.restored) {
+          activeProducts.add(transaction.payment.productIdentifier);
+        }
+      }
+
+      debugPrint('IAPService: Active subscription products: $activeProducts');
+
+      return {
+        'hasActive': activeProducts.isNotEmpty,
+        'products': activeProducts,
+      };
+    } catch (e) {
+      debugPrint('IAPService: Error checking transactions: $e');
+      return {'hasActive': false, 'products': []};
+    }
+  }
+
+  /// Sync database with current StoreKit state
+  /// Detects and handles cancelled subscriptions
+  Future<void> syncDatabaseWithStoreKit() async {
+    debugPrint('IAPService: Syncing database with StoreKit state...');
+
+    final storeKitState = await checkActiveSubscriptions();
+    final hasStoreKitSub = storeKitState['hasActive'] as bool;
+    final storeKitProducts = storeKitState['products'] as List<String>;
+
+    final syncService = SubscriptionSyncService();
+    final hasDatabaseSub = await syncService.hasActiveSubscription();
+
+    debugPrint('IAPService: StoreKit has subscription: $hasStoreKitSub');
+    debugPrint('IAPService: Database has subscription: $hasDatabaseSub');
+
+    // Case 1: Database has subscription but StoreKit doesn't (CANCELLED)
+    if (hasDatabaseSub && !hasStoreKitSub) {
+      debugPrint('IAPService: ⚠️  SUBSCRIPTION CANCELLED - Updating database...');
+      await _cancelDatabaseSubscription();
+      return;
+    }
+
+    // Case 2: StoreKit has subscription but database doesn't (RESTORE NEEDED)
+    if (!hasDatabaseSub && hasStoreKitSub && storeKitProducts.isNotEmpty) {
+      debugPrint('IAPService: ⚠️  SUBSCRIPTION FOUND IN STOREKIT - Syncing to database...');
+      await syncService.syncFromStoreKit(storeKitProducts.first);
+      return;
+    }
+
+    debugPrint('IAPService: ✓ Database and StoreKit are in sync');
+  }
+
+  /// Cancel subscription in database when StoreKit shows it's cancelled
+  Future<void> _cancelDatabaseSubscription() async {
+    try {
+      final syncService = SubscriptionSyncService();
+      final activeSub = await syncService.getActiveSubscription();
+
+      if (activeSub == null) {
+        debugPrint('IAPService: No active subscription to cancel');
+        return;
+      }
+
+      final subscriptionId = activeSub['subscription_id'];
+      if (subscriptionId == null) {
+        debugPrint('IAPService: No subscription ID found');
+        return;
+      }
+
+      final supabase = Supabase.instance.client;
+      final userId = supabase.auth.currentUser?.id;
+
+      if (userId == null) {
+        debugPrint('IAPService: No user logged in');
+        return;
+      }
+
+      // Update subscription status to cancelled
+      await supabase.from('user_subscriptions').update({
+        'status': 'cancelled',
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', subscriptionId).eq('user_id', userId);
+
+      // Update profile
+      await supabase.from('profiles').update({
+        'is_subscribed': false,
+        'subscription_tier': 'Free',
+        'subscription_expires_at': null,
+        'current_tier': 'Free',
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', userId);
+
+      debugPrint('IAPService: ✓ Subscription cancelled in database');
+    } catch (e) {
+      debugPrint('IAPService: ✗ Error cancelling subscription: $e');
+    }
   }
 
   /// Dispose resources

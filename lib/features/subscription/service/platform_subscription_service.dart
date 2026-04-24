@@ -16,26 +16,27 @@ class PlatformSubscriptionService {
   // Initialize the appropriate service based on platform
   Future<void> initialize() async {
     debugPrint('=== PLATFORM SUBSCRIPTION SERVICE INIT ===');
-    debugPrint('Platform.isIOS: ${Platform.isIOS}');
-    
-    if (Platform.isIOS) {
-      debugPrint('Initializing Apple IAP Service...');
-      _appleIAPService = AppleIAPService();
-      debugPrint('Apple IAP Service initialized successfully');
-      
-      // Don't set up callbacks here - let the UI handle them directly
-      // This prevents callback conflicts and allows proper error handling
-    } else {
-      debugPrint('Initializing Paystack service for non-iOS platform');
-      // For Android and Web, use existing Paystack service
+    if (kIsWeb) {
+      debugPrint('Initializing service for Web platform');
       _subscriptionService = SubscriptionService();
+    } else {
+      debugPrint('Platform.isIOS: ${Platform.isIOS}');
+      
+      if (Platform.isIOS) {
+        debugPrint('Initializing Apple IAP Service...');
+        _appleIAPService = AppleIAPService();
+        debugPrint('Apple IAP Service initialized successfully');
+      } else {
+        debugPrint('Initializing Paystack service for non-iOS platform');
+        _subscriptionService = SubscriptionService();
+      }
     }
     debugPrint('=== PLATFORM SUBSCRIPTION SERVICE INIT COMPLETE ===');
   }
 
   // Check if the platform supports in-app purchases
   Future<bool> isInAppPurchaseAvailable() async {
-    if (Platform.isIOS && _appleIAPService != null) {
+    if (!kIsWeb && Platform.isIOS && _appleIAPService != null) {
       return await _appleIAPService!.isAvailable();
     }
     return false;
@@ -43,7 +44,7 @@ class PlatformSubscriptionService {
 
   // Get available subscription plans for the current platform
   Future<List<SubscriptionPlan>> getAvailablePlans() async {
-    if (Platform.isIOS && _appleIAPService != null) {
+    if (!kIsWeb && Platform.isIOS && _appleIAPService != null) {
       try {
         final products = await _appleIAPService!.getProducts();
         

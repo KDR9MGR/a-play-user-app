@@ -5,64 +5,105 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class IAPVerificationService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  /// Verify Apple IAP purchase with backend
+  /// Verify Apple IAP purchase and create subscription
+  /// The database trigger will automatically update the profile
   Future<void> verifyAndActivateSubscription({
     required String productId,
   }) async {
-    debugPrint('IAPVerification: Verifying purchase for: $productId');
+    debugPrint('IAPVerification: ═══════════════════════════');
+    debugPrint('IAPVerification: Starting verification for: $productId');
 
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) {
+      debugPrint('IAPVerification: ✗ User not authenticated!');
       throw Exception('User not authenticated');
     }
 
+    debugPrint('IAPVerification: User ID: $userId');
+
     try {
-      // Map product IDs to plan names
-      final planName = _getPlanName(productId);
+      // Map product ID to plan details
+      final planId = _mapProductToPlanId(productId);
+      final planType = _mapProductToPlanType(productId);
+      final tier = _getTier(productId);
+      final tierPoints = _getTierPoints(productId);
+      final amount = _getAmount(productId);
 
-      debugPrint('IAPVerification: Plan name: $planName');
-      debugPrint('IAPVerification: User ID: $userId');
+      debugPrint('IAPVerification: Plan ID: $planId');
+      debugPrint('IAPVerification: Tier: $tier');
 
-      // Create subscription record in Supabase
+      // Calculate subscription period
       final now = DateTime.now();
       final duration = _getDuration(productId);
       final endDate = now.add(duration);
 
-      final subscriptionData = {
-        'user_id': userId,
-        'plan_id': _mapProductToPlanId(productId),
-        'plan_type': _mapProductToPlanType(productId),
-        'status': 'active',
-        'start_date': now.toIso8601String(),
-        'end_date': endDate.toIso8601String(),
-        'payment_method': 'apple_iap',
-        'tier_points_earned': _getTierPoints(productId),
-        'created_at': now.toIso8601String(),
-      };
+      debugPrint('IAPVerification: Duration: ${duration.inDays} days');
+      debugPrint('IAPVerification: End Date: ${endDate.toLocal()}');
 
-      debugPrint('IAPVerification: Creating subscription record...');
+      // Check if user already has an active subscription
+      final existingResponse = await _supabase
+          .from('user_subscriptions')
+          .select()
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .maybeSingle();
 
-      await _supabase.from('user_subscriptions').insert(subscriptionData);
+      if (existingResponse != null) {
+        debugPrint('IAPVerification: ⚠️  User already has active subscription');
+        debugPrint('IAPVerification: Updating existing subscription...');
 
-      debugPrint('IAPVerification: ✓ Subscription activated successfully');
+        // Update existing subscription
+        await _supabase.from('user_subscriptions').update({
+          'plan_id': planId,
+          'plan_type': planType,
+          'tier': tier,
+          'subscription_type': 'premium',
+          'amount': amount,
+          'currency': 'USD',
+          'end_date': endDate.toIso8601String(),
+          'tier_points_earned': tierPoints,
+          'updated_at': now.toIso8601String(),
+        }).eq('id', existingResponse['id']);
+
+        debugPrint('IAPVerification: ✓ Existing subscription updated');
+      } else {
+        debugPrint('IAPVerification: Creating new subscription record...');
+
+        // Create new subscription record
+        final subscriptionData = {
+          'user_id': userId,
+          'plan_id': planId,
+          'plan_type': planType,
+          'tier': tier,
+          'status': 'active',
+          'subscription_type': 'premium', // Required field
+          'billing_cycle': 'lifetime', // IAP purchases are one-time
+          'amount': amount,
+          'currency': 'USD', // IAP currency
+          'start_date': now.toIso8601String(),
+          'end_date': endDate.toIso8601String(),
+          'payment_method': 'apple_iap',
+          'tier_points_earned': tierPoints,
+          'created_at': now.toIso8601String(),
+        };
+
+        await _supabase.from('user_subscriptions').insert(subscriptionData);
+
+        debugPrint('IAPVerification: ✓ Subscription record created');
+      }
+
+      // Note: Profile is automatically updated by database trigger
+      debugPrint('IAPVerification: ✓ Subscription activated successfully!');
+      debugPrint('IAPVerification: ✓ Tier: $tier');
+      debugPrint('IAPVerification: ✓ Expires: ${endDate.toLocal()}');
+      debugPrint('IAPVerification: ℹ️  Profile will be updated by database trigger');
+      debugPrint('IAPVerification: ═══════════════════════════');
     } catch (e) {
-      debugPrint('IAPVerification: ✗ Verification failed: $e');
+      debugPrint('IAPVerification: ═══════════════════════════');
+      debugPrint('IAPVerification: ✗ VERIFICATION FAILED!');
+      debugPrint('IAPVerification: Error: $e');
+      debugPrint('IAPVerification: ═══════════════════════════');
       rethrow;
-    }
-  }
-
-  String _getPlanName(String productId) {
-    switch (productId) {
-      case '7day':
-        return '1 Week Premium';
-      case '1month':
-        return '1 Month Premium';
-      case '3SUB':
-        return '3 Months Premium';
-      case '365day':
-        return '1 Year Premium';
-      default:
-        return 'Unknown';
     }
   }
 
@@ -123,6 +164,36 @@ class IAPVerificationService {
         return 3000;
       default:
         return 0;
+    }
+  }
+
+  String _getTier(String productId) {
+    switch (productId) {
+      case '7day':
+        return 'Gold';
+      case '1month':
+        return 'Platinum';
+      case '3SUB':
+        return 'Platinum';
+      case '365day':
+        return 'Black';
+      default:
+        return 'Gold';
+    }
+  }
+
+  double _getAmount(String productId) {
+    switch (productId) {
+      case '7day':
+        return 3.99;
+      case '1month':
+        return 12.99;
+      case '3SUB':
+        return 36.99;
+      case '365day':
+        return 146.99;
+      default:
+        return 0.0;
     }
   }
 }

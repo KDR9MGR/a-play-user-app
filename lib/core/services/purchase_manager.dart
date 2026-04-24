@@ -109,7 +109,7 @@ class PurchaseManager extends ChangeNotifier {
       return;
     }
 
-    if (Platform.isIOS) {
+    if (!kIsWeb && Platform.isIOS) {
       final InAppPurchaseStoreKitPlatformAddition iosPlatformAddition =
           _inAppPurchase.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
       await iosPlatformAddition.setDelegate(ExamplePaymentQueueDelegate());
@@ -361,7 +361,7 @@ class PurchaseManager extends ChangeNotifier {
   /// Get the full App Store receipt from the app bundle (iOS only)
   /// This is required for subscription verification with Apple
   Future<String?> _getAppStoreReceipt() async {
-    if (!Platform.isIOS) return null;
+    if (kIsWeb || !Platform.isIOS) return null;
 
     try {
       const platform = MethodChannel('app.aplay/receipt');
@@ -397,7 +397,7 @@ class PurchaseManager extends ChangeNotifier {
       // The purchase details receipt is not sufficient for subscription verification
       String finalReceiptData = receiptData;
 
-      if (Platform.isIOS) {
+      if (!kIsWeb && Platform.isIOS) {
         final appStoreReceipt = await _getAppStoreReceipt();
 
         if (appStoreReceipt != null) {
@@ -501,7 +501,7 @@ class PurchaseManager extends ChangeNotifier {
 
   @override
   void dispose() {
-    if (Platform.isIOS) {
+    if (!kIsWeb && Platform.isIOS) {
       final InAppPurchaseStoreKitPlatformAddition iosPlatformAddition =
           _inAppPurchase.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
       iosPlatformAddition.setDelegate(null);
