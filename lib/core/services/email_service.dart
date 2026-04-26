@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:a_play/core/config/env.dart';
 
 /// Resend Email Service
 /// Handles transactional emails:
@@ -14,15 +15,12 @@ class EmailService {
   factory EmailService() => _instance;
   EmailService._internal();
 
-  // Get Resend API key from environment
-  final String _apiKey = const String.fromEnvironment('RESEND_API_KEY');
+  // Get Resend API key from environment (using Env class to read from .env file)
+  String get _apiKey => Env.resendApiKey;
   final String _baseUrl = 'https://api.resend.com';
 
-  // Your verified domain/email in Resend
-  final String _fromEmail = const String.fromEnvironment(
-    'RESEND_FROM_EMAIL',
-    defaultValue: 'A-Play <noreply@yourdomain.com>',
-  );
+  // Your verified domain/email in Resend (using Env class to read from .env file)
+  String get _fromEmail => Env.resendFromEmail;
 
   /// Send welcome email to new user
   Future<bool> sendWelcomeEmail({

@@ -93,9 +93,10 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
     });
 
     try {
-      // Verify with backend
+      // Verify with backend - pass amount from StoreKit
       await _verificationService.verifyAndActivateSubscription(
         productId: product.id,
+        amount: product.rawPrice, // Pass actual price from StoreKit
       );
 
       if (mounted) {

@@ -44,6 +44,7 @@ class RouterNotifier extends ChangeNotifier {
   String? call(BuildContext context, GoRouterState state) {
     final isLoggingIn = state.matchedLocation == '/sign-in' ||
         state.matchedLocation == '/sign-up' ||
+        state.matchedLocation == '/reset-password' ||
         state.matchedLocation == '/auth/callback';
     if (state.matchedLocation == '/splash') return null;
 

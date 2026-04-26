@@ -7,8 +7,11 @@ class IAPVerificationService {
 
   /// Verify Apple IAP purchase and create subscription
   /// The database trigger will automatically update the profile
+  ///
+  /// NOTE: Amount should be passed from StoreKit ProductDetails, not hardcoded
   Future<void> verifyAndActivateSubscription({
     required String productId,
+    double? amount, // Optional: pass from StoreKit product.rawPrice
   }) async {
     debugPrint('IAPVerification: ═══════════════════════════');
     debugPrint('IAPVerification: Starting verification for: $productId');
@@ -27,10 +30,13 @@ class IAPVerificationService {
       final planType = _mapProductToPlanType(productId);
       final tier = _getTier(productId);
       final tierPoints = _getTierPoints(productId);
-      final amount = _getAmount(productId);
+
+      // Use provided amount or fall back to lookup (for backward compatibility)
+      final subscriptionAmount = amount ?? _getAmountFallback(productId);
 
       debugPrint('IAPVerification: Plan ID: $planId');
       debugPrint('IAPVerification: Tier: $tier');
+      debugPrint('IAPVerification: Amount: \$${subscriptionAmount.toStringAsFixed(2)}');
 
       // Calculate subscription period
       final now = DateTime.now();
@@ -58,7 +64,7 @@ class IAPVerificationService {
           'plan_type': planType,
           'tier': tier,
           'subscription_type': 'premium',
-          'amount': amount,
+          'amount': subscriptionAmount,
           'currency': 'USD',
           'end_date': endDate.toIso8601String(),
           'tier_points_earned': tierPoints,
@@ -78,7 +84,7 @@ class IAPVerificationService {
           'status': 'active',
           'subscription_type': 'premium', // Required field
           'billing_cycle': 'lifetime', // IAP purchases are one-time
-          'amount': amount,
+          'amount': subscriptionAmount,
           'currency': 'USD', // IAP currency
           'start_date': now.toIso8601String(),
           'end_date': endDate.toIso8601String(),
@@ -182,7 +188,10 @@ class IAPVerificationService {
     }
   }
 
-  double _getAmount(String productId) {
+  /// Fallback method for getting amount when not provided from StoreKit
+  /// TODO: Remove this once all callers pass amount from ProductDetails
+  double _getAmountFallback(String productId) {
+    debugPrint('IAPVerification: ⚠️  Using fallback pricing - should pass amount from StoreKit');
     switch (productId) {
       case '7day':
         return 3.99;

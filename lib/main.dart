@@ -80,9 +80,9 @@ Future<void> main() async {
       FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
     }
 
+    // Error already logged to Crashlytics
     if (kDebugMode) {
-      debugPrint('Error in main: $error');
-      debugPrint('Stack trace: $stackTrace');
+      debugPrint('App initialization failed: $error');
     }
 
     runApp(
@@ -127,11 +127,6 @@ Future<void> _bootstrapApp({
   final oneSignalAppId = Env.oneSignalAppId;
   if (oneSignalAppId.isNotEmpty && !kIsWeb) {
     await NotificationService().initialize(appId: oneSignalAppId);
-    debugPrint('✅ OneSignal initialized with App ID: ${oneSignalAppId.substring(0, 8)}...');
-  } else if (kIsWeb) {
-    debugPrint('ℹ️ OneSignal disabled on Web for now');
-  } else {
-    debugPrint('⚠️ OneSignal App ID not found - push notifications disabled');
   }
 
   final platformService = PlatformSubscriptionService();
@@ -139,20 +134,15 @@ Future<void> _bootstrapApp({
 
   // Initialize new IAP service for subscription sync
   if (!kIsWeb) {
-    debugPrint('Initializing IAP Service for subscription sync...');
     await IAPService.instance.initialize();
-    debugPrint('✅ IAP Service initialized');
-  } else {
-    debugPrint('ℹ️ IAP Service skipped on Web');
   }
 
   final realtimeService = RealtimeSyncService();
   await realtimeService.initialize();
 
   runApp(
-    ProviderScope(
-      key: ValueKey('app_${DateTime.now().millisecondsSinceEpoch}'),
-      child: const APlayApp(),
+    const ProviderScope(
+      child: APlayApp(),
     ),
   );
 }

@@ -41,23 +41,39 @@ class AuthButton extends StatelessWidget {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    icon!,
-                    const SizedBox(width: 12),
-                  ],
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
+            : _AuthButtonContent(text: text, icon: icon),
       ),
+    );
+  }
+}
+
+// Extract button content to avoid rebuilding when not necessary
+class _AuthButtonContent extends StatelessWidget {
+  final String text;
+  final Widget? icon;
+
+  const _AuthButtonContent({
+    required this.text,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (icon != null) ...[
+          icon!,
+          const SizedBox(width: 12),
+        ],
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 } 

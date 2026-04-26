@@ -1,7 +1,6 @@
 import 'package:a_play/features/explore/model/event_by_category_model.dart';
 import 'package:a_play/features/explore/model/service_event_model.dart';
 import 'package:a_play/features/explore/model/category_model.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -44,18 +43,10 @@ class EventSupabaseService {
           .limit(50) // Limit results for better performance
           .timeout(
             const Duration(seconds: 10),
-            onTimeout: () {
-              if (kDebugMode) {
-                print('Timeout fetching events');
-              }
-              throw Exception('NETWORK_TIMEOUT');
-            },
+            onTimeout: () => throw Exception('NETWORK_TIMEOUT'),
           );
       return response.map((json) => ServiceEventModel.fromJson(json)).toList();
     } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching events: $e');
-      }
       // Throw specific error types for better UI handling
       if (e.toString().contains('NETWORK_TIMEOUT') || e.toString().contains('SocketException')) {
         throw Exception('NETWORK_ERROR');
@@ -72,18 +63,10 @@ class EventSupabaseService {
           .order('name')
           .timeout(
             const Duration(seconds: 10),
-            onTimeout: () {
-              if (kDebugMode) {
-                print('Timeout fetching categories');
-              }
-              throw Exception('NETWORK_TIMEOUT');
-            },
+            onTimeout: () => throw Exception('NETWORK_TIMEOUT'),
           );
       return response.map((json) => CategoryModel.fromJson(json)).toList();
     } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching categories: $e');
-      }
       // Throw specific error types for better UI handling
       if (e.toString().contains('NETWORK_TIMEOUT') || e.toString().contains('SocketException')) {
         throw Exception('NETWORK_ERROR');
@@ -96,10 +79,6 @@ class EventSupabaseService {
     try {
       final now = DateTime.now().toIso8601String();
 
-      if (kDebugMode) {
-        print('Fetching events for category: $categoryName');
-      }
-
       if (categoryName.toLowerCase() == 'all') {
         // Get all active events - NO authentication required (Apple Guideline 5.1.1)
         final eventsResponse = await supabase
@@ -110,17 +89,8 @@ class EventSupabaseService {
             .limit(50) // Limit results to improve performance on iPad
             .timeout(
               const Duration(seconds: 10),
-              onTimeout: () {
-                if (kDebugMode) {
-                  print('Timeout fetching events');
-                }
-                throw Exception('NETWORK_TIMEOUT');
-              },
+              onTimeout: () => throw Exception('NETWORK_TIMEOUT'),
             );
-
-        if (kDebugMode) {
-          print('Fetched ${eventsResponse.length} events');
-        }
 
         // Convert to ServiceEventModel with category_name as null
         return eventsResponse.map((json) {
@@ -139,18 +109,10 @@ class EventSupabaseService {
           .maybeSingle() // Use maybeSingle to handle missing categories gracefully
           .timeout(
             const Duration(seconds: 10),
-            onTimeout: () {
-              if (kDebugMode) {
-                print('Timeout fetching category');
-              }
-              throw Exception('NETWORK_TIMEOUT');
-            },
+            onTimeout: () => throw Exception('NETWORK_TIMEOUT'),
           );
 
       if (categoryResponse == null) {
-        if (kDebugMode) {
-          print('Category not found: $categoryName');
-        }
         return []; // Empty result is valid for missing categories
       }
 
@@ -164,20 +126,12 @@ class EventSupabaseService {
           .limit(50) // Limit results
           .timeout(
             const Duration(seconds: 10),
-            onTimeout: () {
-              if (kDebugMode) {
-                print('Timeout fetching event categories');
-              }
-              throw Exception('NETWORK_TIMEOUT');
-            },
+            onTimeout: () => throw Exception('NETWORK_TIMEOUT'),
           );
 
       final eventIds = eventCategoryResponse.map((item) => item['event_id']).toList();
 
       if (eventIds.isEmpty) {
-        if (kDebugMode) {
-          print('No events found for category: $categoryName');
-        }
         return []; // Empty result is valid
       }
 
@@ -191,17 +145,8 @@ class EventSupabaseService {
           .limit(50) // Limit results
           .timeout(
             const Duration(seconds: 10),
-            onTimeout: () {
-              if (kDebugMode) {
-                print('Timeout fetching events');
-              }
-              throw Exception('NETWORK_TIMEOUT');
-            },
+            onTimeout: () => throw Exception('NETWORK_TIMEOUT'),
           );
-
-      if (kDebugMode) {
-        print('Fetched ${eventsResponse.length} events for category $categoryName');
-      }
 
       // Convert to ServiceEventModel with category_name
       return eventsResponse.map((json) {
@@ -212,11 +157,7 @@ class EventSupabaseService {
 
     } catch (error) {
       // Throw specific errors instead of silently returning empty list
-      // This allows UI to show proper error messages (fixes iPad Air error display)
-      if (kDebugMode) {
-        print('Error fetching events by category $categoryName: $error');
-      }
-      // Check for network-related errors
+      // This allows UI to show proper error messages
       if (error.toString().contains('NETWORK_TIMEOUT') ||
           error.toString().contains('SocketException') ||
           error.toString().contains('Connection reset')) {

@@ -44,9 +44,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     setState(() => _isLoading = true);
 
     try {
-      debugPrint(
-          'Attempting to sign in with email: ${_emailController.text.trim()}');
-
       final authController = ref.read(authControllerProvider.notifier);
       await authController.signInWithEmail(
         _emailController.text.trim(),
@@ -60,28 +57,72 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           if (user == null) {
             throw 'Failed to sign in';
           }
+          // Show success message
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Sign in successful! Welcome back.'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
         },
         error: (error, stackTrace) {
           throw error.toString();
         },
         loading: () {},
       );
-
-      debugPrint('Sign in successful');
     } catch (e) {
-      debugPrint('Sign in error: $e');
       if (mounted) {
         String errorMessage = 'An error occurred during sign in';
+
+        // Extract the actual error message
+        String rawError = e.toString();
+
+        // Parse Supabase AuthException for user-friendly messages
         if (e is AuthException) {
-          errorMessage = e.message;
-        } else if (e is String) {
-          errorMessage = e;
+          rawError = e.message;
+        }
+
+        // Check for common error patterns
+        if (rawError.toLowerCase().contains('invalid login credentials') ||
+            rawError.toLowerCase().contains('invalid email or password') ||
+            rawError.toLowerCase().contains('invalid credentials')) {
+          errorMessage = 'Invalid email or password. Please try again.';
+        } else if (rawError.toLowerCase().contains('email not confirmed')) {
+          errorMessage = 'Please verify your email address before signing in.';
+        } else if (rawError.toLowerCase().contains('user not found')) {
+          errorMessage = 'No account found with this email.';
+        } else if (rawError.toLowerCase().contains('network') ||
+                   rawError.toLowerCase().contains('connection')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else {
+          // Clean up the error message - remove "AuthException:" or "Exception:" prefix
+          errorMessage = rawError
+              .replaceAll('AuthException:', '')
+              .replaceAll('Exception:', '')
+              .replaceAll('AuthException', '')
+              .trim();
+
+          // If still too technical, use generic message
+          if (errorMessage.length > 100 || errorMessage.contains('(') || errorMessage.contains('{')) {
+            errorMessage = 'Unable to sign in. Please check your credentials and try again.';
+          }
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: Colors.red[700],
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              textColor: Colors.white,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
           ),
         );
       }
@@ -169,7 +210,27 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 32),
+
+                  // Forgot Password link
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => context.go('/reset-password'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                      ),
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 14,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
 
                   // Sign In button with custom styling
                   _CustomButton(
@@ -264,7 +325,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 }
 
-// Custom TextField Widget
+// Custom TextField Widget - Optimized with proper state management
 class _CustomTextField extends StatefulWidget {
   final String label;
   final String hint;
@@ -293,27 +354,26 @@ class _CustomTextField extends StatefulWidget {
 }
 
 class _CustomTextFieldState extends State<_CustomTextField> {
-  bool _obscureText = true;
+  late bool _obscureText;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.isPassword;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: TextStyle(
-            color: Colors.grey[300],
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
-        ),
+        _FieldLabel(text: widget.label),
         const SizedBox(height: 8),
         TextFormField(
           controller: widget.controller,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
-          obscureText: widget.isPassword && _obscureText,
+          obscureText: _obscureText,
           onFieldSubmitted: widget.onSubmitted,
           validator: widget.validator,
           style: const TextStyle(color: Colors.white),
@@ -330,11 +390,7 @@ class _CustomTextFieldState extends State<_CustomTextField> {
                       _obscureText ? Icons.visibility_off : Icons.visibility,
                       color: Colors.grey[400],
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureText = !_obscureText;
-                      });
-                    },
+                    onPressed: () => setState(() => _obscureText = !_obscureText),
                   )
                 : null,
             filled: true,
@@ -350,6 +406,25 @@ class _CustomTextFieldState extends State<_CustomTextField> {
           ),
         ),
       ],
+    );
+  }
+}
+
+// Extracted label widget for performance
+class _FieldLabel extends StatelessWidget {
+  final String text;
+
+  const _FieldLabel({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: Colors.grey[300],
+        fontWeight: FontWeight.w600,
+        fontSize: 16,
+      ),
     );
   }
 }

@@ -42,11 +42,49 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             password: _passwordController.text,
             displayName: _nameController.text.trim(),
           );
-      if (mounted) context.go('/onboarding');
+
+      if (mounted) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Account created successfully! Welcome, ${_nameController.text.trim()}!'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+
+        // Navigate to onboarding
+        context.go('/onboarding');
+      }
     } catch (e) {
       if (mounted) {
+        // Parse error for user-friendly messages
+        String errorMessage = 'An error occurred during sign up';
+
+        if (e.toString().toLowerCase().contains('already registered') ||
+            e.toString().toLowerCase().contains('user already exists')) {
+          errorMessage = 'This email is already registered. Please sign in instead.';
+        } else if (e.toString().toLowerCase().contains('invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (e.toString().toLowerCase().contains('weak password')) {
+          errorMessage = 'Password is too weak. Please use a stronger password.';
+        } else {
+          errorMessage = e.toString().replaceAll('Exception:', '').trim();
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red[700],
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              textColor: Colors.white,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
+          ),
         );
       }
     } finally {

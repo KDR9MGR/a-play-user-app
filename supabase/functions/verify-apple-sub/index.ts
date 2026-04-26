@@ -179,7 +179,7 @@ async function upsertSubscription(
     // Upsert using latest_transaction_id as unique key
     // This handles both new subscriptions and renewals
     const { data, error } = await supabase
-      .from('subscriptions')
+      .from('user_subscriptions')  // FIXED: Changed from 'subscriptions' to 'user_subscriptions'
       .upsert(
         subscriptionData,
         {
