@@ -14,9 +14,9 @@
 #### PayStack Public Key
 **File:** [lib/core/config/env.dart](lib/core/config/env.dart#L3)
 ```dart
-static const String _hardcodedPaystackKey = 'pk_live_YOUR_PRODUCTION_KEY';
+static const String _hardcodedPaystackKey = 'pk_live_YOUR_KEY';
 ```
-Replace `pk_test_your_test_key` with your **PayStack Live Key**
+Replace `pk_test_YOUR_KEY` with your **PayStack Live Key**
 
 #### Email Sender Domain
 **File:** [supabase/functions/send-email/index.ts](supabase/functions/send-email/index.ts#L47)
@@ -86,8 +86,8 @@ supabase secrets list
 
 **Set Missing Secrets:**
 ```bash
-supabase secrets set RESEND_API_KEY=re_your_api_key
-supabase secrets set PAYSTACK_SECRET_KEY=sk_live_your_secret_key
+supabase secrets set RESEND_API_KEY=re_YOUR_RESEND_API_KEY
+supabase secrets set PAYSTACK_SECRET_KEY=sk_live_YOUR_SECRET
 ```
 
 ---

@@ -57,7 +57,7 @@ This is a Flutter event booking application for Ghana built with **Clean Archite
 
 **Feature Structure**: Each feature follows this consistent pattern (from .cursorrules):
 ```
-lib/features/<feature_name>/
+lib/features/<feature_YOUR_RESEND_API_KEY>/
 ├── model/          # Freezed immutable data models
 ├── service/        # API interactions and business logic
 ├── controller/     # AsyncNotifier state management
@@ -104,11 +104,11 @@ lib/features/<feature_name>/
 ### Development Rules (from .cursorrules)
 
 **Code Structure**:
-- Use **Freezed** for all data models in `lib/features/<feature_name>/model/`
-- Implement API interactions in `lib/features/<feature_name>/service/`
-- Manage state using **AsyncNotifier** in `lib/features/<feature_name>/controller/`
-- Expose providers via **AsyncNotifierProvider** in `lib/features/<feature_name>/provider/`
-- Design UI in `lib/features/<feature_name>/view/` using `AsyncValue.when`
+- Use **Freezed** for all data models in `lib/features/<feature_YOUR_RESEND_API_KEY>/model/`
+- Implement API interactions in `lib/features/<feature_YOUR_RESEND_API_KEY>/service/`
+- Manage state using **AsyncNotifier** in `lib/features/<feature_YOUR_RESEND_API_KEY>/controller/`
+- Expose providers via **AsyncNotifierProvider** in `lib/features/<feature_YOUR_RESEND_API_KEY>/provider/`
+- Design UI in `lib/features/<feature_YOUR_RESEND_API_KEY>/view/` using `AsyncValue.when`
 - Use `ref.invalidate()` to refresh providers after mutations
 - Keep business logic out of UI components
 

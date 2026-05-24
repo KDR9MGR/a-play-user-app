@@ -180,7 +180,7 @@ Future<List<CategoryModel>> getCategories() async {
   ```
 
 #### D. Improve UI Error Detection and Messages
-**File:** [lib/features/explore/screens/explore_page.dart:389-447](lib/features/explore/screens/explore_page.dart#L389-L447)
+**File:** [lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart:389-447](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart#L389-L447)
 
 ```dart
 error: (error, stack) {
@@ -262,7 +262,7 @@ All fixes follow consistent error handling pattern:
 | [lib/features/booking/service/booking_service.dart](lib/features/booking/service/booking_service.dart) | Added AUTH_REQUIRED exception | ✅ FIXED |
 | [lib/features/booking/screens/my_tickets_screen.dart](lib/features/booking/screens/my_tickets_screen.dart) | Auth error detection + Sign In CTA | ✅ FIXED |
 | [lib/features/explore/service/event_supabase_service.dart](lib/features/explore/service/event_supabase_service.dart) | Added timeouts + error handling | ✅ FIXED |
-| [lib/features/explore/screens/explore_page.dart](lib/features/explore/screens/explore_page.dart) | Network error detection + better UI | ✅ FIXED |
+| [lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart) | Network error detection + better UI | ✅ FIXED |
 
 ---
 

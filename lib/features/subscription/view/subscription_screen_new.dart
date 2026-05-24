@@ -35,52 +35,88 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
   }
 
   Future<void> _initialize() async {
-    debugPrint('SubscriptionScreen: Initializing...');
+    try {
+      debugPrint('SubscriptionScreen: Initializing...');
 
-    // DEBUG: Check current user
-    final currentUser = Supabase.instance.client.auth.currentUser;
-    debugPrint('SubscriptionScreen: Current User ID = ${currentUser?.id}');
-    debugPrint('SubscriptionScreen: Current User Email = ${currentUser?.email}');
+      // DEBUG: Check current user
+      final currentUser = Supabase.instance.client.auth.currentUser;
+      debugPrint('SubscriptionScreen: Current User ID = ${currentUser?.id}');
+      debugPrint('SubscriptionScreen: Current User Email = ${currentUser?.email}');
 
-    // CRITICAL: Sync database with StoreKit state FIRST
-    // This detects cancellations and restores
-    debugPrint('SubscriptionScreen: Syncing with StoreKit...');
-    await _iapService.syncDatabaseWithStoreKit();
+      // CRITICAL: Sync database with StoreKit state FIRST
+      // This detects cancellations and restores
+      debugPrint('SubscriptionScreen: Syncing with StoreKit...');
+      try {
+        await _iapService.syncDatabaseWithStoreKit();
+      } catch (e) {
+        debugPrint('SubscriptionScreen: StoreKit sync failed (non-fatal): $e');
+        // Continue anyway - this might fail in simulator or if StoreKit isn't configured
+      }
 
-    // STEP 1: Check for existing subscription AFTER sync
-    debugPrint('SubscriptionScreen: Checking for existing subscriptions...');
-    final hasActive = await _syncService.hasActiveSubscription();
-    final activeSub = await _syncService.getActiveSubscription();
+      // STEP 1: Check for existing subscription AFTER sync
+      debugPrint('SubscriptionScreen: Checking for existing subscriptions...');
+      try {
+        final hasActive = await _syncService.hasActiveSubscription();
+        final activeSub = await _syncService.getActiveSubscription();
 
-    debugPrint('SubscriptionScreen: hasActive = $hasActive');
-    debugPrint('SubscriptionScreen: activeSub = $activeSub');
+        debugPrint('SubscriptionScreen: hasActive = $hasActive');
+        debugPrint('SubscriptionScreen: activeSub = $activeSub');
 
-    if (hasActive) {
-      debugPrint('SubscriptionScreen: ✓ User already has active subscription - SHOWING MANAGEMENT VIEW');
-      setState(() {
-        _hasActiveSubscription = true;
-        _activeSubscription = activeSub;
-        _isLoading = false;
-      });
-      return; // Don't load products if already subscribed
+        if (hasActive) {
+          debugPrint('SubscriptionScreen: ✓ User already has active subscription - SHOWING MANAGEMENT VIEW');
+          if (mounted) {
+            setState(() {
+              _hasActiveSubscription = true;
+              _activeSubscription = activeSub;
+              _isLoading = false;
+            });
+          }
+          return; // Don't load products if already subscribed
+        }
+      } catch (e) {
+        debugPrint('SubscriptionScreen: Error checking subscriptions: $e');
+        // Continue to load products even if subscription check fails
+      }
+
+      debugPrint('SubscriptionScreen: No active subscription found, loading products...');
+
+      // STEP 2: Set up IAP callbacks
+      _iapService.onPurchaseSuccess = _handlePurchaseSuccess;
+      _iapService.onPurchaseError = _handlePurchaseError;
+      _iapService.onPurchaseCancelled = _handlePurchaseCancelled;
+
+      // STEP 3: Initialize IAP
+      try {
+        await _iapService.initialize();
+      } catch (e) {
+        debugPrint('SubscriptionScreen: IAP initialization failed: $e');
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Unable to load subscription plans. This is normal in simulator. Please try on a real device or contact support if the issue persists.';
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
+      if (mounted) {
+        setState(() {
+          _products = _iapService.products;
+          _isLoading = false;
+        });
+      }
+
+      debugPrint('SubscriptionScreen: Found ${_products.length} products');
+    } catch (e, stackTrace) {
+      debugPrint('SubscriptionScreen: Fatal initialization error: $e');
+      debugPrint('StackTrace: $stackTrace');
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to initialize subscriptions: ${e.toString()}';
+          _isLoading = false;
+        });
+      }
     }
-
-    debugPrint('SubscriptionScreen: No active subscription found, loading products...');
-
-    // STEP 2: Set up IAP callbacks
-    _iapService.onPurchaseSuccess = _handlePurchaseSuccess;
-    _iapService.onPurchaseError = _handlePurchaseError;
-    _iapService.onPurchaseCancelled = _handlePurchaseCancelled;
-
-    // STEP 3: Initialize IAP
-    await _iapService.initialize();
-
-    setState(() {
-      _products = _iapService.products;
-      _isLoading = false;
-    });
-
-    debugPrint('SubscriptionScreen: Found ${_products.length} products');
   }
 
   void _handlePurchaseSuccess(ProductDetails product) async {

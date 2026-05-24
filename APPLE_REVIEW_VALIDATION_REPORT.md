@@ -84,7 +84,7 @@ final eventsResponse = await supabase
 
 #### 2. **Event Tap Error Handling**
 
-**File:** [lib/features/explore/screens/explore_page.dart](lib/features/explore/screens/explore_page.dart)
+**File:** [lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart)
 
 **Lines 458-491:** Event Card Tap Handler
 ```dart
@@ -410,7 +410,7 @@ void _handleTabTap(int index) {
 
 #### 3. **Explore Page Implementation**
 
-**File:** [lib/features/explore/screens/explore_page.dart](lib/features/explore/screens/explore_page.dart)
+**File:** [lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart)
 
 **Lines 455-456:** Guideline Documentation
 ```dart

@@ -49,11 +49,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       password: password,
       data: displayName != null ? {'full_name': displayName} : null,
     );
-    
+
     if (response.user == null) {
       throw Exception('Failed to sign up');
     }
-    
+
+    // When email confirmation is enabled, session will be null but user exists.
+    // This is expected — the user needs to confirm their email.
+    if (response.session == null) {
+      throw Exception('Please check your email to confirm your account');
+    }
+
     return UserModel.fromSupabaseUser(response.user!.toJson());
   }
 

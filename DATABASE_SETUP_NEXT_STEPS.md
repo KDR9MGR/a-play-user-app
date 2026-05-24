@@ -198,7 +198,7 @@ SUPABASE_URL=https://your-project-ref.supabase.co
 SUPABASE_ANON_KEY=your-anon-key-here
 
 # PayStack (Staging)
-PAYSTACK_PUBLIC_KEY=pk_test_your_test_key
+PAYSTACK_PUBLIC_KEY=pk_test_YOUR_KEY
 
 # App Environment
 APP_ENV=staging

@@ -123,7 +123,7 @@ await _verificationService.verifyAndActivateSubscription(
    SELECT cron.schedule(
      'expire-old-subscriptions',
      '0 2 * * *', -- Daily at 2 AM UTC
-     $$SELECT expire_old_subscriptions()$$
+     $$SELECT expire_YOUR_RESEND_API_KEY()$$
    );
    ```
 

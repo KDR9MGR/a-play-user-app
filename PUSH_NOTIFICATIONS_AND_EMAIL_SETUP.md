@@ -374,7 +374,7 @@ Use Resend's sandbox: `onboarding@resend.dev`
 2. Click **Create API Key**
 3. Name it: **"A-Play Production"**
 4. **Permissions**: Full Access (or just Send access)
-5. Copy the API key (starts with `re_...`)
+5. Copy the API key (starts with `re_YOUR_RESEND_API_KEY...`)
 6. **Save it securely** - you can't view it again!
 
 ### 4. Update Environment Variables
@@ -383,7 +383,7 @@ Add to `.env`:
 
 ```env
 # Resend Email Service
-RESEND_API_KEY=re_your_api_key_here
+RESEND_API_KEY=re_YOUR_RESEND_API_KEY
 RESEND_FROM_EMAIL=A-Play <noreply@yourdomain.com>
 ```
 
@@ -519,13 +519,13 @@ SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key-here
 
 # PayStack
-PAYSTACK_PUBLIC_KEY=pk_test_xxxxx
+PAYSTACK_PUBLIC_KEY=pk_test_YOUR_KEY
 
 # OneSignal
 ONESIGNAL_APP_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 # Resend
-RESEND_API_KEY=re_xxxxxxxxxxxxx
+RESEND_API_KEY=re_YOUR_RESEND_API_KEY
 RESEND_FROM_EMAIL=A-Play <noreply@yourdomain.com>
 ```
 

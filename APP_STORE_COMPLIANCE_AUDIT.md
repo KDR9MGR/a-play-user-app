@@ -41,7 +41,7 @@ release {
 ```xml
 <meta-data
     android:name="com.google.android.geo.API_KEY"
-    android:value="AIzaSyCgWaCUMUltw9fP0uD9e0RBEyVMdAW1nlA"/>  <!-- ⚠️ EXPOSED -->
+    android:value="YOUR_FIREBASE_API_KEY"/>  <!-- ⚠️ EXPOSED -->
 ```
 
 **Risk**:

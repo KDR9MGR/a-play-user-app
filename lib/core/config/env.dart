@@ -2,7 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Env {
   // Hardcoded PayStack key (replace with your actual production key)
-  static const String _hardcodedPaystackKey = 'pk_test_your_test_key';
+  static const String _hardcodedPaystackKey = 'pk_test_YOUR_PAYSTACK_KEY';
 
   static String get paystackPublicKey {
     // Try flutter_dotenv first, then dart-define, then fall back to hardcoded

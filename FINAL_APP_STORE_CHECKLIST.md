@@ -60,7 +60,7 @@ Line 763:   await _handlePaystackPurchase(plan);
 |-----------|--------|--------------|
 | Router allows `/explore` | ✅ PASS | Line 47 in router.dart |
 | Navbar doesn't protect Explore | ✅ PASS | Line 62 in navbar.dart - index 1 not in protectedTabs |
-| No auth checks in Explore | ✅ PASS | explore_page.dart - no auth code |
+| No auth checks in Explore | ✅ PASS | explore_YOUR_RESEND_API_KEY.dart - no auth code |
 | Supabase queries are public | ✅ PASS | event_supabase_service.dart - uses anon key |
 
 **Result:** ✅ **Users can browse Explore without login**
@@ -74,7 +74,7 @@ Line 763:   await _handlePaystackPurchase(plan);
 | Network timeouts (10s) | ✅ IMPLEMENTED | Lines 71-79, 116-119, 138-141 in event_supabase_service.dart |
 | Query limits (50 items) | ✅ IMPLEMENTED | Lines 70, 115, 137 in event_supabase_service.dart |
 | Graceful error handling | ✅ IMPLEMENTED | Lines 154-162 in event_supabase_service.dart |
-| Better empty states | ✅ IMPLEMENTED | Lines 300-364 in explore_page.dart |
+| Better empty states | ✅ IMPLEMENTED | Lines 300-364 in explore_YOUR_RESEND_API_KEY.dart |
 | maybeSingle() for null safety | ✅ IMPLEMENTED | Line 99 in event_supabase_service.dart |
 
 **Result:** ✅ **No hanging/freezing on iPad Air**

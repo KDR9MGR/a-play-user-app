@@ -379,7 +379,7 @@ If missing, run the migration again.
 
 **Function to manually expire old subscriptions**:
 ```sql
-SELECT expire_old_subscriptions();
+SELECT expire_YOUR_RESEND_API_KEY();
 ```
 
 Run this periodically (daily) via cron or Edge Function.

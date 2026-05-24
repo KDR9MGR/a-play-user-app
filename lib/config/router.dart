@@ -29,6 +29,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../features/authentication/presentation/screens/password_reset_screen.dart';
 import '../features/authentication/presentation/screens/sign_in_screen.dart';
 import '../features/authentication/presentation/screens/sign_up_screen.dart';
+import '../features/profile/screens/help_support_page.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -50,8 +51,30 @@ class RouterNotifier extends ChangeNotifier {
 
     if (state.matchedLocation == '/auth/callback') return null;
 
+    // Allow guest browsing of these routes without authentication
+    final guestAllowedRoutes = [
+      '/home',
+      '/explore',
+      '/feed',
+      '/podcast',
+      '/help-support',
+      RegExp(r'^/club-booking/[^/]+$'), // Club details
+      RegExp(r'^/restaurant/[^/]+$'),   // Restaurant details
+    ];
+
+    // Check if current route is guest-allowed
+    final isGuestAllowed = guestAllowedRoutes.any((route) {
+      if (route is String) {
+        return state.matchedLocation == route;
+      } else if (route is RegExp) {
+        return route.hasMatch(state.matchedLocation);
+      }
+      return false;
+    });
+
     if (!isAuth) {
-      if (isLoggingIn) return null;
+      if (isLoggingIn || isGuestAllowed) return null;
+      // For protected routes, redirect to sign-in
       return '/sign-in';
     }
 
@@ -121,6 +144,10 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/help-support',
+          builder: (context, state) => const HelpSupportPage(),
         ),
         GoRoute(
           path: '/booking-confirmation/:id',

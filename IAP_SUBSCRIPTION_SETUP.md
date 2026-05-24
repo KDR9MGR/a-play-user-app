@@ -71,7 +71,7 @@ has_active_subscription(user_id)
 get_active_subscription(user_id)
 
 -- Expire old subscriptions (run this daily)
-expire_old_subscriptions()
+expire_YOUR_RESEND_API_KEY()
 ```
 
 ---

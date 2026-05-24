@@ -34,7 +34,7 @@
 #### Explore Tab - Network Error Handling
 **Files:**
 - [lib/features/explore/service/event_supabase_service.dart](lib/features/explore/service/event_supabase_service.dart)
-- [lib/features/explore/screens/explore_page.dart](lib/features/explore/screens/explore_page.dart#L389-L447)
+- [lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart#L389-L447)
 
 - **Issue:** Technical error messages (ClientException, URLs) exposed to users
 - **Fix:**
@@ -205,7 +205,7 @@ Your app is ready when you:
 | lib/features/booking/service/booking_service.dart | Auth error handling | ✅ Fixed |
 | lib/features/booking/screens/my_tickets_screen.dart | UI error detection | ✅ Fixed |
 | lib/features/explore/service/event_supabase_service.dart | Network timeouts | ✅ Fixed |
-| lib/features/explore/screens/explore_page.dart | Error UI improvement | ✅ Fixed |
+| lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart | Error UI improvement | ✅ Fixed |
 
 ---
 

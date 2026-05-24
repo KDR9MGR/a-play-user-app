@@ -30,7 +30,7 @@ await Supabase.initialize(
 **Status:** ✅ **VALID**
 - Supabase initializes **before** app starts
 - Uses config from [lib/core/config/supabase_config.dart](lib/core/config/supabase_config.dart)
-- Project URL: `https://yvnfhsipyfxdmulajbgl.supabase.co`
+- Project URL: `https://YOUR-PROJECT.supabase.co`
 - Anonymous key properly configured
 - Debug mode enabled for development
 

@@ -132,7 +132,7 @@ final amount = product?.rawPrice ?? 0.0;
 SELECT cron.schedule(
   'expire-old-subscriptions',
   '0 2 * * *', -- Daily at 2 AM UTC
-  $$SELECT expire_old_subscriptions()$$
+  $$SELECT expire_YOUR_RESEND_API_KEY()$$
 );
 ```
 
@@ -181,7 +181,7 @@ DROP POLICY IF EXISTS "user_subscriptions_insert_service" ON user_subscriptions;
 4. Document in `.env.example`:
    ```bash
    # Apple IAP Receipt Verification
-   APPLE_SHARED_SECRET=get_from_app_store_connect
+   APPLE_SHARED_SECRET=get_from_app_store_YOUR_RESEND_API_KEY
    ```
 
 **Impact**: ⚠️ Receipt verification will fail (though local DB verification still works)

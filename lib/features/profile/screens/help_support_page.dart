@@ -1,7 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HelpSupportPage extends StatelessWidget {
   const HelpSupportPage({super.key});
+
+  Future<void> _launchEmail() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'support@aplayworld.com',
+      query: 'subject=A-Play Support Request',
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Future<void> _launchPhone() async {
+    final uri = Uri(scheme: 'tel', path: '+233501234567');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,33 +62,14 @@ class HelpSupportPage extends StatelessWidget {
                 icon: Icons.email_outlined,
                 title: 'Email Support',
                 subtitle: 'support@aplayworld.com',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Email support is not available.')),
-                  );
-                },
+                onTap: _launchEmail,
               ),
               _buildContactTile(
                 context,
                 icon: Icons.phone_outlined,
                 title: 'Phone Support',
-                subtitle: '+1 (234) 567-8900',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Phone support is not available.')),
-                  );
-                },
-              ),
-              _buildContactTile(
-                context,
-                icon: Icons.chat_outlined,
-                title: 'Live Chat',
-                subtitle: 'Available 24/7',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Live chat is coming soon')),
-                  );
-                },
+                subtitle: '+233 50 123 4567',
+                onTap: _launchPhone,
               ),
             ],
           ),

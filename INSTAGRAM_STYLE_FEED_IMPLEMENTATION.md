@@ -54,7 +54,7 @@ AspectRatio(
 - Share button with send icon
 - Native share dialog
 - Shares post content with author attribution
-- Cross-platform sharing (uses `share_plus` package)
+- Cross-platform sharing (uses `share_YOUR_RESEND_API_KEY` package)
 
 #### **Follow Feature**
 - Follow/Following button on each post
@@ -105,7 +105,7 @@ RefreshIndicator(
 
 ### 1. **lib/features/feed/screen/feed_page.dart**
 **Changes:**
-- Added imports for `share_plus` and `blogger_follow_model`
+- Added imports for `share_YOUR_RESEND_API_KEY` and `blogger_follow_model`
 - Updated `_buildFeedCard` with Instagram-style layout
 - Changed image aspect ratio from 16:12 to 1:1 (square)
 - Added Follow/Following button functionality
@@ -266,7 +266,7 @@ await ref.read(feedProvider.notifier).createPostWithDuration(
 
 ### Dependencies Used
 - `cached_network_image` - Image loading and caching
-- `share_plus` - Native share functionality
+- `share_YOUR_RESEND_API_KEY` - Native share functionality
 - `timeago` - Relative time formatting
 - `iconsax` - Modern icon set
 - `supabase_flutter` - Backend integration

@@ -37,7 +37,7 @@ All changes described in `APPLE_RESUBMISSION_FIX_v2.md` and `APPLE_REVIEW_FIXES_
    - Explore tab (index 1) is NOT in protected tabs
    - Users can freely browse Explore without login
 
-3. **Explore Page** ([lib/features/explore/screens/explore_page.dart:455-456](lib/features/explore/screens/explore_page.dart#L455-L456))
+3. **Explore Page** ([lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart:455-456](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart#L455-L456))
    ```dart
    // Apple App Store Guideline 5.1.1: Allow explore without forcing login or premium
    // All events should be viewable without requiring authentication or subscription
@@ -135,7 +135,7 @@ All changes described in `APPLE_RESUBMISSION_FIX_v2.md` and `APPLE_REVIEW_FIXES_
 
 ### B. iPad Air Crash Prevention
 
-**File:** [lib/features/explore/screens/explore_page.dart](lib/features/explore/screens/explore_page.dart)
+**File:** [lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart)
 
 1. **Event Card Tap Error Handling** (Lines 458-491)
    ```dart

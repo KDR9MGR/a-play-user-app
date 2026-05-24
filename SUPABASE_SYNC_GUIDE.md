@@ -131,10 +131,10 @@ Set these secrets for Edge Functions:
 
 ```bash
 # Resend API key (for email service)
-supabase secrets set RESEND_API_KEY=re_your_actual_api_key
+supabase secrets set RESEND_API_KEY=re_YOUR_RESEND_API_KEY
 
 # PayStack secret key (NOT public key)
-supabase secrets set PAYSTACK_SECRET_KEY=sk_live_your_actual_secret_key
+supabase secrets set PAYSTACK_SECRET_KEY=sk_live_YOUR_SECRET
 ```
 
 ### Verify Secrets
@@ -145,10 +145,10 @@ supabase secrets list
 
 **Expected Output:**
 ```
-RESEND_API_KEY          re_***
+RESEND_API_KEY          re_YOUR_RESEND_API_KEY***
 PAYSTACK_SECRET_KEY     sk_***
 SUPABASE_URL            https://***
-SUPABASE_SERVICE_ROLE_KEY  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.***
+SUPABASE_SERVICE_ROLE_KEY  YOUR_SUPABASE_ANON_KEY
 ```
 
 ---
@@ -350,7 +350,7 @@ curl -X POST 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/paystack-webhook
 ### Issue: Emails not sending
 
 **Checklist:**
-- [ ] Resend API key is valid (starts with `re_`)
+- [ ] Resend API key is valid (starts with `re_YOUR_RESEND_API_KEY`)
 - [ ] Sender domain verified in Resend dashboard
 - [ ] Template files deployed with function
 - [ ] Check email logs for errors

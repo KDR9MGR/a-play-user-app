@@ -35,7 +35,7 @@ Supabase Dashboard → Project Settings → Edge Functions → Environment Varia
 | Variable Name | Description | Where to Get It | Example |
 |--------------|-------------|-----------------|---------|
 | `SUPABASE_URL` | Your Supabase project URL | Supabase Dashboard → Settings → API | `https://abcdefgh.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (bypasses RLS) | Supabase Dashboard → Settings → API → service_role | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (bypasses RLS) | Supabase Dashboard → Settings → API → service_role | `YOUR_SUPABASE_ANON_KEY |
 | `APPLE_SHARED_SECRET` | Apple App Store shared secret | App Store Connect → App → Subscriptions → App-Specific Shared Secret | `a1b2c3d4e5f6...` |
 
 #### 3. How to Add Environment Variables

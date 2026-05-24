@@ -15,7 +15,7 @@ All three Apple IAP Supabase Edge Functions are fully integrated with your Flutt
 ## 📋 Edge Functions Overview
 
 ### 1. **verify-apple-sub**
-**Endpoint**: `https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/verify-apple-sub`
+**Endpoint**: `https://YOUR-PROJECT.supabase.co/functions/v1/verify-apple-sub`
 
 **Purpose**: Primary Apple receipt verification and subscription creation
 
@@ -27,7 +27,7 @@ All three Apple IAP Supabase Edge Functions are fully integrated with your Flutt
 **Data Sent**:
 ```json
 {
-  "receiptData": "base64_encoded_app_store_receipt",
+  "receiptData": "base64_encoded_app_store_YOUR_RESEND_API_KEY",
   "userId": "user_uuid",
   "sandbox": true/false
 }
@@ -51,7 +51,7 @@ All three Apple IAP Supabase Edge Functions are fully integrated with your Flutt
 ---
 
 ### 2. **get-subscription-status**
-**Endpoint**: `https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/get-subscription-status`
+**Endpoint**: `https://YOUR-PROJECT.supabase.co/functions/v1/get-subscription-status`
 
 **Purpose**: Check current subscription status for a user
 
@@ -89,7 +89,7 @@ All three Apple IAP Supabase Edge Functions are fully integrated with your Flutt
 ---
 
 ### 3. **verify-apple-receipt**
-**Endpoint**: `https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/verify-apple-receipt`
+**Endpoint**: `https://YOUR-PROJECT.supabase.co/functions/v1/verify-apple-receipt`
 
 **Purpose**: Enhanced receipt validation with detailed error reporting
 
@@ -309,8 +309,8 @@ APPLE_SHARED_SECRET=your_apple_shared_secret
 
 Already configured in `.env`:
 ```env
-SUPABASE_URL=https://yvnfhsipyfxdmulajbgl.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 ```
 
 ---
@@ -341,7 +341,7 @@ supabase functions list
 
 ```bash
 # Test verify-apple-sub
-curl -X POST https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/verify-apple-sub \
+curl -X POST https://YOUR-PROJECT.supabase.co/functions/v1/verify-apple-sub \
   -H "Authorization: Bearer YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -351,13 +351,13 @@ curl -X POST https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/verify-apple-
   }'
 
 # Test get-subscription-status
-curl -X POST https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/get-subscription-status \
+curl -X POST https://YOUR-PROJECT.supabase.co/functions/v1/get-subscription-status \
   -H "Authorization: Bearer YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{"userId": "test-user-id"}'
 
 # Test verify-apple-receipt
-curl -X POST https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/verify-apple-receipt \
+curl -X POST https://YOUR-PROJECT.supabase.co/functions/v1/verify-apple-receipt \
   -H "Authorization: Bearer YOUR_ANON_KEY" \
   -H "Content-Type: application/json" \
   -d '{

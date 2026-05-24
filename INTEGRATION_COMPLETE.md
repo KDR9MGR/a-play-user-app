@@ -5,7 +5,7 @@
 ### 1. Environment Configuration ✅
 - Created `.env` file with your credentials:
   - OneSignal App ID: `1635806b-c5f2-4615-8ebb-4424ba5510dd`
-  - Resend API Key: `re_AboimpaW_6twVjP58XvhrgdBTKmBKfAFJ`
+  - Resend API Key: `re_YOUR_RESEND_API_KEY`
   - Resend From Email: `A-Play <noreply@aplayapp.com>`
 - Updated `pubspec.yaml` with `flutter_dotenv: ^5.1.0`
 - Modified [lib/core/config/env.dart](lib/core/config/env.dart) to load environment variables from `.env`

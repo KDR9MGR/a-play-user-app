@@ -69,7 +69,7 @@
 | **Referrals** | ✅ Hidden | Feature flag (hidden from Profile) |
 
 **Files:**
-- [lib/config/feature_flags.dart](lib/config/feature_flags.dart) ✅
+- [lib/config/feature_YOUR_RESEND_API_KEY.dart](lib/config/feature_YOUR_RESEND_API_KEY.dart) ✅
 - [lib/core/widgets/coming_soon_widget.dart](lib/core/widgets/coming_soon_widget.dart) ✅
 - [lib/config/router.dart](lib/config/router.dart) ✅
 
@@ -93,7 +93,7 @@
 - [x] Booking confirmation email template
 - [x] **NEW:** Cancellation email template ✅
 - [x] Environment variables configured (.env)
-- [x] **User Completed:** Resend account setup (API Key: re_Abo...)
+- [x] **User Completed:** Resend account setup (API Key: re_YOUR_RESEND_API_KEY...)
 
 **Files Created:**
 - [lib/core/services/notification_service.dart](lib/core/services/notification_service.dart) ✅

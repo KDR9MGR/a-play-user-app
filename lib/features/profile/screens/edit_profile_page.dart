@@ -104,9 +104,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       if (_selectedImageBytes != null && _selectedImagePath != null) {
         final extension = _selectedImagePath!.split('.').last;
         final fileName = '${user.id}.$extension';
-        
+
         // Upload to Supabase Storage
-        final storage = ref.read(supabaseProvider).storage;
+        final storage = Supabase.instance.client.storage;
         await storage.from('avatars').uploadBinary(
           fileName,
           _selectedImageBytes!,
@@ -115,7 +115,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             upsert: true,
           ),
         );
-        
+
         newPhotoUrl = storage
             .from('avatars')
             .getPublicUrl(fileName);

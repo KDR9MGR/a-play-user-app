@@ -85,7 +85,7 @@ class AboutScreen extends StatelessWidget {
             
             _buildSection(
               'Contact Us',
-              'Have questions or suggestions? Reach out to us at:\nsupport@aplay.com',
+              'Have questions or suggestions? Reach out to us at:\nsupport@aplayworld.com',
             ),
             
             const SizedBox(height: 24),

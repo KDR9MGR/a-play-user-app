@@ -82,7 +82,7 @@ The migration includes:
 - Configuring Row Level Security policies
 
 **To execute:**
-1. Go to your Supabase dashboard: https://yvnfhsipyfxdmulajbgl.supabase.co
+1. Go to your Supabase dashboard: https://YOUR-PROJECT.supabase.co
 2. Navigate to SQL Editor
 3. Copy the entire SQL migration from `FEED_IMPROVEMENTS_IMPLEMENTATION.md`
 4. Execute the script

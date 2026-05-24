@@ -35,7 +35,7 @@
 - Added limits (50 items) to prevent overwhelming iPad with data
 - Better null checks and fallbacks throughout
 
-#### C. Enhanced Empty State Messages ([explore_page.dart](lib/features/explore/screens/explore_page.dart))
+#### C. Enhanced Empty State Messages ([explore_YOUR_RESEND_API_KEY.dart](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart))
 - Changed "No events found" to "No events available"
 - Added helpful subtitle: "Check back soon for upcoming events in Ghana"
 - Better visual hierarchy with larger, bold titles
@@ -65,7 +65,7 @@ We reviewed the code and confirmed:
 - Only tabs 2, 3, 4 (Bookings, Concierge, Feed) require login
 - Explore is freely accessible
 
-✅ **Explore Page** ([explore_page.dart](lib/features/explore/screens/explore_page.dart)):
+✅ **Explore Page** ([explore_YOUR_RESEND_API_KEY.dart](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart)):
 - No authentication checks in the page code
 - No premium/subscription requirements
 - Events load for all users without login
@@ -155,7 +155,7 @@ SELECT COUNT(*) FROM events WHERE end_date > NOW();
    - Enhanced debug logging
    - Better null checks
 
-2. **lib/features/explore/screens/explore_page.dart**
+2. **lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart**
    - Improved empty state UI
    - Better error messages
    - Clearer call-to-action

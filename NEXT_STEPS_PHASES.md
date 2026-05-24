@@ -24,7 +24,7 @@
 ### Feature Flags Implementation ✅
 
 ```dart
-// /lib/config/feature_flags.dart
+// /lib/config/feature_YOUR_RESEND_API_KEY.dart
 enableEventBookings: true    ✅ MVP
 enableSubscriptions: true    ✅ MVP
 enableChat: true            ✅ MVP
@@ -249,7 +249,7 @@ flutter analyze
    - Click **API Keys** → **Create API Key**
    - Name: **"A-Play Production"**
    - Permissions: **Full Access** (or Send emails)
-   - Copy the API key (starts with `re_...`)
+   - Copy the API key (starts with `re_YOUR_RESEND_API_KEY...`)
    - **SAVE IT SECURELY** - you can't view it again!
 
 4. **Test Email** (Optional but recommended)
@@ -290,7 +290,7 @@ SUPABASE_ANON_KEY=your-supabase-anon-key-here
 # ===========================================
 # PAYSTACK (Existing)
 # ===========================================
-PAYSTACK_PUBLIC_KEY=pk_test_xxxxxxxxxxxxx
+PAYSTACK_PUBLIC_KEY=pk_test_YOUR_KEY
 
 # ===========================================
 # ONESIGNAL (NEW)
@@ -300,7 +300,7 @@ ONESIGNAL_APP_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 # ===========================================
 # RESEND EMAIL SERVICE (NEW)
 # ===========================================
-RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxx
+RESEND_API_KEY=re_YOUR_RESEND_API_KEY
 
 # For production (custom domain):
 RESEND_FROM_EMAIL=A-Play <noreply@yourdomain.com>
@@ -876,9 +876,9 @@ Replace with placeholders:
 ```env
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
-PAYSTACK_PUBLIC_KEY=pk_test_xxxxx
+PAYSTACK_PUBLIC_KEY=pk_test_YOUR_KEY
 ONESIGNAL_APP_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-RESEND_API_KEY=re_xxxxxxxxxxxxx
+RESEND_API_KEY=re_YOUR_RESEND_API_KEY
 RESEND_FROM_EMAIL=A-Play <noreply@yourdomain.com>
 ```
 

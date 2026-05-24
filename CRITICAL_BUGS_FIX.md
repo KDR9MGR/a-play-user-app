@@ -89,7 +89,7 @@ final String _apiKey = const String.fromEnvironment('RESEND_API_KEY');
 final String _apiKey = Env.resendApiKey;
 ```
 
-**Why**: The `.env` file has the key (`re_AboimpaW_6twVjP58XvhrgdBTKmBKfAFJ`) but the code isn't reading it
+**Why**: The `.env` file has the key (`re_YOUR_RESEND_API_KEY`) but the code isn't reading it
 
 ---
 

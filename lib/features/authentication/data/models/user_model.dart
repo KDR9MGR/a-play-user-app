@@ -21,7 +21,8 @@ class UserModel {
     return UserModel(
       id: json['id'] as String,
       email: json['email'] as String? ?? '',
-      displayName: json['user_metadata']?['display_name'] as String?,
+      displayName: (json['user_metadata']?['full_name'] as String?) ??
+                   (json['user_metadata']?['display_name'] as String?),
       photoUrl: json['user_metadata']?['photo_url'] as String?,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : null,
       lastSignInTime: json['last_sign_in_at'] != null ? DateTime.parse(json['last_sign_in_at'] as String) : null,

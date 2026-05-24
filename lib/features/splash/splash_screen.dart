@@ -100,12 +100,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
       // Navigate based on auth state:
       // - If authenticated: go to home
-      // - If not authenticated: go to sign-in (where user can also choose guest access)
-      if (isAuthenticated) {
-        context.go('/home');
-      } else {
-        context.go('/sign-in');
-      }
+      // - If not authenticated: go directly to home (guest browsing)
+      //   Users can browse freely; sign-in is only required for account actions
+      context.go('/home');
     } catch (e) {
       debugPrint('Error in splash screen: $e');
       if (!mounted) return;

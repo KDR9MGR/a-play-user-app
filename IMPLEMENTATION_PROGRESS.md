@@ -322,7 +322,7 @@ Sign Up → Complete Onboarding (5 screens) → Trial Offer Screen → Start Tri
 
 1. **Update PayStack Key**
    - File: [lib/core/config/env.dart](lib/core/config/env.dart:3)
-   - Replace `pk_test_your_test_key` with production key
+   - Replace `pk_test_YOUR_KEY` with production key
 
 2. **Update Email Sender**
    - File: [supabase/functions/send-email/index.ts](supabase/functions/send-email/index.ts:43)

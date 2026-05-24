@@ -10,7 +10,7 @@ This document outlines how the A Play app complies with Apple App Store Guidelin
 - Modified router to allow guest access to `/home`, `/podcast`, and `/explore` routes without authentication
 - Updated explore page to allow all users to view events without requiring login or premium subscription
 - Users can browse events freely; only booking/purchasing requires authentication
-- See: `lib/config/router.dart` lines 43-48 and `lib/features/explore/screens/explore_page.dart`
+- See: `lib/config/router.dart` lines 43-48 and `lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart`
 
 ## Guideline 2.1 - Performance - App Completeness
 
@@ -23,7 +23,7 @@ This document outlines how the A Play app complies with Apple App Store Guidelin
   - Improved error messages to be user-friendly instead of technical
   - Added try-catch blocks around event tap handlers to prevent app freezing
   - Responsive grid layout adjusted for iPad (2-4 columns based on screen size)
-  - See: `lib/features/explore/screens/explore_page.dart` and `lib/features/explore/service/event_supabase_service.dart`
+  - See: `lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart` and `lib/features/explore/service/event_supabase_service.dart`
 
 ## Guideline 3.1.2 - Business - Payments - Subscriptions
 

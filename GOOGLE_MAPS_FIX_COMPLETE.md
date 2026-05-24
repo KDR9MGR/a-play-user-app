@@ -65,7 +65,7 @@ if let mapsApiKey = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_MAPS_API_KE
 Added Google Maps API key entry:
 ```xml
 <key>GOOGLE_MAPS_API_KEY</key>
-<string>AIzaSyCgWaCUMUltw9fP0uD9e0RBEyVMdAW1nlA</string>
+<string>YOUR_FIREBASE_API_KEY</string>
 ```
 
 **Location**: Lines 50-51 of Info.plist
@@ -179,7 +179,7 @@ flutter run --dart-define=SANDBOX_MODE=true
 
 ### Current API Key:
 ```
-AIzaSyCgWaCUMUltw9fP0uD9e0RBEyVMdAW1nlA
+YOUR_FIREBASE_API_KEY
 ```
 
 ### API Key Restrictions (Recommended):

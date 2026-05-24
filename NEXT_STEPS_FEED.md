@@ -15,7 +15,7 @@ flutter packages pub run build_runner build --delete-conflicting-outputs
 You need to run the SQL migration in your Supabase dashboard.
 
 **Instructions:**
-1. Go to: https://yvnfhsipyfxdmulajbgl.supabase.co
+1. Go to: https://YOUR-PROJECT.supabase.co
 2. Navigate to: **SQL Editor**
 3. Copy the entire SQL migration from: **`FEED_IMPROVEMENTS_IMPLEMENTATION.md`** (lines 16-271)
 4. Execute the script
@@ -122,7 +122,7 @@ await ref.read(feedProvider.notifier).fetchFollowedFeeds();
 ## Dependencies
 
 All required packages are already in `pubspec.yaml`:
-- ✅ `share_plus: ^11.0.0` - For sharing functionality
+- ✅ `share_YOUR_RESEND_API_KEY: ^11.0.0` - For sharing functionality
 - ✅ `cached_network_image` - For image caching
 - ✅ `timeago` - For relative time display
 - ✅ `iconsax` - For modern icons

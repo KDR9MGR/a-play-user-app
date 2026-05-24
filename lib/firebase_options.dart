@@ -37,31 +37,31 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAuSQPdsayTWgRrjq6CutNE0_e4UIqirt8',
-    appId: '1:1093191311629:web:accf020c2a8578cdecd044',
+    apiKey: 'YOUR_FIREBASE_API_KEY',
+    appId: '1:YOUR_APP_ID:web:YOUR_MEASUREMENT_ID',
     messagingSenderId: '1093191311629',
-    projectId: 'aplay-b7c41',
-    authDomain: 'aplay-b7c41.firebaseapp.com',
-    storageBucket: 'aplay-b7c41.firebasestorage.app',
+    projectId: 'YOUR_FIREBASE_PROJECT_ID',
+    authDomain: 'YOUR_FIREBASE_PROJECT_ID.firebaseapp.com',
+    storageBucket: 'YOUR_FIREBASE_PROJECT_ID.firebasestorage.app',
     measurementId: 'G-XXXXXXXXXX',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAuSQPdsayTWgRrjq6CutNE0_e4UIqirt8',
-    appId: '1:1093191311629:android:b827e6839217a03aecd044',
+    apiKey: 'YOUR_FIREBASE_API_KEY',
+    appId: '1:YOUR_APP_ID:android:YOUR_MEASUREMENT_ID',
     messagingSenderId: '1093191311629',
-    projectId: 'aplay-b7c41',
-    storageBucket: 'aplay-b7c41.firebasestorage.app',
+    projectId: 'YOUR_FIREBASE_PROJECT_ID',
+    storageBucket: 'YOUR_FIREBASE_PROJECT_ID.firebasestorage.app',
   );
 
   // Development placeholder Firebase configuration - replace with actual values
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAFqMfBA8PqB5W4EGKGhs7BdkJefWHOFZU',
-    appId: '1:1093191311629:ios:accf020c2a8578cdecd044',
+    apiKey: 'YOUR_FIREBASE_API_KEY',
+    appId: '1:YOUR_APP_ID:ios:YOUR_MEASUREMENT_ID',
     messagingSenderId: '1093191311629',
-    projectId: 'aplay-b7c41',
-    storageBucket: 'aplay-b7c41.firebasestorage.app',
+    projectId: 'YOUR_FIREBASE_PROJECT_ID',
+    storageBucket: 'YOUR_FIREBASE_PROJECT_ID.firebasestorage.app',
     iosBundleId: 'com.aplay.aPlay',
   );
 

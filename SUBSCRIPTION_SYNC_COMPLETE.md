@@ -201,7 +201,7 @@ Current implementation treats subscriptions as one-time purchases with fixed dur
    - Update database when Apple processes renewals
 
 3. **Set Up Scheduled Job**
-   - Run `expire_old_subscriptions()` daily
+   - Run `expire_YOUR_RESEND_API_KEY()` daily
    - Marks expired subscriptions
    - Updates profiles accordingly
 

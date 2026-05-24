@@ -1073,7 +1073,7 @@ tableLocation, totalPrice, clubPhone, clubAddress, bookingReference
 
 - [ ] Update PayStack public key
   - File: [lib/core/config/env.dart](lib/core/config/env.dart#L3)
-  - Replace `pk_test_your_test_key` with actual production key
+  - Replace `pk_test_YOUR_KEY` with actual production key
 
 - [ ] Verify Supabase Edge Function environment variables
   - `RESEND_API_KEY` - Email service

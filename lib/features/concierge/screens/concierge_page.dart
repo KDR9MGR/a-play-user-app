@@ -670,7 +670,7 @@ class _ConciergePageState extends ConsumerState<ConciergePage> {
                   ),
                   builder: (_) {
                     const phone = '+12345678900';
-                    const email = 'support@aplay.com';
+                    const email = 'support@aplayworld.com';
 
                     return Padding(
                       padding: const EdgeInsets.all(20),

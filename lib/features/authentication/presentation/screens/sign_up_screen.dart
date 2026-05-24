@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../providers/auth_provider.dart';
 import '../widgets/auth_button.dart';
@@ -60,28 +61,53 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       if (mounted) {
         // Parse error for user-friendly messages
         String errorMessage = 'An error occurred during sign up';
+        bool isEmailConfirmation = false;
 
-        if (e.toString().toLowerCase().contains('already registered') ||
-            e.toString().toLowerCase().contains('user already exists')) {
+        // Extract the actual error message
+        String rawError = e.toString();
+        if (e is AuthException) {
+          rawError = e.message;
+        }
+
+        if (rawError.toLowerCase().contains('check your email') ||
+            rawError.toLowerCase().contains('confirm your account')) {
+          // Email confirmation required — not really an error
+          isEmailConfirmation = true;
+          errorMessage = 'Account created! Please check your email to verify your account.';
+        } else if (rawError.toLowerCase().contains('already registered') ||
+            rawError.toLowerCase().contains('user already exists') ||
+            rawError.toLowerCase().contains('already been registered')) {
           errorMessage = 'This email is already registered. Please sign in instead.';
-        } else if (e.toString().toLowerCase().contains('invalid email')) {
+        } else if (rawError.toLowerCase().contains('invalid email')) {
           errorMessage = 'Please enter a valid email address.';
-        } else if (e.toString().toLowerCase().contains('weak password')) {
-          errorMessage = 'Password is too weak. Please use a stronger password.';
+        } else if (rawError.toLowerCase().contains('weak password') ||
+                   rawError.toLowerCase().contains('password')) {
+          errorMessage = rawError.replaceAll('AuthException:', '').replaceAll('Exception:', '').trim();
         } else {
-          errorMessage = e.toString().replaceAll('Exception:', '').trim();
+          // Clean up technical error messages
+          errorMessage = rawError
+              .replaceAll('AuthException:', '')
+              .replaceAll('Exception:', '')
+              .replaceAll('AuthException', '')
+              .trim();
+          if (errorMessage.length > 100 || errorMessage.contains('{')) {
+            errorMessage = 'Unable to create account. Please try again.';
+          }
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red[700],
-            duration: const Duration(seconds: 4),
+            backgroundColor: isEmailConfirmation ? Colors.green : Colors.red[700],
+            duration: Duration(seconds: isEmailConfirmation ? 6 : 4),
             action: SnackBarAction(
-              label: 'Dismiss',
+              label: isEmailConfirmation ? 'Sign In' : 'Dismiss',
               textColor: Colors.white,
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                if (isEmailConfirmation) {
+                  context.go('/sign-in');
+                }
               },
             ),
           ),

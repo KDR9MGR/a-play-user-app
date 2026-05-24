@@ -190,7 +190,7 @@ const ComingSoonBanner(
 
 Create a feature flags file for easy toggling:
 
-**Create:** `/lib/config/feature_flags.dart`
+**Create:** `/lib/config/feature_YOUR_RESEND_API_KEY.dart`
 
 ```dart
 /// Feature flags for MVP launch
@@ -237,7 +237,7 @@ class FeatureFlags {
 **Usage in code:**
 
 ```dart
-import 'package:a_play/config/feature_flags.dart';
+import 'package:a_play/config/feature_YOUR_RESEND_API_KEY.dart';
 
 // In home screen
 if (FeatureFlags.enableRestaurants) {
@@ -275,10 +275,10 @@ After hiding non-MVP features:
 
 ### Should Modify:
 5. `/lib/features/profile/screens/profile_screen.dart` - Hide referral UI
-6. `/lib/features/explore/screens/explore_screen.dart` - Hide non-MVP categories
+6. `/lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart` - Hide non-MVP categories
 
 ### Optional:
-7. `/lib/config/feature_flags.dart` - Create feature flags (New file)
+7. `/lib/config/feature_YOUR_RESEND_API_KEY.dart` - Create feature flags (New file)
 
 ---
 

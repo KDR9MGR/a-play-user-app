@@ -216,7 +216,7 @@ class EmailService {
                     <tr>
                         <td style="background-color: #151515; padding: 30px; text-align: center; border-top: 1px solid #2A2A2A;">
                             <p style="color: #707070; font-size: 14px; margin: 0 0 10px 0;">
-                                Need help? Contact us at <a href="mailto:support@yourapp.com" style="color: #FF6B35; text-decoration: none;">support@yourapp.com</a>
+                                Need help? Contact us at <a href="mailto:support@aplayworld.com" style="color: #FF6B35; text-decoration: none;">support@aplayworld.com</a>
                             </p>
                             <p style="color: #505050; font-size: 12px; margin: 0;">
                                 © 2026 A-Play. All rights reserved.
@@ -365,7 +365,7 @@ class EmailService {
                     <tr>
                         <td style="background-color: #151515; padding: 30px; text-align: center; border-top: 1px solid #2A2A2A;">
                             <p style="color: #707070; font-size: 14px; margin: 0 0 10px 0;">
-                                Need help? Contact us at <a href="mailto:support@yourapp.com" style="color: #FF6B35; text-decoration: none;">support@yourapp.com</a>
+                                Need help? Contact us at <a href="mailto:support@aplayworld.com" style="color: #FF6B35; text-decoration: none;">support@aplayworld.com</a>
                             </p>
                             <p style="color: #505050; font-size: 12px; margin: 0;">
                                 © 2026 A-Play. All rights reserved.
@@ -471,7 +471,7 @@ class EmailService {
                     <tr>
                         <td style="background-color: #151515; padding: 30px; text-align: center; border-top: 1px solid #2A2A2A;">
                             <p style="color: #707070; font-size: 14px; margin: 0 0 10px 0;">
-                                Questions? Contact us at <a href="mailto:support@yourapp.com" style="color: #FF6B35; text-decoration: none;">support@yourapp.com</a>
+                                Questions? Contact us at <a href="mailto:support@aplayworld.com" style="color: #FF6B35; text-decoration: none;">support@aplayworld.com</a>
                             </p>
                             <p style="color: #505050; font-size: 12px; margin: 0;">
                                 © 2026 A-Play. All rights reserved.
@@ -674,7 +674,7 @@ class EmailService {
                     <tr>
                         <td style="background-color: #151515; padding: 30px; text-align: center; border-top: 1px solid #2A2A2A;">
                             <p style="color: #707070; font-size: 14px; margin: 0 0 10px 0;">
-                                Questions? Contact us at <a href="mailto:support@aplayapp.com" style="color: #FF6B35; text-decoration: none;">support@aplayapp.com</a>
+                                Questions? Contact us at <a href="mailto:support@aplayworld.com" style="color: #FF6B35; text-decoration: none;">support@aplayworld.com</a>
                             </p>
                             <p style="color: #707070; font-size: 12px; margin: 10px 0;">
                                 <a href="https://www.aplayworld.com/refund-policy" style="color: #808080; text-decoration: none;">Refund Policy</a> •

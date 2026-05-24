@@ -89,7 +89,7 @@ flutter run
 
 ### 3. Database Migration (IMPORTANT!)
 **If you haven't already**, run the SQL migration in Supabase:
-1. Go to: https://yvnfhsipyfxdmulajbgl.supabase.co
+1. Go to: https://YOUR-PROJECT.supabase.co
 2. SQL Editor
 3. Run: `FEED_DATABASE_MIGRATION.sql`
 

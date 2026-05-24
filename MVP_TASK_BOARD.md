@@ -185,12 +185,12 @@ in_app_purchase_storekit: ^0.4.8+1  # ✅ Added
 **Implementation Complete:**
 ```dart
 // Feature flags system implemented
-// See: /lib/config/feature_flags.dart
+// See: /lib/config/feature_YOUR_RESEND_API_KEY.dart
 ```
 
 **Files Updated:**
 - ✅ Created: `/lib/core/widgets/coming_soon_widget.dart` (3 widget variants)
-- ✅ Created: `/lib/config/feature_flags.dart` (centralized feature toggles)
+- ✅ Created: `/lib/config/feature_YOUR_RESEND_API_KEY.dart` (centralized feature toggles)
 - ✅ Updated: `/lib/features/booking/screens/my_tickets_screen.dart` (Restaurant tab hidden)
 - ✅ Updated: `/lib/features/home/screens/home_screen2.dart` (Clubs/Lounges/Pubs/Arcades/Beaches/Restaurants hidden)
 - ✅ Updated: `/lib/config/router.dart` (Coming Soon redirects for disabled routes)
@@ -223,7 +223,7 @@ in_app_purchase_storekit: ^0.4.8+1  # ✅ Added
 - [x] Resend password reset email
 - [x] Environment variables configured (.env)
 - [x] ✅ **USER COMPLETED:** OneSignal account configured (App ID: 1635806b-...)
-- [x] ✅ **USER COMPLETED:** Resend account configured (API Key: re_Abo...)
+- [x] ✅ **USER COMPLETED:** Resend account configured (API Key: re_YOUR_RESEND_API_KEY...)
 - [ ] **USER ACTION REQUIRED:** Run `flutter pub get`
 - [ ] **USER ACTION REQUIRED:** Update iOS Info.plist (see INTEGRATION_COMPLETE.md)
 - [ ] **USER ACTION REQUIRED:** Update AndroidManifest.xml (see INTEGRATION_COMPLETE.md)

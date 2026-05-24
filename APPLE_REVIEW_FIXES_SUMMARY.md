@@ -14,7 +14,7 @@ The app required users to register or log in to access the Explore feature, whic
    - Added `/explore` to guest-allowed routes (lines 43-48)
    - Users can now browse explore without authentication
 
-2. **Updated Explore Page** ([lib/features/explore/screens/explore_page.dart](lib/features/explore/screens/explore_page.dart)):
+2. **Updated Explore Page** ([lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart)):
    - Removed premium access restrictions
    - All events are now viewable without login or subscription
    - Removed paywall checks from event cards
@@ -38,7 +38,7 @@ The app required users to register or log in to access the Explore feature, whic
    - This is a data issue, not a code issue
    - Ensure all event images are high-quality and not placeholders
 
-2. **iPad Air Bug Fixes** ([lib/features/explore/screens/explore_page.dart](lib/features/explore/screens/explore_page.dart)):
+2. **iPad Air Bug Fixes** ([lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart](lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart)):
    - Added try-catch error handling around event tap handlers (lines 436-468)
    - Improved error messages to be user-friendly instead of technical (lines 366-416)
    - Fixed responsive grid for iPad: 4 columns on large tablets, 3 on medium, 2 on phones (line 349)
@@ -122,7 +122,7 @@ if (Platform.isIOS) {
 
 ### Files Modified
 1. ✏️ `lib/config/router.dart` - Added explore to guest routes
-2. ✏️ `lib/features/explore/screens/explore_page.dart` - Removed auth/premium restrictions, improved error handling
+2. ✏️ `lib/features/explore/screens/explore_YOUR_RESEND_API_KEY.dart` - Removed auth/premium restrictions, improved error handling
 3. ✏️ `lib/features/subscription/screens/subscription_plans_screen.dart` - Added EULA link
 4. ✅ `lib/features/subscription/screens/subscription_plans_screen.dart` - Platform payment already correct
 

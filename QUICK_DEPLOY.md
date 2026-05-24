@@ -44,10 +44,10 @@ supabase functions deploy send-email
 
 ```bash
 # Resend API key
-supabase secrets set RESEND_API_KEY=re_YOUR_KEY_HERE
+supabase secrets set RESEND_API_KEY=re_YOUR_RESEND_API_KEY
 
 # PayStack secret key
-supabase secrets set PAYSTACK_SECRET_KEY=sk_live_YOUR_KEY_HERE
+supabase secrets set PAYSTACK_SECRET_KEY=sk_live_YOUR_SECRET
 ```
 
 **Get your keys:**
@@ -141,7 +141,7 @@ supabase functions deploy send-email
 
 # 4. Set secrets (replace with your actual keys)
 supabase secrets set RESEND_API_KEY=re_YOUR_RESEND_API_KEY
-supabase secrets set PAYSTACK_SECRET_KEY=sk_live_YOUR_PAYSTACK_SECRET
+supabase secrets set PAYSTACK_SECRET_KEY=sk_live_YOUR_SECRET
 
 # 5. Verify
 supabase functions list

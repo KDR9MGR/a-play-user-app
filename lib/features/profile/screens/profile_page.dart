@@ -438,7 +438,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       {'title': 'Payment Methods', 'icon': Iconsax.card, 'onTap': () {}},
       {'title': 'Notifications', 'icon': Iconsax.notification, 'onTap': () {}},
       {'title': 'Privacy & Security', 'icon': Iconsax.shield_tick, 'onTap': () {}},
-      {'title': 'Help & Support', 'icon': Iconsax.message_question, 'onTap': () {}},
+      {'title': 'Help & Support', 'icon': Iconsax.message_question, 'onTap': () => context.go('/help-support')},
     ];
 
     return Column(

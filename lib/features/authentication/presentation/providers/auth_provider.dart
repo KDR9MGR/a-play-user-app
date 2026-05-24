@@ -39,7 +39,8 @@ final authStateProvider = StreamProvider<UserModel?>((ref) {
     return UserModel(
       id: user.id,
       email: user.email ?? '',
-      displayName: user.userMetadata?['display_name'] as String?,
+      displayName: (user.userMetadata?['full_name'] as String?) ??
+                   (user.userMetadata?['display_name'] as String?),
       photoUrl: user.userMetadata?['photo_url'] as String?,
       createdAt: DateTime.parse(user.createdAt),
       lastSignInTime: user.lastSignInAt != null 
@@ -287,17 +288,21 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         email: email,
         password: password,
         data: {
-          if (displayName != null) 'display_name': displayName,
+          if (displayName != null) 'full_name': displayName,
         },
       );
-      
-      if (response.session == null) {
-        throw const AuthException('Failed to sign up: No session created');
-      }
-      
+
       final user = response.user;
       if (user == null) {
         throw const AuthException('Failed to sign up: No user returned');
+      }
+
+      // When email confirmation is enabled, session will be null but user exists.
+      // This is expected behavior — the user needs to confirm their email.
+      if (response.session == null) {
+        // Still set the user in state so the UI can show a confirmation message
+        state = AsyncValue.data(UserModel.fromSupabaseUser(user.toJson()));
+        throw const AuthException('Please check your email to confirm your account');
       }
 
       // Link user to OneSignal for push notifications
