@@ -28,24 +28,24 @@ class FeatureFlags {
   static const bool enableFeed = true;
 
   // ==========================================
-  // NON-MVP FEATURES (Disabled for MVP Launch)
+  // NON-MVP FEATURES (NOW ENABLED FOR TESTING)
   // ==========================================
 
   /// Restaurant table bookings and food orders
-  /// Coming Soon in v2.1
-  static const bool enableRestaurants = false;
+  /// ENABLED FOR TESTING
+  static const bool enableRestaurants = true;
 
   /// Club/VIP table reservations
-  /// Coming Soon in v2.1
-  static const bool enableClubs = false;
+  /// ENABLED FOR TESTING
+  static const bool enableClubs = true;
 
   /// Podcast and YouTube content streaming
-  /// Coming Soon in v2.2
-  static const bool enablePodcasts = false;
+  /// ENABLED FOR TESTING
+  static const bool enablePodcasts = true;
 
   /// Referral system and rewards
-  /// Coming Soon in v2.2
-  static const bool enableReferrals = false;
+  /// ENABLED FOR TESTING
+  static const bool enableReferrals = true;
 
   // ==========================================
   // PREMIUM FEATURES (Keep for paid tiers)

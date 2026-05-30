@@ -107,21 +107,22 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
             ),
         ],
       ),
-      floatingActionButton: _showWelcomeOverlay ? null : Container(
-        height: 56,
-        width: 56,
-        margin: const EdgeInsets.only(top: 30),
-        child: FloatingActionButton(
-          foregroundColor: Colors.white,
-          shape: const CircleBorder(),
-          elevation: 0,
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          child: Icon(
-            currentIndex == 0 ? Iconsax.home_25 : Iconsax.home_2,
-            size: 26,
-            color: Colors.white,
+      floatingActionButton: _showWelcomeOverlay ? null : SizedBox(
+        height: 64,
+        width: 64,
+        child: FittedBox(
+          child: FloatingActionButton(
+            foregroundColor: Colors.white,
+            shape: const CircleBorder(),
+            elevation: 4,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            child: Icon(
+              currentIndex == 0 ? Iconsax.home_25 : Iconsax.home_2,
+              size: 28,
+              color: Colors.white,
+            ),
+            onPressed: () => ref.read(navigationIndexProvider.notifier).state = 0,
           ),
-          onPressed: () => ref.read(navigationIndexProvider.notifier).state = 0,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -136,62 +137,48 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
           ],
         ),
         child: BottomAppBar(
-          height: 64 + bottomPadding,
-          padding: EdgeInsets.only(bottom: bottomPadding, left: 8, right: 8),
-          notchMargin: 8,
+          height: 68 + bottomPadding,
+          padding: EdgeInsets.only(
+            bottom: bottomPadding > 0 ? bottomPadding : 8,
+            left: 4,
+            right: 4,
+            top: 4,
+          ),
+          notchMargin: 6,
           color: AppTheme.surfaceDark,
           shape: const CircularNotchedRectangle(),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: _NavBarItem(
-                    icon: Iconsax.discover_1,
-                    selectedIcon: Iconsax.discover5,
-                    label: 'Explore',
-                    isSelected: currentIndex == 1,
-                    onTap: () => _handleTabTap(1),
-                  ),
-                ),
+              _NavBarItem(
+                icon: Iconsax.discover_1,
+                selectedIcon: Iconsax.discover5,
+                label: 'Explore',
+                isSelected: currentIndex == 1,
+                onTap: () => _handleTabTap(1),
               ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: _NavBarItem(
-                    icon: Iconsax.ticket,
-                    selectedIcon: Iconsax.ticket_star5,
-                    label: 'Bookings',
-                    isSelected: currentIndex == 2,
-                    onTap: () => _handleTabTap(2),
-                  ),
-                ),
+              _NavBarItem(
+                icon: Iconsax.ticket,
+                selectedIcon: Iconsax.ticket_star5,
+                label: 'Bookings',
+                isSelected: currentIndex == 2,
+                onTap: () => _handleTabTap(2),
               ),
-              const SizedBox(width: 64), // Space for FAB footprint
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: _NavBarItem(
-                    icon: Iconsax.crown,
-                    selectedIcon: Iconsax.crown5,
-                    label: 'Concierge',
-                    isSelected: currentIndex == 3,
-                    onTap: () => _handleTabTap(3),
-                  ),
-                ),
+              const SizedBox(width: 56), // Space for FAB
+              _NavBarItem(
+                icon: Iconsax.crown,
+                selectedIcon: Iconsax.crown5,
+                label: 'Concierge',
+                isSelected: currentIndex == 3,
+                onTap: () => _handleTabTap(3),
               ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: _NavBarItem(
-                    icon: Iconsax.bookmark,
-                    selectedIcon: Iconsax.bookmark5,
-                    label: 'Feeds',
-                    isSelected: currentIndex == 4,
-                    onTap: () => _handleTabTap(4),
-                  ),
-                ),
+              _NavBarItem(
+                icon: Iconsax.bookmark,
+                selectedIcon: Iconsax.bookmark5,
+                label: 'Feeds',
+                isSelected: currentIndex == 4,
+                onTap: () => _handleTabTap(4),
               ),
             ],
           ),
@@ -218,30 +205,35 @@ class _NavBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: SizedBox(
-        height: 56,
-        width: 64,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isSelected ? selectedIcon : icon,
-              color: isSelected ? AppTheme.primary : Colors.grey,
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? AppTheme.primary : Colors.grey,
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isSelected ? selectedIcon : icon,
+                color: isSelected ? AppTheme.primary : Colors.grey.shade600,
+                size: 26,
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? AppTheme.primary : Colors.grey.shade600,
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  letterSpacing: 0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

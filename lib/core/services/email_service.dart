@@ -319,7 +319,7 @@ class EmailService {
         <tr>
             <td align="center" style="padding: 40px 20px;">
                 <table width="600" cellpadding="0" cellspacing="0" style="background-color: #1E1E1E; border-radius: 16px; overflow: hidden;">
-                    <!-- Header -->
+                    <!-- Header with gradient -->
                     <tr>
                         <td style="background: linear-gradient(135deg, #FF6B35 0%, #FF8A3D 100%); padding: 40px 30px; text-align: center;">
                             <h1 style="color: #FFFFFF; margin: 0; font-size: 32px; font-weight: 700;">Reset Your Password 🔐</h1>
@@ -332,8 +332,11 @@ class EmailService {
                             <p style="color: #FFFFFF; font-size: 18px; line-height: 1.6; margin: 0 0 20px 0;">
                                 Hi <strong>$userName</strong>,
                             </p>
-                            <p style="color: #B0B0B0; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                            <p style="color: #B0B0B0; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
                                 We received a request to reset your A-Play password. Click the button below to create a new password.
+                            </p>
+                            <p style="color: #B0B0B0; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                                If you didn't request this, you can safely ignore this email. Your password will remain unchanged.
                             </p>
 
                             <!-- CTA Button -->
@@ -352,11 +355,15 @@ class EmailService {
                                 <a href="$resetLink" style="color: #FF6B35; word-break: break-all;">$resetLink</a>
                             </p>
 
-                            <div style="background-color: #2A2A2A; border-left: 4px solid #FF6B35; padding: 20px; margin: 30px 0 0 0; border-radius: 8px;">
-                                <p style="color: #FFA500; font-size: 14px; line-height: 1.6; margin: 0;">
-                                    <strong>Security Note:</strong><br>
-                                    This link will expire in 1 hour. If you didn't request this password reset, please ignore this email or contact support if you have concerns.
-                                </p>
+                            <!-- Security Info Box -->
+                            <div style="background-color: #2A2A2A; border-radius: 12px; padding: 25px; margin: 30px 0 0 0;">
+                                <h2 style="color: #FF6B35; font-size: 18px; margin: 0 0 15px 0;">🔒 Security Information</h2>
+                                <ul style="color: #B0B0B0; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                                    <li>This link will expire in <strong style="color: #FFA500;">1 hour</strong> for your security</li>
+                                    <li>Only use this link if you requested a password reset</li>
+                                    <li>Never share this link with anyone</li>
+                                    <li>If you didn't request this, please contact support immediately</li>
+                                </ul>
                             </div>
                         </td>
                     </tr>

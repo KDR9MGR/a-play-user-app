@@ -22,6 +22,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
   bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
 
   @override
   void dispose() {
@@ -122,16 +123,151 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     setState(() => _isGoogleLoading = true);
 
     try {
+      debugPrint('🔵 [GOOGLE-SIGNUP] Starting Google sign-up');
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
-      if (mounted) context.go('/onboarding');
+
+      if (!mounted) return;
+
+      debugPrint('🔵 [GOOGLE-SIGNUP] Sign-up completed, checking user status');
+
+      // Check if user is first-time or existing
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+
+      debugPrint('🔵 [GOOGLE-SIGNUP] Current user: ${user?.email}');
+
+      if (user != null) {
+        // Check profile existence and validity
+        final profile = await supabase
+            .from('profiles')
+            .select('id, created_at')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        debugPrint('🔵 [GOOGLE-SIGNUP] Profile query result: ${profile != null ? "found" : "null"}');
+
+        if (profile == null) {
+          // Profile doesn't exist - this shouldn't happen after auth_provider fix
+          debugPrint('🔵 [GOOGLE-SIGNUP] ✗ No profile found after sign-up');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Account setup incomplete. Please try signing up again.'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
+
+        debugPrint('🔵 [GOOGLE-SIGNUP] Profile created_at: ${profile['created_at']}');
+
+        if (!mounted) return;
+
+        // Check if new user (profile created within last 30 seconds)
+        final isNewUser = profile['created_at'] != null &&
+            DateTime.parse(profile['created_at'] as String)
+                .isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
+
+        debugPrint('🔵 [GOOGLE-SIGNUP] Is new user: $isNewUser');
+
+        if (isNewUser) {
+          debugPrint('🔵 [GOOGLE-SIGNUP] Navigating to /onboarding');
+          context.go('/onboarding');
+        } else {
+          debugPrint('🔵 [GOOGLE-SIGNUP] Navigating to /home');
+          context.go('/home');
+        }
+      }
     } catch (e) {
+      debugPrint('🔵 [GOOGLE-SIGNUP] ✗ Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(
+            content: Text('Google Sign-Up failed: ${e.toString()}'),
+            backgroundColor: Colors.red[700],
+          ),
         );
       }
     } finally {
       if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
+
+  Future<void> _signUpWithApple() async {
+    setState(() => _isAppleLoading = true);
+
+    try {
+      debugPrint('🍎 [APPLE-SIGNUP] Starting Apple sign-up');
+      await ref.read(authControllerProvider.notifier).signInWithApple();
+
+      if (!mounted) return;
+
+      debugPrint('🍎 [APPLE-SIGNUP] Sign-up completed, checking user status');
+
+      // Check if user is first-time or existing
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+
+      debugPrint('🍎 [APPLE-SIGNUP] Current user: ${user?.email}');
+
+      if (user != null) {
+        // Check profile existence and validity
+        final profile = await supabase
+            .from('profiles')
+            .select('id, created_at')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        debugPrint('🍎 [APPLE-SIGNUP] Profile query result: ${profile != null ? "found" : "null"}');
+
+        if (profile == null) {
+          // Profile doesn't exist - this shouldn't happen after auth_provider fix
+          debugPrint('🍎 [APPLE-SIGNUP] ✗ No profile found after sign-up');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Account setup incomplete. Please try signing up again.'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
+
+        debugPrint('🍎 [APPLE-SIGNUP] Profile created_at: ${profile['created_at']}');
+
+        if (!mounted) return;
+
+        // Check if new user (profile created within last 30 seconds)
+        final isNewUser = profile['created_at'] != null &&
+            DateTime.parse(profile['created_at'] as String)
+                .isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
+
+        debugPrint('🍎 [APPLE-SIGNUP] Is new user: $isNewUser');
+
+        if (isNewUser) {
+          debugPrint('🍎 [APPLE-SIGNUP] Navigating to /onboarding');
+          context.go('/onboarding');
+        } else {
+          debugPrint('🍎 [APPLE-SIGNUP] Navigating to /home');
+          context.go('/home');
+        }
+      }
+    } catch (e) {
+      debugPrint('🍎 [APPLE-SIGNUP] ✗ Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Apple Sign-Up failed: ${e.toString()}'),
+            backgroundColor: Colors.red[700],
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isAppleLoading = false);
     }
   }
 
@@ -247,7 +383,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     onPressed: _signUp,
                     isLoading: _isLoading,
                   ),
-                  // const SizedBox(height: 16),
+                  const SizedBox(height: 24),
+                  // OAuth buttons hidden for MVP
+                  // TODO: Re-enable after configuring OAuth in Supabase Dashboard
                   // Row(
                   //   children: [
                   //     Expanded(
@@ -274,18 +412,32 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   //   backgroundColor: Colors.white,
                   //   textColor: Colors.black87,
                   //   icon: const Icon(
-                  //     FontAwesomeIcons.google,
-                  //     size: 20,
+                  //     Icons.g_mobiledata,
+                  //     size: 28,
                   //     color: Colors.red,
                   //   ),
                   // ),
-                  const SizedBox(height: 24),
+                  // const SizedBox(height: 12),
+                  // AuthButton(
+                  //   text: 'Sign Up with Apple',
+                  //   onPressed: _signUpWithApple,
+                  //   isLoading: _isAppleLoading,
+                  //   backgroundColor: Colors.black,
+                  //   textColor: Colors.white,
+                  //   icon: const Icon(
+                  //     Icons.apple,
+                  //     size: 24,
+                  //     color: Colors.white,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 24),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text('Already have an account?'),
                       TextButton(
-                        onPressed: () => context.pop(),
+                        onPressed: () => context.go('/sign-in'),
                         child: const Text('Sign In'),
                       ),
                     ],

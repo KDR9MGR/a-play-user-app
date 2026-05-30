@@ -151,16 +151,23 @@ function parseAppleResponse(appleResponse: AppleReceiptResponse, receiptData: st
   // Determine if sandbox
   const isSandbox = appleResponse.environment === 'Sandbox';
 
+  // Parse dates
+  const purchaseDate = new Date(parseInt(latestTransaction.purchase_date_ms)).toISOString();
+  const expiresDate = new Date(parseInt(latestTransaction.expires_date_ms)).toISOString();
+
   return {
     user_id: '', // Will be filled by caller
     platform: 'ios',
     product_id: latestTransaction.product_id,
+    plan_id: latestTransaction.product_id, // ADDED: for trigger compatibility
     original_transaction_id: latestTransaction.original_transaction_id,
     latest_transaction_id: latestTransaction.transaction_id,
     status: status,
     sandbox: isSandbox,
-    purchase_date: new Date(parseInt(latestTransaction.purchase_date_ms)).toISOString(),
-    expires_at: new Date(parseInt(latestTransaction.expires_date_ms)).toISOString(),
+    purchase_date: purchaseDate,
+    start_date: purchaseDate, // ADDED: for trigger compatibility
+    expires_at: expiresDate,
+    end_date: expiresDate, // ADDED: for trigger compatibility
     auto_renew_enabled: autoRenewEnabled,
     apple_receipt_data: receiptData,
     apple_latest_receipt: appleResponse.latest_receipt || null,

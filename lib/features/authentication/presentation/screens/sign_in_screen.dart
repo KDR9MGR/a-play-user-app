@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../providers/auth_provider.dart';
+import '../widgets/auth_button.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -17,6 +18,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
 
   @override
   void initState() {
@@ -44,21 +47,30 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     setState(() => _isLoading = true);
 
     try {
+      debugPrint('📱 [SIGN-IN] Starting sign-in process');
+      debugPrint('📱 [SIGN-IN] Email: ${_emailController.text.trim()}');
+
       final authController = ref.read(authControllerProvider.notifier);
       await authController.signInWithEmail(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
+      debugPrint('📱 [SIGN-IN] signInWithEmail completed');
+
       // Check if sign in was successful by checking the state
       final authState = ref.read(authControllerProvider);
+      debugPrint('📱 [SIGN-IN] Checking auth state...');
+
       authState.when(
         data: (user) {
+          debugPrint('📱 [SIGN-IN] State: data - User: ${user?.email ?? "null"}');
           if (user == null) {
             throw 'Failed to sign in';
           }
           // Show success message
           if (mounted) {
+            debugPrint('📱 [SIGN-IN] ✓ Sign-in successful!');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Sign in successful! Welcome back.'),
@@ -69,11 +81,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           }
         },
         error: (error, stackTrace) {
+          debugPrint('📱 [SIGN-IN] State: error - $error');
           throw error.toString();
         },
-        loading: () {},
+        loading: () {
+          debugPrint('📱 [SIGN-IN] State: loading');
+        },
       );
     } catch (e) {
+      debugPrint('📱 [SIGN-IN] ✗ Caught exception: $e');
+      debugPrint('📱 [SIGN-IN] Exception type: ${e.runtimeType}');
       if (mounted) {
         String errorMessage = 'An error occurred during sign in';
 
@@ -83,6 +100,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         // Parse Supabase AuthException for user-friendly messages
         if (e is AuthException) {
           rawError = e.message;
+          debugPrint('📱 [SIGN-IN] AuthException message: $rawError');
         }
 
         // Check for common error patterns
@@ -111,6 +129,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           }
         }
 
+        debugPrint('📱 [SIGN-IN] Showing error to user: $errorMessage');
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -131,6 +151,161 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      debugPrint('🔵 [GOOGLE] Starting Google sign-in');
+      await ref.read(authControllerProvider.notifier).signInWithGoogle();
+
+      if (!mounted) return;
+
+      debugPrint('🔵 [GOOGLE] Sign-in completed, checking user status');
+
+      // Check if user is first-time or existing
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+
+      debugPrint('🔵 [GOOGLE] Current user: ${user?.email}');
+
+      if (user != null) {
+        // Check profile existence and validity
+        final profile = await supabase
+            .from('profiles')
+            .select('id, created_at')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        debugPrint('🔵 [GOOGLE] Profile query result: ${profile != null ? "found" : "null"}');
+
+        if (profile == null) {
+          // Profile doesn't exist - this shouldn't happen after auth_provider fix
+          debugPrint('🔵 [GOOGLE] ✗ No profile found after sign-in');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Account setup incomplete. Please try signing in again.'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
+
+        debugPrint('🔵 [GOOGLE] Profile created_at: ${profile['created_at']}');
+
+        if (!mounted) return;
+
+        // Check if new user (profile created within last 30 seconds)
+        final isNewUser = profile['created_at'] != null &&
+            DateTime.parse(profile['created_at'] as String)
+                .isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
+
+        debugPrint('🔵 [GOOGLE] Is new user: $isNewUser');
+
+        if (isNewUser) {
+          debugPrint('🔵 [GOOGLE] Navigating to /onboarding');
+          context.go('/onboarding');
+        } else {
+          debugPrint('🔵 [GOOGLE] Navigating to /home');
+          context.go('/home');
+        }
+      } else {
+        debugPrint('🔵 [GOOGLE] ✗ No current user after sign-in');
+      }
+    } catch (e) {
+      debugPrint('🔵 [GOOGLE] ✗ Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-In failed: ${e.toString()}'),
+            backgroundColor: Colors.red[700],
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    setState(() => _isAppleLoading = true);
+
+    try {
+      debugPrint('🍎 [APPLE] Starting Apple sign-in');
+      await ref.read(authControllerProvider.notifier).signInWithApple();
+
+      if (!mounted) return;
+
+      debugPrint('🍎 [APPLE] Sign-in completed, checking user status');
+
+      // Check if user is first-time or existing
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+
+      debugPrint('🍎 [APPLE] Current user: ${user?.email}');
+
+      if (user != null) {
+        // Check profile existence and validity
+        final profile = await supabase
+            .from('profiles')
+            .select('id, created_at')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        debugPrint('🍎 [APPLE] Profile query result: ${profile != null ? "found" : "null"}');
+
+        if (profile == null) {
+          // Profile doesn't exist - this shouldn't happen after auth_provider fix
+          debugPrint('🍎 [APPLE] ✗ No profile found after sign-in');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Account setup incomplete. Please try signing in again.'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
+
+        debugPrint('🍎 [APPLE] Profile created_at: ${profile['created_at']}');
+
+        if (!mounted) return;
+
+        // Check if new user (profile created within last 30 seconds)
+        final isNewUser = profile['created_at'] != null &&
+            DateTime.parse(profile['created_at'] as String)
+                .isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
+
+        debugPrint('🍎 [APPLE] Is new user: $isNewUser');
+
+        if (isNewUser) {
+          debugPrint('🍎 [APPLE] Navigating to /onboarding');
+          context.go('/onboarding');
+        } else {
+          debugPrint('🍎 [APPLE] Navigating to /home');
+          context.go('/home');
+        }
+      } else {
+        debugPrint('🍎 [APPLE] ✗ No current user after sign-in');
+      }
+    } catch (e) {
+      debugPrint('🍎 [APPLE] ✗ Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Apple Sign-In failed: ${e.toString()}'),
+            backgroundColor: Colors.red[700],
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isAppleLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,9 +324,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   // App Logo
                   Center(
                     child: Image.asset('assets/images/logo.png',
-                        width: 100, height: 100),
+                        width: 80, height: 80),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   Text(
                     'Welcome Back!',
@@ -161,7 +336,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     'Sign in to continue',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -169,7 +344,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 28),
 
                   // Email field with custom styling
                   _CustomTextField(
@@ -189,7 +364,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
                   // Password field with custom styling
                   _CustomTextField(
@@ -230,7 +405,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
                   // Sign In button with custom styling
                   _CustomButton(
@@ -241,55 +416,87 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Divider
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          color: Colors.grey[800],
-                          thickness: 1,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'OR',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: Colors.grey[800],
-                          thickness: 1,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // OAuth buttons hidden for MVP
+                  // TODO: Re-enable after configuring OAuth in Supabase Dashboard
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //       child: Divider(
+                  //         color: Colors.grey[800],
+                  //         thickness: 1,
+                  //       ),
+                  //     ),
+                  //     Padding(
+                  //       padding: const EdgeInsets.symmetric(horizontal: 16),
+                  //       child: Text(
+                  //         'OR',
+                  //         style: TextStyle(
+                  //           color: Colors.grey[400],
+                  //           fontWeight: FontWeight.bold,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //     Expanded(
+                  //       child: Divider(
+                  //         color: Colors.grey[800],
+                  //         thickness: 1,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
 
-                  const SizedBox(height: 24),
+                  // const SizedBox(height: 16),
+
+                  // // OAuth Buttons
+                  // AuthButton(
+                  //   text: 'Sign In with Google',
+                  //   onPressed: _signInWithGoogle,
+                  //   isLoading: _isGoogleLoading,
+                  //   backgroundColor: Colors.white,
+                  //   textColor: Colors.black87,
+                  //   icon: const Icon(
+                  //     Icons.g_mobiledata,
+                  //     size: 28,
+                  //     color: Colors.red,
+                  //   ),
+                  // ),
+
+                  // const SizedBox(height: 12),
+
+                  // AuthButton(
+                  //   text: 'Sign In with Apple',
+                  //   onPressed: _signInWithApple,
+                  //   isLoading: _isAppleLoading,
+                  //   backgroundColor: Colors.black,
+                  //   textColor: Colors.white,
+                  //   icon: const Icon(
+                  //     Icons.apple,
+                  //     size: 24,
+                  //     color: Colors.white,
+                  //   ),
+                  // ),
+
+                  // const SizedBox(height: 16),
 
                   // Guest Access Option
                   Center(
                     child: TextButton(
                       onPressed: () => context.go('/home'),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
                       child: Text(
                         'Continue as Guest',
                         style: TextStyle(
                           color: Colors.grey[400],
-                          fontSize: 16,
+                          fontSize: 14,
                           decoration: TextDecoration.underline,
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Sign Up link
                   Row(
@@ -300,7 +507,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         style: TextStyle(color: Colors.grey[400]),
                       ),
                       TextButton(
-                        onPressed: () => context.push('/sign-up'),
+                        onPressed: () => context.go('/sign-up'),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -471,4 +678,3 @@ class _CustomButton extends StatelessWidget {
     );
   }
 }
-

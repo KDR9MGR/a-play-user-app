@@ -2,7 +2,10 @@
 // @ts-nocheck
 
 const allowedOrigins = [
-  'http://localhost:8080', // Replace with your app's actual domain
+  'http://localhost:8080',        // Development testing
+  'https://www.aplayworld.com',   // Production web domain
+  'https://aplayworld.com',       // Alternative web domain
+  '*',                             // Allow all origins (mobile apps don't send standard Origin headers)
 ];
 
 function getCorsHeaders(origin: string) {

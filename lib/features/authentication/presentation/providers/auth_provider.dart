@@ -86,6 +86,7 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
 
   Future<void> signInWithEmail(String email, String password) async {
     try {
+      debugPrint('🔐 [AUTH] Starting email sign-in for: $email');
       state = const AsyncValue.loading();
 
       final response = await _client.auth.signInWithPassword(
@@ -93,32 +94,48 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         password: password,
       );
 
+      debugPrint('🔐 [AUTH] Supabase response received');
+      debugPrint('🔐 [AUTH] Session: ${response.session != null ? "✓" : "✗"}');
+      debugPrint('🔐 [AUTH] User: ${response.user != null ? "✓" : "✗"}');
+
       if (response.session == null) {
+        debugPrint('🔐 [AUTH] ✗ No session created');
         throw const AuthException('Failed to sign in: No session created');
       }
 
       final user = response.user;
       if (user == null) {
+        debugPrint('🔐 [AUTH] ✗ No user returned');
         throw const AuthException('Failed to sign in: No user returned');
       }
+
+      debugPrint('🔐 [AUTH] ✓ User authenticated: ${user.email}');
 
       // Link user to OneSignal for push notifications
       try {
         await NotificationService().setExternalUserId(user.id);
+        debugPrint('🔐 [AUTH] ✓ OneSignal linked');
       } catch (e) {
         // Non-critical: Log but don't block sign-in
+        debugPrint('🔐 [AUTH] ⚠️ OneSignal link failed: $e');
       }
 
       state = AsyncValue.data(UserModel.fromSupabaseUser(user.toJson()));
+      debugPrint('🔐 [AUTH] ✓ State updated successfully');
     } on AuthException catch (e, stack) {
+      debugPrint('🔐 [AUTH] ✗ AuthException: ${e.message}');
       state = AsyncValue.error(e, stack);
+      rethrow;
     } catch (e, stack) {
+      debugPrint('🔐 [AUTH] ✗ Exception: $e');
       state = AsyncValue.error(AuthException(e.toString()), stack);
+      rethrow;
     }
   }
 
   Future<void> signInWithGoogle() async {
     try {
+      debugPrint('🔵 [AUTH-PROVIDER] Starting Google sign-in');
       state = const AsyncValue.loading();
 
       // Web client ID for server-side verification
@@ -134,40 +151,119 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         serverClientId: webClientId,
       );
 
+      debugPrint('🔵 [AUTH-PROVIDER] Starting Google authenticate flow');
+
       // Trigger Google Sign-In flow
       final googleUser = await googleSignIn.authenticate();
+
+      debugPrint('🔵 [AUTH-PROVIDER] ✓ Google user obtained: ${googleUser.email}');
 
       // Get authentication tokens
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
 
+      debugPrint('🔵 [AUTH-PROVIDER] ID Token: ${idToken != null ? "✓" : "✗"}');
+
       if (idToken == null) {
+        debugPrint('🔵 [AUTH-PROVIDER] ✗ No ID token from Google');
         throw const AuthException('Failed to get ID token from Google');
       }
 
-      // Sign in to Supabase with the ID token (NO nonce for Google)
+      debugPrint('🔵 [AUTH-PROVIDER] Authenticating with Supabase...');
+
+      // Sign in to Supabase with the ID token
       final authResponse = await _client.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
       );
 
+      debugPrint('🔵 [AUTH-PROVIDER] Supabase auth response received');
+      debugPrint('🔵 [AUTH-PROVIDER] Session: ${authResponse.session != null ? "✓" : "✗"}');
+      debugPrint('🔵 [AUTH-PROVIDER] User: ${authResponse.user != null ? "✓" : "✗"}');
+
       final user = authResponse.user;
       if (user == null) {
-        throw const AuthException('Failed to sign in with Google');
+        debugPrint('🔵 [AUTH-PROVIDER] ✗ No user in Supabase response');
+        throw const AuthException('Failed to sign in with Google - no user returned');
+      }
+
+      debugPrint('🔵 [AUTH-PROVIDER] ✓ Supabase user created: ${user.email} (ID: ${user.id})');
+
+      // Check if profile exists and is valid
+      debugPrint('🔵 [AUTH-PROVIDER] Checking profile existence...');
+      final profile = await _client
+          .from('profiles')
+          .select('id, email, full_name, created_at')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      bool isNewUser = false;
+
+      if (profile == null) {
+        // Profile doesn't exist - create it manually
+        debugPrint('🔵 [AUTH-PROVIDER] ⚠ No profile found, creating manually');
+
+        try {
+          await _client.from('profiles').insert({
+            'id': user.id,
+            'email': user.email,
+            'full_name': user.userMetadata?['full_name'] ??
+                         user.userMetadata?['name'] ??
+                         user.email?.split('@')[0] ?? 'User',
+            'created_at': DateTime.now().toIso8601String(),
+          });
+
+          isNewUser = true;
+          debugPrint('🔵 [AUTH-PROVIDER] ✓ Profile created manually');
+        } catch (e) {
+          debugPrint('🔵 [AUTH-PROVIDER] ✗ Failed to create profile: $e');
+          throw AuthException('Failed to create user profile: ${e.toString()}');
+        }
+      } else {
+        // Profile exists - check if it's a new user (created within last 30 seconds)
+        final createdAt = DateTime.parse(profile['created_at'] as String);
+        isNewUser = createdAt.isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
+        debugPrint('🔵 [AUTH-PROVIDER] Profile found (created: ${profile['created_at']}), isNewUser: $isNewUser');
+      }
+
+      // Send welcome email for new OAuth users
+      if (isNewUser) {
+        try {
+          final userName = user.userMetadata?['full_name'] ??
+                          user.userMetadata?['name'] ??
+                          user.email?.split('@')[0] ??
+                          'there';
+
+          await EmailService().sendWelcomeEmail(
+            toEmail: user.email!,
+            userName: userName,
+          );
+          debugPrint('🔵 [AUTH-PROVIDER] ✓ Welcome email sent to ${user.email}');
+        } catch (e) {
+          debugPrint('🔵 [AUTH-PROVIDER] ⚠ Failed to send welcome email (non-critical): $e');
+          // Don't block authentication if email fails
+        }
       }
 
       // Link user to OneSignal for push notifications
       try {
         await NotificationService().setExternalUserId(user.id);
+        debugPrint('🔵 [AUTH-PROVIDER] ✓ OneSignal linked');
       } catch (e) {
-        // Non-critical: Log but don't block sign-in
+        debugPrint('🔵 [AUTH-PROVIDER] ⚠ OneSignal link failed (non-critical): $e');
       }
 
       state = AsyncValue.data(UserModel.fromSupabaseUser(user.toJson()));
+      debugPrint('🔵 [AUTH-PROVIDER] ✓ Google sign-in complete - state updated');
     } on AuthException catch (e, stack) {
+      debugPrint('🔵 [AUTH-PROVIDER] ✗ AuthException: $e');
       state = AsyncValue.error(e, stack);
+      rethrow;
     } catch (e, stack) {
+      debugPrint('🔵 [AUTH-PROVIDER] ✗ Exception: $e');
+      debugPrint('🔵 [AUTH-PROVIDER] Stack: $stack');
       state = AsyncValue.error(AuthException(e.toString()), stack);
+      rethrow;
     }
   }
 
@@ -187,11 +283,14 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
 
   Future<void> signInWithApple() async {
     try {
+      debugPrint('🍎 [AUTH-PROVIDER] Starting Apple sign-in');
       state = const AsyncValue.loading();
 
       // Generate nonce for Apple Sign-In (required for security)
       final rawNonce = _generateNonce();
       final hashedNonce = _sha256ofString(rawNonce);
+
+      debugPrint('🍎 [AUTH-PROVIDER] Requesting Apple credentials...');
 
       // Request Apple Sign-In credentials
       final credential = await SignInWithApple.getAppleIDCredential(
@@ -202,8 +301,11 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         nonce: hashedNonce,
       );
 
+      debugPrint('🍎 [AUTH-PROVIDER] ✓ Apple credentials received');
+
       final identityToken = credential.identityToken;
       if (identityToken == null) {
+        debugPrint('🍎 [AUTH-PROVIDER] ✗ No identity token from Apple');
         throw const AuthException('Failed to get identity token from Apple');
       }
 
@@ -216,6 +318,8 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         if (fullName.isEmpty) fullName = null;
       }
 
+      debugPrint('🍎 [AUTH-PROVIDER] Authenticating with Supabase...');
+
       // Sign in to Supabase with the ID token and raw nonce
       final authResponse = await _client.auth.signInWithIdToken(
         provider: OAuthProvider.apple,
@@ -223,38 +327,107 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         nonce: rawNonce, // Pass the raw nonce (not hashed) to Supabase
       );
 
+      debugPrint('🍎 [AUTH-PROVIDER] Supabase auth response received');
+      debugPrint('🍎 [AUTH-PROVIDER] Session: ${authResponse.session != null ? "✓" : "✗"}');
+      debugPrint('🍎 [AUTH-PROVIDER] User: ${authResponse.user != null ? "✓" : "✗"}');
+
       final user = authResponse.user;
       if (user == null) {
-        throw const AuthException('Failed to sign in with Apple');
+        debugPrint('🍎 [AUTH-PROVIDER] ✗ No user in Supabase response');
+        throw const AuthException('Failed to sign in with Apple - no user returned');
       }
 
-      // Update profile with the user's name if available
-      // CRITICAL: Apple only provides the name on the FIRST sign-in, so we must save it
-      if (fullName != null && fullName.isNotEmpty) {
+      debugPrint('🍎 [AUTH-PROVIDER] ✓ Supabase user created: ${user.email ?? "no-email"} (ID: ${user.id})');
+
+      // Check if profile exists and is valid
+      debugPrint('🍎 [AUTH-PROVIDER] Checking profile existence...');
+      final profile = await _client
+          .from('profiles')
+          .select('id, email, full_name, created_at')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      bool isNewUser = false;
+
+      if (profile == null) {
+        // Profile doesn't exist - create it manually
+        debugPrint('🍎 [AUTH-PROVIDER] ⚠ No profile found, creating manually');
+
         try {
-          await _client.from('profiles').upsert({
+          await _client.from('profiles').insert({
             'id': user.id,
-            'full_name': fullName,
+            'email': user.email,
+            'full_name': fullName ??
+                         user.userMetadata?['full_name'] ??
+                         user.email?.split('@')[0] ?? 'User',
             'created_at': DateTime.now().toIso8601String(),
           });
+
+          isNewUser = true;
+          debugPrint('🍎 [AUTH-PROVIDER] ✓ Profile created manually');
         } catch (e) {
-          // Log error but don't fail the sign-in
-          // User can update their name later in profile settings
+          debugPrint('🍎 [AUTH-PROVIDER] ✗ Failed to create profile: $e');
+          throw AuthException('Failed to create user profile: ${e.toString()}');
+        }
+      } else {
+        // Profile exists - check if it's a new user (created within last 30 seconds)
+        final createdAt = DateTime.parse(profile['created_at'] as String);
+        isNewUser = createdAt.isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
+        debugPrint('🍎 [AUTH-PROVIDER] Profile found (created: ${profile['created_at']}), isNewUser: $isNewUser');
+
+        // Update profile with the user's name if available from Apple (only on first sign-in)
+        // CRITICAL: Apple only provides the name on the FIRST sign-in, so we must save it
+        if (fullName != null && fullName.isNotEmpty) {
+          try {
+            await _client.from('profiles').update({
+              'full_name': fullName,
+            }).eq('id', user.id);
+            debugPrint('🍎 [AUTH-PROVIDER] ✓ Profile updated with Apple name');
+          } catch (e) {
+            debugPrint('🍎 [AUTH-PROVIDER] ⚠ Failed to update profile name (non-critical): $e');
+          }
+        }
+      }
+
+      // Send welcome email for new OAuth users
+      if (isNewUser) {
+        try {
+          final userName = fullName ??
+                          user.userMetadata?['full_name'] ??
+                          user.email?.split('@')[0] ??
+                          'there';
+
+          if (user.email != null) {
+            await EmailService().sendWelcomeEmail(
+              toEmail: user.email!,
+              userName: userName,
+            );
+            debugPrint('🍎 [AUTH-PROVIDER] ✓ Welcome email sent to ${user.email}');
+          }
+        } catch (e) {
+          debugPrint('🍎 [AUTH-PROVIDER] ⚠ Failed to send welcome email (non-critical): $e');
+          // Don't block authentication if email fails
         }
       }
 
       // Link user to OneSignal for push notifications
       try {
         await NotificationService().setExternalUserId(user.id);
+        debugPrint('🍎 [AUTH-PROVIDER] ✓ OneSignal linked');
       } catch (e) {
-        // Non-critical: Log but don't block sign-in
+        debugPrint('🍎 [AUTH-PROVIDER] ⚠ OneSignal link failed (non-critical): $e');
       }
 
       state = AsyncValue.data(UserModel.fromSupabaseUser(user.toJson()));
+      debugPrint('🍎 [AUTH-PROVIDER] ✓ Apple sign-in complete - state updated');
     } on AuthException catch (e, stack) {
+      debugPrint('🍎 [AUTH-PROVIDER] ✗ AuthException: $e');
       state = AsyncValue.error(e, stack);
+      rethrow;
     } catch (e, stack) {
+      debugPrint('🍎 [AUTH-PROVIDER] ✗ Exception: $e');
       state = AsyncValue.error(AuthException(e.toString()), stack);
+      rethrow;
     }
   }
 
@@ -337,11 +510,22 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
 
   Future<void> resetPassword(String email) async {
     try {
+      debugPrint('🔑 [RESET] Starting password reset for: $email');
+
+      // Use different redirect URLs for web vs mobile
+      final redirectUrl = kIsWeb
+          ? 'https://www.aplayworld.com/reset-password' // Production web URL
+          : 'aplayorganiser://reset-password'; // Mobile deep link
+
+      debugPrint('🔑 [RESET] Using redirect URL: $redirectUrl');
+
       // Trigger Supabase password reset flow
       await _client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'io.supabase.aplay://reset-callback/',
+        redirectTo: redirectUrl,
       );
+
+      debugPrint('🔑 [RESET] ✓ Password reset email sent');
 
       // Send branded password reset email via Resend
       try {

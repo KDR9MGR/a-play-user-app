@@ -66,7 +66,7 @@ class HomeAppBar extends ConsumerWidget {
                 children: [
                   const Icon(
                     Icons.location_on_rounded,
-                    size: 14,
+                    size: 18,
                     color: Colors.white,
                   ),
                   const SizedBox(width: 6),
@@ -82,7 +82,7 @@ class HomeAppBar extends ConsumerWidget {
                   const SizedBox(width: 8),
                   const Icon(
                     Iconsax.arrow_down_1,
-                    size: 12,
+                    size: 14,
                     color: Colors.white,
                   ),
                 ],
@@ -116,7 +116,7 @@ class HomeAppBar extends ConsumerWidget {
             children: [
               const Icon(
                 Iconsax.location_slash,
-                size: 14,
+                size: 18,
                 color: Colors.white,
               ),
               const SizedBox(width: 4),

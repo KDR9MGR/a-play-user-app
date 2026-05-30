@@ -105,72 +105,38 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // ========================================================================
-    // 3. Query Active Subscription
+    // 3. Query Active Subscription from user_subscriptions table
     // ========================================================================
 
-    // Method 1: Use the helper function we created
-    const { data: functionResult, error: functionError } = await supabase
-      .rpc('get_user_subscription', { p_user_id: userId });
+    console.log('Checking subscription for user:', userId);
 
-    if (functionError) {
-      console.error('Function call error:', functionError);
+    // Query user_subscriptions table directly (where IAP data is stored)
+    const { data: subscriptions, error: queryError } = await supabase
+      .from('user_subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .gt('end_date', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1);
 
-      // Fallback: Query directly if function fails
-      const { data: subscriptions, error: queryError } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .in('status', ['active', 'grace_period'])
-        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-        .order('expires_at', { ascending: false, nullsFirst: true })
-        .limit(1);
-
-      if (queryError) {
-        console.error('Direct query error:', queryError);
-        return new Response(
-          JSON.stringify({
-            isSubscribed: false,
-            error: 'Database query failed',
-          }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
-      }
-
-      if (!subscriptions || subscriptions.length === 0) {
-        return new Response(
-          JSON.stringify({
-            isSubscribed: false,
-          }),
-          {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
-      }
-
-      const sub = subscriptions[0];
+    if (queryError) {
+      console.error('Query error:', queryError);
       return new Response(
         JSON.stringify({
-          isSubscribed: true,
-          productId: sub.product_id,
-          expiry: sub.expires_at,
-          platform: sub.platform,
-          status: sub.status,
-          autoRenewEnabled: sub.auto_renew_enabled,
-          sandbox: sub.sandbox,
+          isSubscribed: false,
+          error: 'Database query failed',
         }),
         {
-          status: 200,
+          status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
     }
 
-    // Function executed successfully
-    if (!functionResult || functionResult.length === 0 || !functionResult[0].is_subscribed) {
+    // No active subscription found
+    if (!subscriptions || subscriptions.length === 0) {
+      console.log('No active subscription found for user:', userId);
       return new Response(
         JSON.stringify({
           isSubscribed: false,
@@ -185,15 +151,21 @@ serve(async (req) => {
     // ========================================================================
     // 4. Return Subscription Status
     // ========================================================================
-    const result = functionResult[0];
+    const sub = subscriptions[0];
+    console.log('Active subscription found:', {
+      product_id: sub.product_id,
+      status: sub.status,
+      expires: sub.end_date,
+    });
 
     const response: SubscriptionStatus = {
-      isSubscribed: result.is_subscribed,
-      productId: result.product_id,
-      expiry: result.expires_at,
-      platform: result.platform,
-      status: result.status,
-      autoRenewEnabled: result.auto_renew_enabled,
+      isSubscribed: true,
+      productId: sub.product_id,
+      expiry: sub.end_date, // Changed from expires_at to end_date
+      platform: sub.platform,
+      status: sub.status,
+      autoRenewEnabled: sub.auto_renew_enabled,
+      sandbox: sub.sandbox,
     };
 
     return new Response(

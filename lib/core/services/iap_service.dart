@@ -35,6 +35,7 @@ class IAPService {
   bool _isAvailable = false;
   bool _isInitialized = false;
   List<ProductDetails> _products = [];
+  final Map<String, Timer> _pendingTimers = {}; // Track pending purchases
 
   // Callbacks
   void Function(ProductDetails product)? onPurchaseSuccess;
@@ -218,8 +219,24 @@ class IAPService {
 
   void _handlePending(PurchaseDetails details) {
     debugPrint('IAPService: ⏳ Purchase PENDING');
-    debugPrint('IAPService: → Look for payment confirmation dialog');
-    debugPrint('IAPService: → Tap [Buy] to complete purchase');
+    debugPrint('IAPService: → Product: ${details.productID}');
+    debugPrint('IAPService: → Purchase ID: ${details.purchaseID}');
+    debugPrint('IAPService: → Transaction Date: ${details.transactionDate}');
+    debugPrint('IAPService: → Pending Complete: ${details.pendingCompletePurchase}');
+    debugPrint('IAPService: ');
+    debugPrint('IAPService: 📱 SANDBOX TESTING INSTRUCTIONS:');
+    debugPrint('IAPService: 1. Look for the StoreKit payment confirmation dialog');
+    debugPrint('IAPService: 2. Tap [Buy] to complete the purchase');
+    debugPrint('IAPService: 3. If testing in Sandbox, the purchase should complete within 5-10 seconds');
+    debugPrint('IAPService: 4. If stuck, try:');
+    debugPrint('IAPService:    - Restart the app');
+    debugPrint('IAPService:    - Sign out/in to Sandbox account in Settings');
+    debugPrint('IAPService:    - Check Network Connection');
+    debugPrint('IAPService: ');
+
+    // NOTE: In Sandbox, pending status can take time to resolve
+    // StoreKit will automatically call back with purchased/error status
+    // No action needed here - just wait for the status update
   }
 
   void _handlePurchased(PurchaseDetails details) {

@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:a_play/core/theme/app_theme.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+// Firebase temporarily disabled for testing - uncomment when GoogleService-Info.plist is configured
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +19,7 @@ import 'package:a_play/features/subscription/service/platform_subscription_servi
 import 'package:a_play/core/services/realtime_sync_service.dart';
 import 'package:a_play/core/services/notification_service.dart';
 import 'package:a_play/core/services/iap_service.dart';
-import 'package:a_play/firebase_options.dart';
+// import 'package:a_play/firebase_options.dart';
 
 // Initialize app state provider
 final appInitializationProvider = StateProvider<bool>((ref) => false);
@@ -29,19 +30,38 @@ Future<void> main() async {
 
     await Env.initialize();
 
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    // Firebase temporarily disabled for testing
+    // TODO: Re-enable when GoogleService-Info.plist is properly configured
+    /*
+    // Initialize Firebase with error handling
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
 
-    if (!kIsWeb) {
-      FlutterError.onError = (details) {
-        FirebaseCrashlytics.instance.recordFlutterFatalError(details);
-      };
+      if (!kIsWeb) {
+        FlutterError.onError = (details) {
+          FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+        };
 
-      PlatformDispatcher.instance.onError = (error, stack) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-        return true;
-      };
+        PlatformDispatcher.instance.onError = (error, stack) {
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          return true;
+        };
+      }
+    } catch (e) {
+      // Firebase initialization failed - continue without Firebase
+      // This allows app to run without proper Firebase configuration during testing
+      if (kDebugMode) {
+        debugPrint('⚠️ Firebase initialization failed: $e');
+        debugPrint('⚠️ App will run without Firebase/Crashlytics');
+      }
+      // Don't throw - allow app to continue
+    }
+    */
+
+    if (kDebugMode) {
+      debugPrint('ℹ️ Firebase/Crashlytics disabled for testing');
     }
 
     await Connectivity().checkConnectivity();
@@ -76,13 +96,25 @@ Future<void> main() async {
 
     await _bootstrapApp(supabaseUrl: supabaseUrl, supabaseAnonKey: supabaseAnonKey);
   }, (error, stackTrace) {
+    // Firebase/Crashlytics temporarily disabled for testing
+    /*
+    // Try to record error in Crashlytics if available
     if (!kIsWeb) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
+      try {
+        FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
+      } catch (e) {
+        // Firebase/Crashlytics not available - log to console only
+        if (kDebugMode) {
+          debugPrint('Could not record error to Crashlytics: $e');
+        }
+      }
     }
+    */
 
-    // Error already logged to Crashlytics
+    // Log error to console
     if (kDebugMode) {
       debugPrint('App initialization failed: $error');
+      debugPrint('Stack trace: $stackTrace');
     }
 
     runApp(

@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:video_player/video_player.dart';
-import '../authentication/presentation/providers/auth_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -21,7 +22,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeVideo();
+    // Skip video on web - go directly to auth check
+    if (kIsWeb) {
+      debugPrint('🌐 [SPLASH] Running on web - skipping video');
+      _useFallback();
+    } else {
+      _initializeVideo();
+    }
   }
 
   Future<void> _initializeVideo() async {
@@ -92,17 +99,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       // Add small delay to ensure smooth transition
       await Future.delayed(const Duration(milliseconds: 300));
 
-      // Check authentication state
-      final authState = ref.read(authStateProvider);
-      final isAuthenticated = authState.value != null;
+      // Check authentication state from Supabase
+      final supabaseClient = Supabase.instance.client;
+      final session = supabaseClient.auth.currentSession;
+      final user = supabaseClient.auth.currentUser;
 
       if (!mounted) return;
 
       // Navigate based on auth state:
-      // - If authenticated: go to home
-      // - If not authenticated: go directly to home (guest browsing)
-      //   Users can browse freely; sign-in is only required for account actions
-      context.go('/home');
+      // - If authenticated and has session: go to home
+      // - If not authenticated: go to sign-in screen
+      if (session != null && user != null) {
+        debugPrint('✓ User authenticated: ${user.email}');
+        context.go('/home');
+      } else {
+        debugPrint('✗ No active session - redirecting to sign-in');
+        context.go('/sign-in');
+      }
     } catch (e) {
       debugPrint('Error in splash screen: $e');
       if (!mounted) return;
