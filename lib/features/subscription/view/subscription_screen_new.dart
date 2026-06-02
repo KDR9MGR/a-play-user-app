@@ -4,6 +4,10 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/iap_service.dart';
+import '../../../services/unified_payment_service.dart';
+import '../model/subscription_model.dart';
+import '../screens/subscription_success_screen.dart';
+import '../screens/subscription_failure_screen.dart';
 import '../service/iap_verification_service.dart';
 import '../service/subscription_sync_service.dart';
 
@@ -90,9 +94,9 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
         await _iapService.initialize();
       } catch (e) {
         debugPrint('SubscriptionScreen: IAP initialization failed: $e');
+        // Don't set error - will fall back to PayStack plans
         if (mounted) {
           setState(() {
-            _errorMessage = 'Unable to load subscription plans. This is normal in simulator. Please try on a real device or contact support if the issue persists.';
             _isLoading = false;
           });
         }
@@ -138,11 +142,18 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
       if (mounted) {
         setState(() {
           _isPurchasing = false;
-          _successMessage = 'Subscription activated successfully!';
         });
 
-        // Show success dialog
-        _showSuccessDialog();
+        // Navigate to success screen
+        await Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => SubscriptionSuccessScreen(
+              planName: product.title.split('(').first.trim(),
+              transactionId: product.id,
+              expiryDate: DateTime.now().add(const Duration(days: 30)), // Default to 30 days
+            ),
+          ),
+        );
       }
     } catch (e) {
       debugPrint('SubscriptionScreen: Verification failed: $e');
@@ -150,9 +161,18 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
       if (mounted) {
         setState(() {
           _isPurchasing = false;
-          _errorMessage = 'Purchase successful but verification failed. Please contact support.';
-          _successMessage = null;
         });
+
+        // Navigate to failure screen
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => SubscriptionFailureScreen(
+              errorMessage: 'Purchase successful but verification failed. Please contact support with product ID: ${product.id}',
+              planName: product.title.split('(').first.trim(),
+              onRetry: null, // Can't retry IAP
+            ),
+          ),
+        );
       }
     }
   }
@@ -166,6 +186,17 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
         _errorMessage = error;
         _successMessage = null;
       });
+
+      // Navigate to failure screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => SubscriptionFailureScreen(
+            errorMessage: error,
+            planName: null,
+            onRetry: null, // Can't automatically retry IAP
+          ),
+        ),
+      );
     }
   }
 
@@ -197,22 +228,420 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
     await _iapService.purchaseSubscription(product.id);
   }
 
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Success!'),
-        content: const Text('Your subscription has been activated successfully.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Close subscription screen
-            },
-            child: const Text('OK'),
+
+  // Load PayStack subscription plans from database
+  Future<List<SubscriptionPlan>> _loadPayStackPlans() async {
+    try {
+      debugPrint('Loading PayStack subscription plans from database...');
+
+      final response = await Supabase.instance.client
+          .from('subscription_plans')
+          .select()
+          .eq('is_active', true)
+          .order('price');
+
+      debugPrint('Loaded ${response.length} PayStack plans');
+
+      return (response as List)
+          .map((json) => SubscriptionPlan.fromJson(json))
+          .toList();
+    } catch (e) {
+      debugPrint('Failed to load PayStack plans: $e');
+      // Return default plans as fallback
+      return SubscriptionPlan.defaultPlans;
+    }
+  }
+
+  // Build UI for PayStack subscription plans
+  Widget _buildPayStackPlansUI(List<SubscriptionPlan> plans) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Header
+        const Text(
+          'Choose Your Plan',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
           ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Get access to premium features',
+          style: TextStyle(color: Colors.grey),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 32),
+
+        // Plans
+        ...plans.map((plan) => _buildPayStackPlanCard(plan)),
+
+        const SizedBox(height: 24),
+
+        // Terms
+        const Text(
+          'Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period.',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  // Build individual PayStack plan card
+  Widget _buildPayStackPlanCard(SubscriptionPlan plan) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Stack(
+        children: [
+          Card(
+            elevation: plan.isPopular ? 8 : 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: plan.isPopular
+                  ? const BorderSide(color: Colors.blue, width: 2)
+                  : BorderSide.none,
+            ),
+            child: InkWell(
+              onTap: _isPurchasing ? null : () => _purchaseWithPayStack(plan),
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      plan.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Description
+                    if (plan.description != null && plan.description!.isNotEmpty)
+                      Text(
+                        plan.description!,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    const SizedBox(height: 16),
+
+                    // Price
+                    Row(
+                      children: [
+                        Text(
+                          '${plan.currency} ${plan.price?.toStringAsFixed(2) ?? '0.00'}',
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _getPayStackPeriodText(plan),
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+
+                    // Benefits
+                    if (plan.benefits.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      ...plan.benefits.take(3).map((benefit) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle, size: 16, color: Colors.green),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                benefit,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                    ],
+
+                    const SizedBox(height: 16),
+
+                    // Subscribe button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isPurchasing ? null : () => _purchaseWithPayStack(plan),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: plan.isPopular ? Colors.blue : null,
+                        ),
+                        child: const Text(
+                          'Subscribe Now',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Popular badge
+          if (plan.isPopular)
+            Positioned(
+              top: 0,
+              right: 20,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'MOST POPULAR',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+
+  String _getPayStackPeriodText(SubscriptionPlan plan) {
+    if (plan.planType == SubscriptionPlanType.trial) return 'free trial';
+    if (plan.planType == SubscriptionPlanType.weekly) return '/ week';
+    if (plan.planType == SubscriptionPlanType.monthly) return '/ month';
+    if (plan.planType == SubscriptionPlanType.quarterly) return '/ 3 months';
+    if (plan.planType == SubscriptionPlanType.annual) return '/ year';
+    return '';
+  }
+
+  // Purchase subscription using PayStack
+  Future<void> _purchaseWithPayStack(SubscriptionPlan plan) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      _showErrorDialog('Please sign in to subscribe');
+      return;
+    }
+
+    if (plan.price == null || plan.price == 0) {
+      _showErrorDialog('Invalid subscription plan');
+      return;
+    }
+
+    setState(() {
+      _isPurchasing = true;
+      _errorMessage = null;
+      _successMessage = null;
+    });
+
+    final reference = 'aplay_sub_${DateTime.now().millisecondsSinceEpoch}';
+
+    try {
+      debugPrint('Processing PayStack subscription payment for plan: ${plan.name}');
+
+      final success = await UnifiedPaymentService.instance.processPayment(
+        context: context,
+        email: user.email!,
+        amount: plan.price!,
+        reference: reference,
+        metadata: {
+          'type': 'subscription',
+          'plan_id': plan.id,
+          'plan_type': plan.planType?.toString(),
+          'user_id': user.id,
+        },
+        onSuccess: () async {
+          debugPrint('PayStack payment successful, creating subscription...');
+          try {
+            await _createPayStackSubscription(plan, reference);
+
+            // Navigate to success screen
+            if (mounted) {
+              setState(() {
+                _isPurchasing = false;
+              });
+
+              final endDate = _calculateEndDate(plan);
+
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => SubscriptionSuccessScreen(
+                    planName: plan.name,
+                    transactionId: reference,
+                    expiryDate: endDate,
+                  ),
+                ),
+              );
+            }
+          } catch (e) {
+            debugPrint('Failed to create subscription: $e');
+            // Show failure screen even though payment succeeded
+            if (mounted) {
+              setState(() {
+                _isPurchasing = false;
+              });
+
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => SubscriptionFailureScreen(
+                    errorMessage: 'Payment succeeded but failed to activate subscription. Please contact support with transaction ID: $reference',
+                    planName: plan.name,
+                    onRetry: () {
+                      Navigator.of(context).pop();
+                      _purchaseWithPayStack(plan);
+                    },
+                  ),
+                ),
+              );
+            }
+          }
+        },
+        onError: (error) {
+          debugPrint('PayStack payment failed: $error');
+          if (mounted) {
+            setState(() {
+              _isPurchasing = false;
+            });
+
+            // Navigate to failure screen
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SubscriptionFailureScreen(
+                  errorMessage: error,
+                  planName: plan.name,
+                  onRetry: () {
+                    Navigator.of(context).pop();
+                    _purchaseWithPayStack(plan);
+                  },
+                ),
+              ),
+            );
+          }
+        },
+      );
+
+      // Handle case where payment was cancelled
+      if (!success && mounted) {
+        setState(() {
+          _isPurchasing = false;
+        });
+
+        // User cancelled payment - just reset state, don't show error
+        debugPrint('Payment was cancelled by user');
+      }
+    } catch (e) {
+      debugPrint('PayStack subscription error: $e');
+      if (mounted) {
+        setState(() {
+          _isPurchasing = false;
+        });
+
+        // Navigate to failure screen
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => SubscriptionFailureScreen(
+              errorMessage: 'An unexpected error occurred: ${e.toString()}',
+              planName: plan.name,
+              onRetry: () {
+                Navigator.of(context).pop();
+                _purchaseWithPayStack(plan);
+              },
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  // Create subscription record after successful PayStack payment
+  Future<void> _createPayStackSubscription(SubscriptionPlan plan, String transactionId) async {
+    final user = Supabase.instance.client.auth.currentUser!;
+
+    try {
+      final endDate = _calculateEndDate(plan);
+
+      await Supabase.instance.client.from('user_subscriptions').insert({
+        'user_id': user.id,
+        'plan_id': plan.id,
+        'tier': _getTierFromPlan(plan),
+        'status': 'active',
+        'start_date': DateTime.now().toIso8601String(),
+        'end_date': endDate.toIso8601String(),
+        'payment_method': 'paystack',
+        'payment_reference': transactionId,
+        'amount': plan.price,
+        'currency': plan.currency,
+      });
+
+      // Update user profile tier
+      await Supabase.instance.client
+          .from('profiles')
+          .update({'tier': _getTierFromPlan(plan)})
+          .eq('id', user.id);
+
+      debugPrint('Subscription created successfully');
+    } catch (e) {
+      debugPrint('Failed to create subscription record: $e');
+      throw Exception('Failed to activate subscription: $e');
+    }
+  }
+
+  DateTime _calculateEndDate(SubscriptionPlan plan) {
+    final now = DateTime.now();
+    if (plan.durationDays != null) {
+      return now.add(Duration(days: plan.durationDays!));
+    }
+
+    // Fallback based on plan type
+    switch (plan.planType) {
+      case SubscriptionPlanType.trial:
+        return now.add(const Duration(days: 3));
+      case SubscriptionPlanType.weekly:
+        return now.add(const Duration(days: 7));
+      case SubscriptionPlanType.monthly:
+        return now.add(const Duration(days: 30));
+      case SubscriptionPlanType.quarterly:
+        return now.add(const Duration(days: 90));
+      case SubscriptionPlanType.annual:
+        return now.add(const Duration(days: 365));
+      default:
+        return now.add(const Duration(days: 30));
+    }
+  }
+
+  String _getTierFromPlan(SubscriptionPlan plan) {
+    // Map plan to tier
+    if (plan.id.contains('trial') || plan.id.contains('weekly')) {
+      return 'Bronze';
+    } else if (plan.id.contains('monthly')) {
+      return 'Silver';
+    } else if (plan.id.contains('quarterly')) {
+      return 'Gold';
+    } else if (plan.id.contains('annual')) {
+      return 'Platinum';
+    }
+    return 'Silver'; // Default
+  }
+
+  void _showErrorDialog(String message) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SubscriptionFailureScreen(
+          errorMessage: message,
+          planName: null,
+          onRetry: () => Navigator.of(context).pop(),
+        ),
       ),
     );
   }
@@ -637,30 +1066,61 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
       return _buildAlreadySubscribedView();
     }
 
-    // PRIORITY 2: If no products available
+    // PRIORITY 2: If no IAP products, fall back to PayStack subscriptions
     if (_products.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'No subscription plans available',
-              style: TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'This is normal in simulator.',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Go Back'),
-            ),
-          ],
-        ),
+      return FutureBuilder<List<SubscriptionPlan>>(
+        future: _loadPayStackPlans(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            // Only show error if both IAP and PayStack fail
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Unable to load subscription plans',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Please check your connection and try again.',
+                    style: TextStyle(color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => setState(() {
+                          _isLoading = true;
+                          _initialize();
+                        }),
+                        child: const Text('Retry'),
+                      ),
+                      const SizedBox(width: 16),
+                      OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Go Back'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Show PayStack subscriptions
+          return _buildPayStackPlansUI(snapshot.data!);
+        },
       );
     }
 

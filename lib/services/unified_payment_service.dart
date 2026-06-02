@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class UnifiedPaymentService {
   static UnifiedPaymentService? _instance;
@@ -106,7 +107,7 @@ class UnifiedPaymentService {
   }
 }
 
-class PaystackWebView extends StatelessWidget {
+class PaystackWebView extends StatefulWidget {
   final String authorizationUrl;
   final String reference;
   final Function() onSuccess;
@@ -121,25 +122,163 @@ class PaystackWebView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Payment'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () {
-            onError('Payment cancelled');
-            Navigator.of(context).pop(false);
+  State<PaystackWebView> createState() => _PaystackWebViewState();
+}
+
+class _PaystackWebViewState extends State<PaystackWebView> {
+  late final WebViewController _controller;
+  bool _isVerifying = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(Colors.white)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (String url) {
+            debugPrint('Page started loading: $url');
+          },
+          onPageFinished: (String url) {
+            debugPrint('Page finished loading: $url');
+            if (mounted) {
+              setState(() => _isLoading = false);
+            }
+
+            // Check for payment completion callbacks
+            if (url.contains('checkout.paystack.com/close') ||
+                url.contains('standard.paystack.co/close') ||
+                url == 'aplay://payment-callback') {
+              _verifyTransaction();
+            }
+          },
+          onWebResourceError: (WebResourceError error) {
+            debugPrint('WebView error: ${error.description}');
           },
         ),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            onError('Payment webview unavailable');
-            Navigator.of(context).pop(false);
-          },
-          child: const Text('Close'),
+      )
+      ..loadRequest(Uri.parse(widget.authorizationUrl));
+  }
+
+  Future<void> _verifyTransaction() async {
+    if (_isVerifying) return;
+    setState(() => _isVerifying = true);
+
+    try {
+      debugPrint('Verifying transaction: ${widget.reference}');
+
+      final response = await Supabase.instance.client.functions.invoke(
+        'paystack',
+        body: {
+          'action': 'verify',
+          'reference': widget.reference,
+        },
+      );
+
+      final responseData = (response.data as Map).cast<String, dynamic>();
+      final data = (responseData['data'] as Map?)?.cast<String, dynamic>();
+
+      debugPrint('Verification response: $responseData');
+
+      if (response.status == 200 &&
+          responseData['status'] == true &&
+          data?['status'] == 'success') {
+        widget.onSuccess();
+        if (mounted) {
+          Navigator.of(context).pop(true);
+        }
+      } else {
+        throw Exception('Payment verification failed: ${responseData['message'] ?? 'Unknown error'}');
+      }
+    } catch (e) {
+      debugPrint('Verification error: $e');
+      widget.onError('Payment verification failed: $e');
+      if (mounted) {
+        Navigator.of(context).pop(false);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isVerifying = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: !_isVerifying,
+      onPopInvoked: (didPop) {
+        if (!didPop && !_isVerifying) {
+          widget.onError('Payment cancelled');
+          Navigator.of(context).pop(false);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Payment Review'),
+          backgroundColor: const Color(0xFF1A1A2E),
+          foregroundColor: Colors.white,
+          leading: _isVerifying
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    widget.onError('Payment cancelled');
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+        ),
+        body: Stack(
+          children: [
+            WebViewWidget(controller: _controller),
+            if (_isLoading)
+              Container(
+                color: Colors.white,
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B35)),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Loading payment page...',
+                        style: TextStyle(
+                          color: Color(0xFF1A1A2E),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            if (_isVerifying)
+              Container(
+                color: Colors.black87,
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Verifying payment...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
