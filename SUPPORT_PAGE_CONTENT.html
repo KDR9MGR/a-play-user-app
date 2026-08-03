@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-Play Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8A3D 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            color: #FF6B35;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #FF6B35;
+        }
+        .contact-box {
+            background: #f8f9fa;
+            border-left: 4px solid #FF6B35;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .contact-box p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        .contact-box a {
+            color: #FF6B35;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .contact-box a:hover {
+            text-decoration: underline;
+        }
+        .faq-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        .faq-item:hover {
+            transform: translateX(5px);
+        }
+        .faq-question {
+            font-weight: 700;
+            color: #FF6B35;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .faq-answer {
+            color: #555;
+            line-height: 1.8;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .feature-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        .footer a {
+            color: #FF6B35;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 A-Play Support</h1>
+            <p>Your Event Booking & Entertainment Hub in Ghana</p>
+        </div>
+
+        <div class="content">
+            <!-- Contact Section -->
+            <div class="section">
+                <h2>📧 Contact Us</h2>
+                <div class="contact-box">
+                    <p><strong>Email Support:</strong> <a href="mailto:support@aplayworld.com">support@aplayworld.com</a></p>
+                    <p><strong>Response Time:</strong> Within 24-48 hours</p>
+                    <p><strong>Available:</strong> Monday - Saturday, 9 AM - 6 PM GMT</p>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="section">
+                <h2>🌟 About A-Play</h2>
+                <p style="font-size: 1.1em; line-height: 1.8; color: #555;">
+                    A-Play is Ghana's premier event booking and entertainment platform. Discover and book tickets for concerts, shows, club nights, and exclusive experiences. Join thousands of users enjoying seamless event booking and premium entertainment services.
+                </p>
+            </div>
+
+            <!-- Features Section -->
+            <div class="section">
+                <h2>✨ Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>🎫 Event Booking</h3>
+                        <p>Browse and book tickets for events across Ghana</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🎪 Club Reservations</h3>
+                        <p>Reserve VIP tables and experiences</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🍽️ Restaurant Bookings</h3>
+                        <p>Book tables at top restaurants</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>👑 Premium Access</h3>
+                        <p>Exclusive concierge services</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="section">
+                <h2>❓ Frequently Asked Questions</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question">How do I create an account?</div>
+                    <div class="faq-answer">
+                        Download the A-Play app, tap "Sign Up", and enter your email and password. You can also continue as a guest to browse events without creating an account.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">How do I book an event?</div>
+                    <div class="faq-answer">
+                        Browse events on the home screen, select your preferred event, choose your ticket zone and quantity, then proceed to payment. You'll receive a QR code ticket via email after successful payment.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">What payment methods are accepted?</div>
+                    <div class="faq-answer">
+                        We accept PayStack payments (Visa, Mastercard, mobile money) and Apple In-App Purchases for subscriptions. All payments are processed securely.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">How do I reset my password?</div>
+                    <div class="faq-answer">
+                        On the sign-in screen, tap "Forgot Password?", enter your email, and we'll send you a password reset link. Check your email (including spam folder) and follow the link to set a new password.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Can I cancel or refund my booking?</div>
+                    <div class="faq-answer">
+                        Cancellation policies vary by event. Generally, bookings can be cancelled up to 24-48 hours before the event for a refund. Check the specific event's cancellation policy before booking.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">What is the Premium subscription?</div>
+                    <div class="faq-answer">
+                        Premium subscriptions (Bronze, Silver, Gold, Platinum) give you access to exclusive features like concierge services, priority booking, reward points, and special discounts. Subscribe via the app's subscription page.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">How do I use my QR code ticket?</div>
+                    <div class="faq-answer">
+                        After booking, you'll receive a QR code ticket in the app and via email. Simply show the QR code at the event entrance for scanning. Make sure to save it to your phone or print it out.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Can I browse events without signing in?</div>
+                    <div class="faq-answer">
+                        Yes! You can browse all events, clubs, and restaurants as a guest. Sign-in is only required when you want to book tickets, make reservations, or access premium features.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Getting Help Section -->
+            <div class="section">
+                <h2>🆘 Need More Help?</h2>
+                <div class="contact-box">
+                    <p>If you can't find the answer to your question in our FAQ, please reach out to us:</p>
+                    <ul style="margin: 15px 0 0 20px; line-height: 2;">
+                        <li>Email: <a href="mailto:support@aplayworld.com">support@aplayworld.com</a></li>
+                        <li>Report a bug or issue</li>
+                        <li>Request a feature</li>
+                        <li>General inquiries</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>We're here to help!</strong> Our support team typically responds within 24-48 hours.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 A-Play. All rights reserved.</p>
+            <p style="margin: 15px 0;">
+                <a href="https://www.aplayworld.com/privacy">Privacy Policy</a> |
+                <a href="https://www.aplayworld.com/terms">Terms of Service</a> |
+                <a href="mailto:support@aplayworld.com">Contact</a>
+            </p>
+            <p style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">
+                Made with ❤️ in Ghana
+            </p>
+        </div>
+    </div>
+</body>
+</html>

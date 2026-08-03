@@ -37,10 +37,14 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "io.supabase.aplay://login-callback" -->
+                <!-- Accepts io.supabase.aplay://login-callback (OAuth) and
+                     io.supabase.aplay://reset-callback (password recovery) -->
                 <data
                     android:scheme="io.supabase.aplay"
                     android:host="login-callback" />
+                <data
+                    android:scheme="io.supabase.aplay"
+                    android:host="reset-callback" />
             </intent-filter>
         </activity>
         <!-- Google Maps API Key -->

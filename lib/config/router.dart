@@ -15,18 +15,25 @@ import 'package:a_play/features/authentication/data/models/user_model.dart';
 import 'package:a_play/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:a_play/features/authentication/presentation/screens/auth_callback_screen.dart';
 import 'package:a_play/features/profile/screens/profile_screen.dart';
+import 'package:a_play/features/profile/screens/edit_profile_page.dart';
 import 'package:a_play/features/restaurant/screens/restaurant_details_screen.dart';
 import 'package:a_play/features/restaurant/screens/restaurant_payment_screen.dart';
 import 'package:a_play/features/splash/splash_screen.dart';
 import 'package:a_play/features/subscription/screens/subscription_history_screen.dart';
 import 'package:a_play/features/subscription/screens/trial_offer_screen.dart';
 import 'package:a_play/features/subscription/view/subscription_screen_new.dart';
+import 'package:a_play/features/subscription/provider/subscription_provider.dart';
+import 'package:a_play/features/subscription/provider/subscription_status_provider.dart';
+import 'package:a_play/features/booking/providers/bookin_history_provider.dart';
+import 'package:a_play/features/profile/providers/profile_provider.dart';
+import 'package:a_play/features/referral/controller/referral_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../features/authentication/presentation/screens/password_reset_screen.dart';
+import '../features/authentication/presentation/screens/update_password_screen.dart';
 import '../features/authentication/presentation/screens/sign_in_screen.dart';
 import '../features/authentication/presentation/screens/sign_up_screen.dart';
 import '../features/profile/screens/help_support_page.dart';
@@ -34,12 +41,36 @@ import '../features/profile/screens/help_support_page.dart';
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
   bool isAuth;
+  String? _lastUserId;
 
   RouterNotifier(this._ref) : isAuth = Supabase.instance.client.auth.currentUser != null {
+    _lastUserId = Supabase.instance.client.auth.currentUser?.id;
     _ref.listen<AsyncValue<UserModel?>>(authStateProvider, (_, next) {
+      final newUserId = next.value?.id;
+      // Whenever the signed-in user changes (sign-out, sign-in, or switching
+      // accounts without restarting the app), drop every per-user cached
+      // provider so no previous user's bookings/subscription/profile/points
+      // data can leak into the next session on this device.
+      if (newUserId != _lastUserId) {
+        _lastUserId = newUserId;
+        _invalidateUserScopedProviders();
+      }
       isAuth = next.value != null;
       notifyListeners();
     });
+  }
+
+  void _invalidateUserScopedProviders() {
+    _ref.invalidate(currentUserProvider);
+    _ref.invalidate(profileFutureProvider);
+    _ref.invalidate(myBookingsProvider);
+    _ref.invalidate(bookingHistoryProvider);
+    _ref.invalidate(subscriptionStatusProvider);
+    _ref.invalidate(activeSubscriptionProvider);
+    _ref.invalidate(subscriptionHistoryProvider);
+    _ref.invalidate(paymentHistoryProvider);
+    _ref.invalidate(pointTransactionsProvider);
+    _ref.invalidate(referralProvider);
   }
 
   String? call(BuildContext context, GoRouterState state) {
@@ -52,13 +83,17 @@ class RouterNotifier extends ChangeNotifier {
     if (state.matchedLocation == '/auth/callback') return null;
 
     // Allow guest browsing of these routes without authentication
+    // Required by App Store Guideline 5.1.1(v) - Users must browse without login
     final guestAllowedRoutes = [
       '/home',
       '/explore',
       '/feed',
       '/podcast',
       '/help-support',
+      RegExp(r'^/event/[^/]+$'),        // Event details (App Store requirement)
+      RegExp(r'^/events$'),              // Events list (App Store requirement)
       RegExp(r'^/club-booking/[^/]+$'), // Club details
+      RegExp(r'^/club/[^/]+$'),          // Club details (alt route)
       RegExp(r'^/restaurant/[^/]+$'),   // Restaurant details
     ];
 
@@ -104,6 +139,10 @@ class RouterNotifier extends ChangeNotifier {
           builder: (context, state) => const PasswordResetScreen(),
         ),
         GoRoute(
+          path: '/update-password',
+          builder: (context, state) => const UpdatePasswordScreen(),
+        ),
+        GoRoute(
           path: '/onboarding',
           builder: (context, state) => const OnboardingScreen(),
         ),
@@ -144,6 +183,10 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/profile/edit',
+          builder: (context, state) => const EditProfilePage(),
         ),
         GoRoute(
           path: '/help-support',
@@ -286,10 +329,22 @@ class RouterNotifier extends ChangeNotifier {
 // Router provider
 final goRouterProvider = Provider<GoRouter>((ref) {
   final notifier = RouterNotifier(ref);
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: '/splash',
     refreshListenable: notifier,
     redirect: notifier.call,
     routes: notifier.routes,
   );
+
+  // When the user opens the password-reset link from their email,
+  // supabase_flutter consumes the deep link, establishes a recovery session,
+  // and fires this event - take them straight to the set-new-password screen.
+  final recoverySub = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    if (data.event == AuthChangeEvent.passwordRecovery) {
+      router.go('/update-password');
+    }
+  });
+  ref.onDispose(recoverySub.cancel);
+
+  return router;
 });

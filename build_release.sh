@@ -8,6 +8,29 @@ echo ""
 # Navigate to project directory
 cd "$(dirname "$0")"
 
+# Generate dart-defines from .env and refuse to proceed with a missing or
+# test Paystack key - this used to be silently baked into stale Xcode
+# archives (Generated.xcconfig only updates on flutter build/run, Xcode
+# Archive alone does not regenerate it), shipping test-mode payments.
+echo "0. Generating dart-defines from .env..."
+if [ ! -f ".env" ]; then
+    echo "   ✗ .env not found. Copy .env.example to .env and fill in real (live) values first."
+    exit 1
+fi
+python3 tool/gen_dart_defines.py --env-file .env --out .dart-defines.json
+PAYSTACK_KEY=$(grep '"PAYSTACK_PUBLIC_KEY"' .dart-defines.json | sed -E 's/.*: *"([^"]*)".*/\1/')
+if [[ -z "$PAYSTACK_KEY" ]]; then
+    echo "   ✗ PAYSTACK_PUBLIC_KEY is not set in .env. A release build cannot ship without it."
+    exit 1
+fi
+if [[ "$PAYSTACK_KEY" == pk_test_* ]]; then
+    echo "   ⚠️  PAYSTACK_PUBLIC_KEY is a test key (pk_test_). This value isn't actually"
+    echo "   used by the live payment flow (that goes through the paystack edge function"
+    echo "   server-side), so this is informational only, not blocking."
+fi
+echo "   ✓ dart-defines generated"
+echo ""
+
 # Set file limit
 echo "1. Setting file descriptor limit..."
 ulimit -n 10240
@@ -62,7 +85,7 @@ echo ""
 
 if [ "$choice" = "a" ]; then
     echo "   Building iOS release IPA..."
-    flutter build ios --release
+    flutter build ios --release --dart-define-from-file=.dart-defines.json
     if [ $? -eq 0 ]; then
         echo ""
         echo "   ✓ IPA built successfully"
@@ -73,6 +96,15 @@ if [ "$choice" = "a" ]; then
         exit 1
     fi
 elif [ "$choice" = "b" ]; then
+    echo "   Refreshing Generated.xcconfig with live dart-defines before Xcode..."
+    echo "   (Xcode Archive alone would otherwise reuse stale values from"
+    echo "   whatever flutter command last ran, e.g. a debug 'flutter run')"
+    flutter build ios --release --dart-define-from-file=.dart-defines.json
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "   ✗ Build failed - not opening Xcode"
+        exit 1
+    fi
     open ios/Runner.xcworkspace
     echo "   ✓ Xcode opened"
     echo ""
@@ -83,6 +115,9 @@ elif [ "$choice" = "b" ]; then
     echo "   4. Click 'Distribute App'"
     echo "   5. Choose 'App Store Connect'"
     echo "   6. Follow the upload wizard"
+    echo ""
+    echo "   ⚠️  Do not run 'flutter run' (debug) before archiving, or the"
+    echo "   dart-defines will go stale again and you'll re-archive test values."
 else
     echo "   ✓ Build preparation complete"
     echo "   You can now:"

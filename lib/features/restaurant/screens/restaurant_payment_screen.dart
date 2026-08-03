@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:a_play/services/unified_payment_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:a_play/core/utils/payment_email.dart';
 
 class RestaurantPaymentScreen extends ConsumerStatefulWidget {
   final String restaurantId;
@@ -334,6 +335,13 @@ class _RestaurantPaymentScreenState
         throw Exception('User not authenticated');
       }
 
+      // Robust email resolution for Apple Sign-In accounts (hidden relay
+      // email is fine; a missing auth email previously crashed on user.email!)
+      final paymentEmail = await resolvePaymentEmail();
+      if (paymentEmail == null) {
+        throw Exception(missingPaymentEmailMessage);
+      }
+
       // Generate unique reference
       const uuid = Uuid();
       final reference = 'REST_${uuid.v4().substring(0, 13)}';
@@ -343,7 +351,7 @@ class _RestaurantPaymentScreenState
       // Process payment with PayStack
       final paymentSuccess = await _paymentService.processPayment(
         context: context,
-        email: user.email!,
+        email: paymentEmail,
         amount: widget.amount,
         reference: reference,
         metadata: {

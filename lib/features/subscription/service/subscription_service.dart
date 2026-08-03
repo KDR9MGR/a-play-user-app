@@ -3,8 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../model/subscription_model.dart';
 import '../../../core/config/paystack_config.dart';
-import '../../../core/services/purchase_manager.dart';
-import 'apple_iap_service.dart';
 
 class SubscriptionService {
   late final SupabaseClient _client;
@@ -237,325 +235,55 @@ class SubscriptionService {
   }
 
   // Start free trial subscription
+  /// S2: eligibility and the actual insert are both re-checked/performed
+  /// server-side by the start-free-trial edge function (service role only -
+  /// the client can no longer insert a trial row directly).
   Future<UserSubscription> startFreeTrial() async {
-    try {
-      final userId = _userId;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Check if user is eligible for trial
-      final isEligible = await isEligibleForTrial();
-      if (!isEligible) {
-        throw Exception('User is not eligible for free trial');
-      }
-
-      // Calculate trial dates
-      final startDate = DateTime.now().toUtc();
-      final endDate = startDate.add(const Duration(days: 3));
-
-      // Create trial subscription
-      final subscriptionId = const Uuid().v4();
-      
-      // First, expire any active subscriptions
-      await _client
-          .from('user_subscriptions')
-          .update({'status': 'expired', 'updated_at': DateTime.now().toUtc().toIso8601String()})
-          .eq('user_id', userId)
-          .eq('status', 'active');
-
-      // Create the trial subscription
-      final response = await _client.from('user_subscriptions').insert({
-        'id': subscriptionId,
-        'user_id': userId,
-        'subscription_type': '3-Day Free Trial',
-        'plan_type': 'trial',
-        'amount': 0.0,
-        'currency': 'GHS',
-        'status': 'active',
-        'payment_reference': 'TRIAL_${DateTime.now().millisecondsSinceEpoch}',
-        'payment_method': 'trial',
-        'start_date': startDate.toIso8601String(),
-        'end_date': endDate.toIso8601String(),
-        'is_auto_renew': false,
-        'tier_points_earned': 25,
-        'features_unlocked': ['premium_content', 'hd_streaming', 'offline_download', 'ad_free'],
-      }).select().single();
-
-      return UserSubscription.fromJson(response);
-    } catch (e) {
-      throw Exception('Failed to start free trial: $e');
+    final response = await _client.functions.invoke('start-free-trial');
+    final data = response.data;
+    if (data is! Map || data['success'] != true) {
+      throw Exception(data is Map ? (data['error'] ?? 'Failed to start free trial') : 'Failed to start free trial');
     }
+    return UserSubscription.fromJson(Map<String, dynamic>.from(data['subscription']));
   }
 
-  // Create a new subscription after successful payment
+  /// S2: after Paystack confirms the reference, fulfillment (creating the
+  /// user_subscriptions/subscription_payments rows) is done server-side by
+  /// confirm-purchase, which re-verifies with Paystack itself and builds the
+  /// subscription strictly from what paystack/initialize computed and
+  /// recorded for this reference - never from planId/amount supplied here.
   Future<UserSubscription> createSubscription(
       String planId, String paymentReference) async {
-    try {
-      final userId = _userId;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      final verification = await verifyPaystackPayment(paymentReference);
-      if (verification.status != true || (verification.data?['status'] as String?) != 'success') {
-        throw Exception('Payment verification failed');
-      }
-
-      // Get the plan details
-      final planResponse = await _client
-          .from('subscription_plans')
-          .select()
-          .eq('id', planId)
-          .single();
-
-      final plan = SubscriptionPlan.fromJson(planResponse);
-      final price =
-          plan.price ?? plan.priceMonthly ?? plan.priceYearly ?? 0.0;
-      final durationDays = plan.durationDays ?? 30;
-      final startDate = DateTime.now().toUtc();
-      final endDate = startDate.add(Duration(days: durationDays));
-      final billingCycle =
-          plan.priceMonthly != null || plan.priceYearly == null ? 'monthly' : 'annual';
-      final tier =
-          (plan.features != null ? plan.features!['tier'] as String? : null) ??
-              plan.name;
-
-      // Create a new subscription
-      final subscriptionId = const Uuid().v4();
-      
-      // First, expire any active subscriptions
-      await _client
-          .from('user_subscriptions')
-          .update({'status': 'expired', 'updated_at': DateTime.now().toUtc().toIso8601String()})
-          .eq('user_id', userId)
-          .eq('status', 'active');
-
-      // Create the new subscription
-      final response = await _client.from('user_subscriptions').insert({
-        'id': subscriptionId,
-        'user_id': userId,
-        'plan_id': plan.id,
-        'tier': tier,
-        'billing_cycle': billingCycle,
-        'subscription_type': plan.name,
-        'amount': price,
-        'currency': plan.currency,
-        'status': 'active',
-        'payment_reference': paymentReference,
-        'payment_method': 'paystack',
-        'start_date': startDate.toIso8601String(),
-        'end_date': endDate.toIso8601String(),
-        'is_auto_renew': false,
-      }).select().single();
-
-      // Record the payment
-      await _client.from('subscription_payments').insert({
-        'id': const Uuid().v4(),
-        'user_id': userId,
-        'subscription_id': subscriptionId,
-        'amount': price,
-        'currency': plan.currency,
-        'payment_reference': paymentReference,
-        'payment_method': 'paystack',
-        'payment_status': 'success',
-        'payment_date': DateTime.now().toUtc().toIso8601String(),
-        'metadata': {
-          'plan_id': planId,
-          'plan_name': plan.name,
-          'duration_days': durationDays,
-        },
-      });
-
-      // Notify referral system if available
-      try {
-        final referralService = await _client.functions.invoke(
-          'trigger-referral-award',
-          body: {'userId': userId, 'subscriptionId': subscriptionId},
-        );
-      } catch (_) {
-        // Ignore if referral service is not available
-      }
-
-      // Send subscription confirmation email
-      try {
-        final user = _client.auth.currentUser;
-        if (user != null && user.email != null) {
-          await _client.functions.invoke('send-email', body: {
-            'to': user.email,
-            'subject': 'Your A-Play Subscription Confirmation',
-            'html':
-                '<h1>Subscription Confirmed!</h1><p>Your subscription to ${plan.name} is confirmed.</p>',
-          });
-        }
-      } catch (e) {
-        debugPrint('Failed to send subscription confirmation email: $e');
-        // Do not throw, as subscription creation was successful
-      }
-
-      return UserSubscription.fromJson(response);
-    } catch (e) {
-      throw Exception('Failed to create subscription: $e');
+    final response = await _client.functions.invoke(
+      'confirm-purchase',
+      body: {'reference': paymentReference},
+    );
+    final data = response.data;
+    if (data is! Map || data['success'] != true) {
+      throw Exception(data is Map ? (data['error'] ?? 'Failed to confirm subscription') : 'Failed to confirm subscription');
     }
-  }
 
-  // Create subscription for Apple IAP after server-side receipt verification
-  Future<UserSubscription> createSubscriptionForApple(
-      String planId, String transactionId, String receiptData) async {
+    // Best-effort side effects; failures here must not undo a real payment.
     try {
-      debugPrint('=== APPLE IAP SUBSCRIPTION CREATION ===');
-      debugPrint('Plan ID: $planId');
-      debugPrint('Transaction ID: $transactionId');
-      debugPrint('Receipt Data Length: ${receiptData.length}');
-      
-      final userId = _userId;
-      if (userId == null) {
-        throw Exception('User not authenticated');
+      await _client.functions.invoke(
+        'trigger-referral-award',
+        body: {'userId': _userId, 'subscriptionId': data['id']},
+      );
+    } catch (_) {}
+    try {
+      final user = _client.auth.currentUser;
+      if (user != null && user.email != null) {
+        await _client.functions.invoke('send-email', body: {
+          'to': user.email,
+          'subject': 'Your A-Play Subscription Confirmation',
+          'html': '<h1>Subscription Confirmed!</h1><p>Your subscription is confirmed.</p>',
+        });
       }
-      debugPrint('User ID: $userId');
-
-      // Verify receipt via Supabase Edge Function (backend should validate with Apple)
-      bool verified = false;
-      Map<String, dynamic>? receiptInfo;
-      
-      try {
-        debugPrint('Calling verify-apple-receipt function...');
-        final response = await _client.functions.invoke(
-          'verify-apple-receipt',
-          body: {
-            'userId': userId,
-            'planId': planId,
-            'transactionId': transactionId,
-            'receiptData': receiptData,
-          },
-        );
-        
-        debugPrint('Receipt verification response: ${response.data}');
-        final data = response.data;
-        
-        if (data is Map && data['valid'] == true) {
-          verified = true;
-          receiptInfo = Map<String, dynamic>.from(data);
-          debugPrint('Receipt verification successful');
-        } else {
-          debugPrint('Receipt verification failed - invalid response: $data');
-          throw Exception('Invalid receipt response: $data');
-        }
-      } catch (e) {
-        debugPrint('Receipt verification error: $e');
-        throw Exception('Receipt verification failed: $e');
-      }
-
-      if (!verified) {
-        throw Exception('Apple receipt is not valid');
-      }
-
-      debugPrint('Getting plan details for: $planId');
-      // Get plan details
-      final planResponse = await _client
-          .from('subscription_plans')
-          .select()
-          .eq('id', planId)
-          .single();
-
-      final plan = SubscriptionPlan.fromJson(planResponse);
-      final price =
-          plan.price ?? plan.priceMonthly ?? plan.priceYearly ?? 0.0;
-      final durationDays = plan.durationDays ?? 30;
-      debugPrint('Plan found: ${plan.name}, Duration: $durationDays days');
-
-      final startDate = DateTime.now().toUtc();
-      final endDate = startDate.add(Duration(days: durationDays));
-      debugPrint('Subscription period: $startDate to $endDate');
-
-      debugPrint('Expiring existing active subscriptions...');
-      // Expire any active subscriptions
-      await _client
-          .from('user_subscriptions')
-          .update({
-            'status': 'expired',
-            'updated_at': DateTime.now().toUtc().toIso8601String()
-          })
-          .eq('user_id', userId)
-          .eq('status', 'active');
-
-      // Create the subscription
-      final subscriptionId = const Uuid().v4();
-      debugPrint('Creating new subscription with ID: $subscriptionId');
-      
-      final response = await _client.from('user_subscriptions').insert({
-        'id': subscriptionId,
-        'user_id': userId,
-        'plan_id': plan.id,
-        'subscription_type': plan.name,
-        'amount': price,
-        'currency': plan.currency,
-        'status': 'active',
-        'payment_reference': transactionId,
-        'payment_method': 'apple_iap',
-        'start_date': startDate.toIso8601String(),
-        'end_date': endDate.toIso8601String(),
-        'is_auto_renew': true,
-      }).select().single();
-
-      debugPrint('Subscription created successfully');
-
-      // Record the payment with enhanced metadata
-      debugPrint('Recording payment...');
-      await _client.from('subscription_payments').insert({
-        'id': const Uuid().v4(),
-        'user_id': userId,
-        'subscription_id': subscriptionId,
-        'amount': price,
-        'currency': plan.currency,
-        'payment_reference': transactionId,
-        'payment_method': 'apple_iap',
-        'payment_status': 'success',
-        'payment_date': DateTime.now().toUtc().toIso8601String(),
-        'metadata': {
-          'plan_id': planId,
-          'plan_name': plan.name,
-          'duration_days': durationDays,
-          'verified': true,
-          'source': 'app_store',
-          'receipt_info': receiptInfo,
-          'original_transaction_id': receiptInfo['originalTransactionId'],
-          'product_id': receiptInfo['productId'],
-          'subscription_status': receiptInfo['subscriptionStatus'],
-          'auto_renew_status': receiptInfo['autoRenewStatus'],
-          'environment': receiptInfo['environment'],
-        },
-      });
-
-      debugPrint('Payment recorded successfully');
-
-      // Update subscription with receipt data if available
-      try {
-        await updateSubscriptionWithReceiptData(subscriptionId, receiptInfo);
-        debugPrint('Subscription updated with receipt validation data');
-      } catch (e) {
-        debugPrint('Failed to update subscription with receipt data (non-critical): $e');
-      }
-    
-      // Optional: notify referral system
-      try {
-        debugPrint('Triggering referral award...');
-        await _client.functions.invoke(
-          'trigger-referral-award',
-          body: {'userId': userId, 'subscriptionId': subscriptionId},
-        );
-        debugPrint('Referral award triggered');
-      } catch (e) {
-        debugPrint('Referral award failed (non-critical): $e');
-      }
-
-      debugPrint('=== APPLE IAP SUBSCRIPTION CREATION COMPLETE ===');
-      return UserSubscription.fromJson(response);
     } catch (e) {
-      debugPrint('=== APPLE IAP SUBSCRIPTION CREATION FAILED ===');
-      debugPrint('Error: $e');
-      throw Exception('Failed to create Apple IAP subscription: $e');
+      debugPrint('Failed to send subscription confirmation email: $e');
     }
+
+    return UserSubscription.fromJson(Map<String, dynamic>.from(data['subscription']));
   }
 
   // Sync Apple subscription status with local database
@@ -854,191 +582,53 @@ class SubscriptionService {
     }
   }
 
-  /// Handle restored Apple IAP purchases
-  Future<List<UserSubscription>> handleRestoredPurchases(List<RestoredPurchase> restoredPurchases) async {
-    debugPrint('SubscriptionService: Processing ${restoredPurchases.length} restored purchases');
-    
+  // Apple product ID -> internal plan ID mapping (must match App Store Connect config)
+  static const Map<String, String> _appleProductToPlanId = {
+    '3SUB': 'quarterly_plan',
+    '1month': 'monthly_plan',
+    '7day': 'weekly_plan',
+    '365day': 'annual_plan',
+  };
+
+
+  /// S2: verify-apple-receipt now performs the DB write itself (service
+  /// role), deriving plan/tier from the product_id Apple's own receipt
+  /// confirms - not from anything supplied here. This method just calls it
+  /// and returns the row it wrote; the client can no longer insert a
+  /// subscription of its own choosing after a merely-valid receipt. Throws
+  /// on any failure - callers must not complete the StoreKit transaction
+  /// until this succeeds, so StoreKit redelivers the transaction on next
+  /// launch instead of losing it.
+  Future<UserSubscription> verifyAndActivateAppleSubscription({
+    required String productId,
+    String? transactionId,
+    required String receiptData,
+    DateTime? transactionDate,
+  }) async {
     final userId = _userId;
     if (userId == null) {
       throw Exception('User not authenticated');
     }
 
-    final processedSubscriptions = <UserSubscription>[];
-    
-    for (final restoredPurchase in restoredPurchases) {
-      try {
-        debugPrint('Processing restored purchase: ${restoredPurchase.productId}');
-        
-        // Convert Apple product ID to plan ID
-        final planId = AppleIAPService.getPlanIdFromProductId(restoredPurchase.productId);
-        if (planId == null) {
-          debugPrint('Unknown product ID: ${restoredPurchase.productId}');
-          continue;
-        }
+    final planId = _appleProductToPlanId[productId];
 
-        // Check if this subscription already exists
-        final existingSubscription = await _client
-            .from('user_subscriptions')
-            .select()
-            .eq('user_id', userId)
-            .eq('payment_reference', restoredPurchase.transactionId)
-            .maybeSingle();
+    debugPrint('SubscriptionService: Verifying Apple receipt (transaction: ${transactionId ?? "latest"})...');
+    final response = await _client.functions.invoke(
+      'verify-apple-receipt',
+      body: {
+        'userId': userId,
+        'planId': planId,
+        if (transactionId != null) 'transactionId': transactionId,
+        'receiptData': receiptData,
+      },
+    );
 
-        if (existingSubscription != null) {
-          debugPrint('Subscription already exists for transaction: ${restoredPurchase.transactionId}');
-          
-          // Update the existing subscription status if needed
-          final subscription = UserSubscription.fromJson(existingSubscription);
-          final now = DateTime.now().toUtc();
-          
-          if (subscription.endDate.isAfter(now) && subscription.status != 'active') {
-            await _client
-                .from('user_subscriptions')
-                .update({
-                  'status': 'active',
-                  'updated_at': now.toIso8601String(),
-                })
-                .eq('id', subscription.id);
-            
-            processedSubscriptions.add(subscription.copyWith(status: 'active'));
-          } else {
-            processedSubscriptions.add(subscription);
-          }
-          continue;
-        }
-
-        // Validate the receipt with backend
-        debugPrint('Validating restored purchase receipt...');
-        bool verified = false;
-        Map<String, dynamic>? receiptInfo;
-        
-        try {
-          debugPrint('Calling verify-apple-receipt function...');
-          final response = await _client.functions.invoke(
-            'verify-apple-receipt',
-            body: {
-              'userId': userId,
-              'planId': planId,
-              'transactionId': restoredPurchase.transactionId,
-              'receiptData': restoredPurchase.receiptData,
-            },
-          );
-          
-          debugPrint('Receipt verification response: ${response.data}');
-          final data = response.data;
-          
-          if (data is Map && data['valid'] == true) {
-            verified = true;
-            receiptInfo = Map<String, dynamic>.from(data);
-            debugPrint('Receipt verification successful');
-          } else {
-            debugPrint('Receipt verification failed - invalid response: $data');
-            continue;
-          }
-        } catch (e) {
-          debugPrint('Receipt verification error: $e');
-          continue;
-        }
-
-        if (!verified) {
-          debugPrint('Invalid receipt for restored purchase: ${restoredPurchase.transactionId}');
-          continue;
-        }
-
-        // Get plan details
-        final plan = SubscriptionPlan.defaultPlans.firstWhere(
-          (p) => p.id == planId,
-          orElse: () => SubscriptionPlan.defaultPlans.first,
-        );
-
-        DateTime subscriptionEndDate;
-        final expiresDateMs = receiptInfo['expiresDateMs'] as String?;
-        if (expiresDateMs != null) {
-          subscriptionEndDate = DateTime.fromMillisecondsSinceEpoch(
-            int.parse(expiresDateMs),
-            isUtc: true,
-          );
-        } else {
-          subscriptionEndDate = DateTime.now()
-              .toUtc()
-              .add(Duration(days: plan.durationDays ?? 30));
-        }
-
-        final now = DateTime.now().toUtc();
-        final status = subscriptionEndDate.isAfter(now) ? 'active' : 'expired';
-
-        // Expire existing active subscriptions
-        debugPrint('Expiring existing active subscriptions...');
-        await _client
-            .from('user_subscriptions')
-            .update({
-              'status': 'expired',
-              'updated_at': now.toIso8601String(),
-            })
-            .eq('user_id', userId)
-            .eq('status', 'active');
-
-        final subscriptionData = {
-          'id': const Uuid().v4(),
-          'user_id': userId,
-          'plan_id': planId,
-          'subscription_type': plan.name,
-          'amount': plan.price ?? 0.0,
-          'currency': plan.currency,
-          'status': status,
-          'payment_reference': restoredPurchase.transactionId,
-          'payment_method': 'apple_iap',
-          'start_date': restoredPurchase.transactionDate?.toUtc().toIso8601String() ?? now.toIso8601String(),
-          'end_date': subscriptionEndDate.toIso8601String(),
-          'is_auto_renew': true,
-          'created_at': now.toIso8601String(),
-          'updated_at': now.toIso8601String(),
-        };
-
-        final subscriptionResponse = await _client
-            .from('user_subscriptions')
-            .insert(subscriptionData)
-            .select()
-            .single();
-
-        final newSubscription = UserSubscription.fromJson(subscriptionResponse);
-        processedSubscriptions.add(newSubscription);
-
-        // Record the payment
-        debugPrint('Recording payment...');
-        await _client.from('subscription_payments').insert({
-          'id': const Uuid().v4(),
-          'user_id': userId,
-          'subscription_id': newSubscription.id,
-          'amount': plan.price,
-          'currency': 'USD',
-          'payment_reference': restoredPurchase.transactionId,
-          'payment_method': 'apple_iap',
-          'payment_status': 'success',
-          'payment_date': DateTime.now().toUtc().toIso8601String(),
-          'metadata': {
-            'restored_purchase': true,
-            'original_transaction_id': restoredPurchase.transactionId,
-            'product_id': restoredPurchase.productId,
-            'transaction_date': restoredPurchase.transactionDate?.toIso8601String(),
-            'plan_id': planId,
-            'plan_name': plan.name,
-            'duration_days': plan.durationDays,
-            'verified': true,
-            'source': 'app_store',
-            'receipt_info': receiptInfo,
-          },
-        });
-
-        debugPrint('Successfully processed restored purchase: ${restoredPurchase.transactionId}');
-        
-      } catch (e) {
-        debugPrint('Error processing restored purchase ${restoredPurchase.transactionId}: $e');
-        // Continue with other purchases even if one fails
-      }
+    final data = response.data;
+    if (data is! Map || data['valid'] != true || data['subscription'] == null) {
+      throw Exception('Apple receipt verification failed: ${data is Map ? data['error'] : response.data}');
     }
 
-    debugPrint('Successfully processed ${processedSubscriptions.length} restored purchases');
-    return processedSubscriptions;
+    debugPrint('SubscriptionService: Verified and activated subscription for product: $productId');
+    return UserSubscription.fromJson(Map<String, dynamic>.from(data['subscription']));
   }
 }

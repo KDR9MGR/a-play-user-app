@@ -1,8 +1,12 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../config/feature_flags.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_button.dart';
 
@@ -156,71 +160,22 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     try {
       debugPrint('🔵 [GOOGLE] Starting Google sign-in');
-      await ref.read(authControllerProvider.notifier).signInWithGoogle();
+      // isSignUp: false - throws "No account found... please sign up first"
+      // if this Google account has no existing A-Play account.
+      await ref
+          .read(authControllerProvider.notifier)
+          .signInWithGoogle(isSignUp: false);
 
       if (!mounted) return;
-
-      debugPrint('🔵 [GOOGLE] Sign-in completed, checking user status');
-
-      // Check if user is first-time or existing
-      final supabase = Supabase.instance.client;
-      final user = supabase.auth.currentUser;
-
-      debugPrint('🔵 [GOOGLE] Current user: ${user?.email}');
-
-      if (user != null) {
-        // Check profile existence and validity
-        final profile = await supabase
-            .from('profiles')
-            .select('id, created_at')
-            .eq('id', user.id)
-            .maybeSingle();
-
-        debugPrint('🔵 [GOOGLE] Profile query result: ${profile != null ? "found" : "null"}');
-
-        if (profile == null) {
-          // Profile doesn't exist - this shouldn't happen after auth_provider fix
-          debugPrint('🔵 [GOOGLE] ✗ No profile found after sign-in');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Account setup incomplete. Please try signing in again.'),
-                backgroundColor: Colors.red,
-                duration: Duration(seconds: 4),
-              ),
-            );
-          }
-          return;
-        }
-
-        debugPrint('🔵 [GOOGLE] Profile created_at: ${profile['created_at']}');
-
-        if (!mounted) return;
-
-        // Check if new user (profile created within last 30 seconds)
-        final isNewUser = profile['created_at'] != null &&
-            DateTime.parse(profile['created_at'] as String)
-                .isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
-
-        debugPrint('🔵 [GOOGLE] Is new user: $isNewUser');
-
-        if (isNewUser) {
-          debugPrint('🔵 [GOOGLE] Navigating to /onboarding');
-          context.go('/onboarding');
-        } else {
-          debugPrint('🔵 [GOOGLE] Navigating to /home');
-          context.go('/home');
-        }
-      } else {
-        debugPrint('🔵 [GOOGLE] ✗ No current user after sign-in');
-      }
+      context.go('/home');
     } catch (e) {
       debugPrint('🔵 [GOOGLE] ✗ Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Google Sign-In failed: ${e.toString()}'),
+            content: Text(e.toString().replaceFirst('AuthException: ', '')),
             backgroundColor: Colors.red[700],
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -234,71 +189,22 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     try {
       debugPrint('🍎 [APPLE] Starting Apple sign-in');
-      await ref.read(authControllerProvider.notifier).signInWithApple();
+      // isSignUp: false - throws "No account found... please sign up first"
+      // if this Apple ID has no existing A-Play account.
+      await ref
+          .read(authControllerProvider.notifier)
+          .signInWithApple(isSignUp: false);
 
       if (!mounted) return;
-
-      debugPrint('🍎 [APPLE] Sign-in completed, checking user status');
-
-      // Check if user is first-time or existing
-      final supabase = Supabase.instance.client;
-      final user = supabase.auth.currentUser;
-
-      debugPrint('🍎 [APPLE] Current user: ${user?.email}');
-
-      if (user != null) {
-        // Check profile existence and validity
-        final profile = await supabase
-            .from('profiles')
-            .select('id, created_at')
-            .eq('id', user.id)
-            .maybeSingle();
-
-        debugPrint('🍎 [APPLE] Profile query result: ${profile != null ? "found" : "null"}');
-
-        if (profile == null) {
-          // Profile doesn't exist - this shouldn't happen after auth_provider fix
-          debugPrint('🍎 [APPLE] ✗ No profile found after sign-in');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Account setup incomplete. Please try signing in again.'),
-                backgroundColor: Colors.red,
-                duration: Duration(seconds: 4),
-              ),
-            );
-          }
-          return;
-        }
-
-        debugPrint('🍎 [APPLE] Profile created_at: ${profile['created_at']}');
-
-        if (!mounted) return;
-
-        // Check if new user (profile created within last 30 seconds)
-        final isNewUser = profile['created_at'] != null &&
-            DateTime.parse(profile['created_at'] as String)
-                .isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
-
-        debugPrint('🍎 [APPLE] Is new user: $isNewUser');
-
-        if (isNewUser) {
-          debugPrint('🍎 [APPLE] Navigating to /onboarding');
-          context.go('/onboarding');
-        } else {
-          debugPrint('🍎 [APPLE] Navigating to /home');
-          context.go('/home');
-        }
-      } else {
-        debugPrint('🍎 [APPLE] ✗ No current user after sign-in');
-      }
+      context.go('/home');
     } catch (e) {
       debugPrint('🍎 [APPLE] ✗ Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Apple Sign-In failed: ${e.toString()}'),
+            content: Text(e.toString().replaceFirst('AuthException: ', '')),
             backgroundColor: Colors.red[700],
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -416,67 +322,74 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                   const SizedBox(height: 24),
 
-                  // OAuth buttons hidden for MVP
-                  // TODO: Re-enable after configuring OAuth in Supabase Dashboard
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       child: Divider(
-                  //         color: Colors.grey[800],
-                  //         thickness: 1,
-                  //       ),
-                  //     ),
-                  //     Padding(
-                  //       padding: const EdgeInsets.symmetric(horizontal: 16),
-                  //       child: Text(
-                  //         'OR',
-                  //         style: TextStyle(
-                  //           color: Colors.grey[400],
-                  //           fontWeight: FontWeight.bold,
-                  //         ),
-                  //       ),
-                  //     ),
-                  //     Expanded(
-                  //       child: Divider(
-                  //         color: Colors.grey[800],
-                  //         thickness: 1,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
+                  // Social login hidden again at user's request. The
+                  // underlying sign-in/sign-up intent enforcement and email
+                  // fallback fixes remain in place - only the entry points
+                  // are hidden - so re-enabling later is just deleting this
+                  // `if (FeatureFlags.enableSocialLogin)` guard.
+                  if (FeatureFlags.enableSocialLogin) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey[800],
+                            thickness: 1,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey[800],
+                            thickness: 1,
+                          ),
+                        ),
+                      ],
+                    ),
 
-                  // const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // // OAuth Buttons
-                  // AuthButton(
-                  //   text: 'Sign In with Google',
-                  //   onPressed: _signInWithGoogle,
-                  //   isLoading: _isGoogleLoading,
-                  //   backgroundColor: Colors.white,
-                  //   textColor: Colors.black87,
-                  //   icon: const Icon(
-                  //     Icons.g_mobiledata,
-                  //     size: 28,
-                  //     color: Colors.red,
-                  //   ),
-                  // ),
+                    AuthButton(
+                      text: 'Sign In with Google',
+                      onPressed: _signInWithGoogle,
+                      isLoading: _isGoogleLoading,
+                      backgroundColor: Colors.white,
+                      textColor: Colors.black87,
+                      icon: const Icon(
+                        Icons.g_mobiledata,
+                        size: 28,
+                        color: Colors.red,
+                      ),
+                    ),
 
-                  // const SizedBox(height: 12),
+                    // Apple guideline: Sign in with Apple must be offered on
+                    // Apple platforms whenever other third-party logins are.
+                    if (!kIsWeb && Platform.isIOS) ...[
+                      const SizedBox(height: 12),
+                      AuthButton(
+                        text: 'Sign In with Apple',
+                        onPressed: _signInWithApple,
+                        isLoading: _isAppleLoading,
+                        backgroundColor: Colors.black,
+                        textColor: Colors.white,
+                        icon: const Icon(
+                          Icons.apple,
+                          size: 24,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
 
-                  // AuthButton(
-                  //   text: 'Sign In with Apple',
-                  //   onPressed: _signInWithApple,
-                  //   isLoading: _isAppleLoading,
-                  //   backgroundColor: Colors.black,
-                  //   textColor: Colors.white,
-                  //   icon: const Icon(
-                  //     Icons.apple,
-                  //     size: 24,
-                  //     color: Colors.white,
-                  //   ),
-                  // ),
-
-                  // const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Guest Access Option
                   Center(

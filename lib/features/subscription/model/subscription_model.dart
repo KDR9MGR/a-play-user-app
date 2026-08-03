@@ -114,6 +114,11 @@ class SubscriptionPlan with _$SubscriptionPlan {
       price: 50.0,
       planType: SubscriptionPlanType.weekly,
       tierPointsBonus: 50,
+      benefits: const [
+        '10% discount on all bookings',
+        '24-hour early booking',
+        '1 free table reservation',
+      ],
       features: const {
         'premium_content': true,
         'hd_streaming': true,
@@ -134,6 +139,11 @@ class SubscriptionPlan with _$SubscriptionPlan {
        planType: SubscriptionPlanType.monthly,
        tierPointsBonus: 200,
        isPopular: true,
+       benefits: const [
+         '10% discount on all bookings',
+         '48-hour early booking',
+         '3 free table reservations/month',
+       ],
        features: const {
          'premium_content': true,
          'hd_streaming': true,
@@ -155,6 +165,11 @@ class SubscriptionPlan with _$SubscriptionPlan {
        discountPercentage: 3.5,
        planType: SubscriptionPlanType.quarterly,
        tierPointsBonus: 650,
+       benefits: const [
+         '15% discount on all bookings',
+         '72-hour early booking',
+         'Unlimited table reservations',
+       ],
        features: const {
          'premium_content': true,
          'hd_streaming': true,
@@ -179,6 +194,11 @@ class SubscriptionPlan with _$SubscriptionPlan {
        discountPercentage: 3.5,
        planType: SubscriptionPlanType.annual,
        tierPointsBonus: 3000,
+       benefits: const [
+         '20% discount on all bookings',
+         '1-week early booking access',
+         'VIP lounge access nationwide',
+       ],
        features: const {
          'premium_content': true,
          'hd_streaming': true,

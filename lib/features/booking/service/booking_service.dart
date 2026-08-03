@@ -133,15 +133,20 @@ class BookingService {
 
       debugPrint('Booking created successfully: ${response['id']}');
 
-      // Send confirmation email asynchronously (don't block booking creation)
-      _sendBookingConfirmationEmail(
-        bookingId: response['id'],
-        userEmail: user.email!,
-        bookingData: response,
-      ).catchError((error) {
-        debugPrint('Failed to send confirmation email: $error');
-        // Don't throw - email failure shouldn't fail the booking
-      });
+      // Send confirmation email asynchronously (don't block booking creation).
+      // Skip when the account has no email (possible with Apple Sign-In edge
+      // cases) instead of crashing on a null assertion.
+      final confirmationEmail = user.email;
+      if (confirmationEmail != null && confirmationEmail.isNotEmpty) {
+        _sendBookingConfirmationEmail(
+          bookingId: response['id'],
+          userEmail: confirmationEmail,
+          bookingData: response,
+        ).catchError((error) {
+          debugPrint('Failed to send confirmation email: $error');
+          // Don't throw - email failure shouldn't fail the booking
+        });
+      }
 
       return response['id'];
     } catch (e) {
@@ -334,17 +339,21 @@ class BookingService {
             'cancelled_at': DateTime.now().toIso8601String(),
           });
 
-      // Send cancellation email
-      _sendCancellationEmail(
-        userEmail: user.email!,
-        bookingId: bookingId,
-        eventName: booking['events']['title'],
-        refundAmount: refundAmount,
-        refundStatus: refundStatus,
-      ).catchError((error) {
-        debugPrint('Failed to send cancellation email: $error');
-        // Don't throw - email failure shouldn't fail the cancellation
-      });
+      // Send cancellation email (skip when the account has no email, e.g.
+      // Apple Sign-In edge cases, instead of crashing on a null assertion)
+      final cancellationEmail = user.email;
+      if (cancellationEmail != null && cancellationEmail.isNotEmpty) {
+        _sendCancellationEmail(
+          userEmail: cancellationEmail,
+          bookingId: bookingId,
+          eventName: booking['events']['title'],
+          refundAmount: refundAmount,
+          refundStatus: refundStatus,
+        ).catchError((error) {
+          debugPrint('Failed to send cancellation email: $error');
+          // Don't throw - email failure shouldn't fail the cancellation
+        });
+      }
 
       debugPrint('Booking cancelled successfully: $bookingId');
     } catch (e) {

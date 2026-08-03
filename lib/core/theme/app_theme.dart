@@ -33,7 +33,20 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: backgroundStart,
       primaryColor: primary,
-      
+      visualDensity: VisualDensity.standard,
+      splashFactory: InkSparkle.splashFactory,
+      highlightColor: primary.withValues(alpha: 0.08),
+      splashColor: primary.withValues(alpha: 0.12),
+
+      // Smoother, more consistent screen transitions across platforms -
+      // same navigation, nicer motion.
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
+
       // Color Scheme
       colorScheme: const ColorScheme.dark(
         primary: primary,
@@ -142,36 +155,117 @@ class AppTheme {
 
       // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primary,
-          foregroundColor: Colors.white,
-          elevation: 4,
-          shadowColor: primary.withValues(alpha: 0.5),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50),
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return primary.withValues(alpha: 0.35);
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return Color.lerp(primary, Colors.black, 0.12);
+            }
+            return primary;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            return states.contains(WidgetState.disabled)
+                ? Colors.white.withValues(alpha: 0.6)
+                : Colors.white;
+          }),
+          overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.08)),
+          elevation: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) return 0;
+            if (states.contains(WidgetState.pressed)) return 1;
+            return 4;
+          }),
+          shadowColor: WidgetStateProperty.all(primary.withValues(alpha: 0.5)),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           ),
-          textStyle: TextStyle(
-            fontFamily: GoogleFonts.inter().fontFamily,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
           ),
+          textStyle: WidgetStateProperty.all(
+            TextStyle(
+              fontFamily: GoogleFonts.inter().fontFamily,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          animationDuration: const Duration(milliseconds: 150),
         ),
       ),
 
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: primary,
-          side: const BorderSide(color: primary),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50),
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            return states.contains(WidgetState.disabled)
+                ? primary.withValues(alpha: 0.4)
+                : primary;
+          }),
+          overlayColor: WidgetStateProperty.all(primary.withValues(alpha: 0.08)),
+          side: WidgetStateProperty.resolveWith((states) {
+            return BorderSide(
+              color: states.contains(WidgetState.disabled)
+                  ? primary.withValues(alpha: 0.4)
+                  : primary,
+            );
+          }),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           ),
-          textStyle: TextStyle(
-            fontFamily: GoogleFonts.inter().fontFamily,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
           ),
+          textStyle: WidgetStateProperty.all(
+            TextStyle(
+              fontFamily: GoogleFonts.inter().fontFamily,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            return states.contains(WidgetState.disabled)
+                ? textMuted
+                : primary;
+          }),
+          overlayColor: WidgetStateProperty.all(primary.withValues(alpha: 0.08)),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+          ),
+        ),
+      ),
+
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          overlayColor: WidgetStateProperty.all(textPrimary.withValues(alpha: 0.08)),
+          foregroundColor: WidgetStateProperty.all(textPrimary),
+        ),
+      ),
+
+      // Progress indicators inherit the brand color everywhere automatically.
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: primary,
+        linearTrackColor: surfaceLight,
+        circularTrackColor: surfaceLight,
+      ),
+
+      // Consistent, unobtrusive tooltips.
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: surfaceLight,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        textStyle: TextStyle(
+          color: textPrimary,
+          fontFamily: GoogleFonts.inter().fontFamily,
+          fontSize: 12,
         ),
       ),
 
@@ -208,6 +302,61 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
+      ),
+
+      // Bottom Sheet Theme - matches dialog rounding for a consistent
+      // "raised surface" feel across the app.
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: backgroundMiddle,
+        modalBackgroundColor: backgroundMiddle,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        showDragHandle: true,
+        dragHandleColor: textMuted.withValues(alpha: 0.4),
+      ),
+
+      // List Tile Theme - consistent row spacing/rounding wherever
+      // ListTile is used instead of ad-hoc per-screen padding.
+      listTileTheme: ListTileThemeData(
+        iconColor: textSecondary,
+        textColor: textPrimary,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+
+      // Switch / Checkbox / Radio Themes - same brand color, consistent
+      // states everywhere instead of default Material colors leaking in.
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected) ? primary : textMuted;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected)
+              ? primary.withValues(alpha: 0.4)
+              : surfaceLight;
+        }),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected) ? primary : Colors.transparent;
+        }),
+        side: const BorderSide(color: textMuted, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected) ? primary : textMuted;
+        }),
+      ),
+
+      // Scrollbar Theme - subtle, brand-colored instead of default gray.
+      scrollbarTheme: ScrollbarThemeData(
+        thumbColor: WidgetStateProperty.all(textMuted.withValues(alpha: 0.5)),
+        radius: const Radius.circular(8),
+        thickness: WidgetStateProperty.all(4),
       ),
     );
   }

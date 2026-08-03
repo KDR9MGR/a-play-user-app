@@ -198,8 +198,13 @@ class ReferralService {
     }
   }
 
-  // Redeem points
-  Future<void> redeemPoints(int points, String purpose) async {
+  // Redeem points for an in-app reward (discount, premium week, etc.)
+  Future<void> redeemPoints(
+    int points,
+    String purpose,
+    String rewardType, {
+    double rewardValue = 0,
+  }) async {
     try {
       final userId = _userId;
       if (userId == null) {
@@ -212,12 +217,114 @@ class ReferralService {
         throw Exception('Not enough points available');
       }
 
-      // Add a redemption transaction
+      // Add a redemption transaction (deducts points via the DB trigger)
       await _addPointsTransaction(userId, -points, 'redemption',
           'Points redeemed for $purpose');
+
+      // Record a trackable/redeemable voucher for this redemption
+      final redemptionCode =
+          const Uuid().v4().replaceAll('-', '').substring(0, 8).toUpperCase();
+
+      await _client.from('point_redemptions').insert({
+        'user_id': userId,
+        'points_spent': points,
+        'reward_type': rewardType,
+        'reward_value': rewardValue,
+        'description': purpose,
+        'status': 'pending',
+        'redemption_code': redemptionCode,
+        'expires_at': DateTime.now()
+            .toUtc()
+            .add(const Duration(days: 30))
+            .toIso8601String(),
+      });
     } catch (e) {
       throw Exception('Failed to redeem points: $e');
     }
+  }
+
+  // Get the current user's redemption history (in-app + affiliate)
+  Future<List<PointRedemption>> getMyRedemptions() async {
+    try {
+      final userId = _userId;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final response = await _client
+          .from('point_redemptions')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      return (response as List)
+          .map((json) => PointRedemption.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch redemptions: $e');
+    }
+  }
+
+  // Get all active affiliates (partners) that accept points
+  Future<List<Affiliate>> getActiveAffiliates() async {
+    try {
+      final response = await _client
+          .from('affiliates')
+          .select()
+          .eq('is_active', true)
+          .order('business_name');
+
+      return (response as List)
+          .map((json) => Affiliate.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch affiliates: $e');
+    }
+  }
+
+  // Redeem points at an affiliate/partner business via the server-side RPC.
+  // The RPC validates balance and affiliate status, deducts points and
+  // returns the resulting point_redemptions row (including the code the
+  // user shows in person).
+  Future<PointRedemption> redeemAtAffiliate(
+      String affiliateId, int points) async {
+    try {
+      final userId = _userId;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final response = await _client.rpc('redeem_points_at_affiliate',
+          params: {
+            'p_affiliate_id': affiliateId,
+            'p_points': points,
+          });
+
+      final json = response is List
+          ? response.first as Map<String, dynamic>
+          : response as Map<String, dynamic>;
+
+      return PointRedemption.fromJson(json);
+    } on PostgrestException catch (e) {
+      throw Exception(_friendlyAffiliateRedemptionError(e.message));
+    } catch (e) {
+      throw Exception('Failed to redeem at affiliate: $e');
+    }
+  }
+
+  // Translate known Postgres exceptions from redeem_points_at_affiliate
+  // into friendlier, user-facing messages.
+  String _friendlyAffiliateRedemptionError(String message) {
+    if (message.contains('Not enough points available')) {
+      return 'You don\'t have enough points for this redemption';
+    }
+    if (message.contains('Affiliate not found or not active')) {
+      return 'This partner is no longer accepting point redemptions';
+    }
+    if (message.contains('Not authenticated')) {
+      return 'Please log in and try again';
+    }
+    return message;
   }
 
   // Add points transaction with optional additional metadata
@@ -639,7 +746,7 @@ class ReferralService {
       
       // Check if recipient exists
       final recipient = await _client
-          .from('profiles')
+          .from('public_profiles')
           .select('id, full_name')
           .eq('id', recipientId)
           .maybeSingle();
@@ -700,12 +807,12 @@ class ReferralService {
       final query = username.trim();
       final looksLikeUuid = RegExp(r'^[0-9a-fA-F-]{32,36}$').hasMatch(query);
 
-      final builder = _client.from('profiles').select('id, full_name, username, avatar_url');
+      final builder = _client.from('public_profiles').select('id, full_name, avatar_url');
 
       final user = looksLikeUuid
           ? await builder.eq('id', query).neq('id', userId).maybeSingle()
           : await builder
-              .or('username.ilike.%$query%,full_name.ilike.%$query%')
+              .ilike('full_name', '%$query%')
               .neq('id', userId)
               .limit(1)
               .maybeSingle();

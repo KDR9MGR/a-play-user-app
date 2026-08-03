@@ -6,12 +6,14 @@ import 'package:share_plus/share_plus.dart';
 import '../provider/referral_provider.dart';
 import '../widgets/challenges_card.dart';
 import '../widgets/membership_tier_card.dart';
+import '../widgets/my_redemptions_card.dart';
 import '../widgets/point_redemption_card.dart';
 import '../widgets/point_summary_card.dart';
 import '../widgets/point_transaction_item.dart';
 import '../widgets/point_transfer_card.dart';
 import '../widgets/referral_code_card.dart';
 import '../widgets/time_limited_offers_card.dart';
+import 'affiliate_redeem_screen.dart';
 
 class ReferralScreen extends ConsumerStatefulWidget {
   const ReferralScreen({super.key});
@@ -38,6 +40,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     final membershipTiersAsync = ref.watch(membershipTiersProvider);
     final timeOffersAsync = ref.watch(timeOffersProvider);
     final userChallengesAsync = ref.watch(userChallengesProvider);
+    final redemptionsAsync = ref.watch(pointRedemptionsProvider);
 
     return Scaffold(
         backgroundColor: const Color(0xFF0A0A0B),
@@ -77,6 +80,8 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
               ref.refresh(timeOffersProvider);
               ref.refresh(userChallengesProvider);
               ref.refresh(pointTransactionsProvider);
+              ref.invalidate(pointRedemptionsProvider);
+              ref.invalidate(activeAffiliatesProvider);
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -584,12 +589,122 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  PointRedemptionCard(
-                    onRedeem: (points, purpose) async {
-                      await ref
-                          .read(userPointsProvider.notifier)
-                          .redeemPoints(points, purpose);
-                    },
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    child: PointRedemptionCard(
+                      onRedeem: (points, purpose, rewardType, rewardValue) async {
+                        await ref.read(userPointsProvider.notifier).redeemPoints(
+                              points,
+                              purpose,
+                              rewardType,
+                              rewardValue: rewardValue,
+                            );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Redeem at Partners entry point
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const AffiliateRedeemScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF10B981), Color(0xFF059669)],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Iconsax.shop, color: Colors.white, size: 24),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const [
+                                    Text(
+                                      'Redeem at Partners',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      'Use points for discounts at local businesses',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Iconsax.arrow_right_3, color: Colors.white),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // My Redemptions Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'My Redemptions',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 22,
+                            color: Colors.white,
+                            letterSpacing: -0.5,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    child: redemptionsAsync.when(
+                      data: (redemptions) =>
+                          MyRedemptionsCard(redemptions: redemptions),
+                      loading: () => const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF6366F1)),
+                          ),
+                        ),
+                      ),
+                      error: (error, stack) => Text(
+                        'Error loading redemptions',
+                        style: TextStyle(color: Colors.red[300]),
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 32),

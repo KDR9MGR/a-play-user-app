@@ -13,6 +13,7 @@ import 'package:a_play/features/booking/service/booking_service.dart';
 import 'package:a_play/core/constants/colors.dart';
 import 'package:a_play/services/unified_payment_service.dart';
 import 'package:a_play/features/booking/screens/zone_selection_screen.dart';
+import 'package:a_play/core/utils/payment_email.dart';
 import 'package:go_router/go_router.dart';
 
 // Provider for BookingService
@@ -259,6 +260,19 @@ class _PaymentReviewScreenState extends ConsumerState<PaymentReviewScreen> {
     setState(() => ref.read(isLoadingProvider.notifier).state = true);
 
     try {
+      // Robust email resolution for Apple Sign-In accounts (hidden relay
+      // email is fine; a missing auth email previously crashed on user.email!)
+      final paymentEmail = await resolvePaymentEmail();
+      if (paymentEmail == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text(missingPaymentEmailMessage)),
+          );
+          setState(() => ref.read(isLoadingProvider.notifier).state = false);
+        }
+        return;
+      }
+
       final isUserPremium = await ref.read(isUserPremiumProvider.future);
       final finalAmount =
           isUserPremium ? widget.totalAmount : widget.totalAmount * 2;
@@ -273,7 +287,7 @@ class _PaymentReviewScreenState extends ConsumerState<PaymentReviewScreen> {
       // Process payment with WebView
       final success = await paymentService.processPayment(
         context: context,
-        email: user.email!,
+        email: paymentEmail,
         amount: finalAmount,
         reference: _reference,
         metadata: {
@@ -291,31 +305,35 @@ class _PaymentReviewScreenState extends ConsumerState<PaymentReviewScreen> {
         },
         onSuccess: () async {
           try {
-            debugPrint('Payment successful, processing booking...');
+            debugPrint('Payment successful, confirming booking...');
 
             if (!mounted) return;
-            final bookingService = ref.read(bookingServiceProvider);
-            final bookingIds = await bookingService.createBookings(
-              eventId: widget.event.id,
-              bookingDate: widget.selectedDate.toIso8601String(),
-              eventDate: widget.selectedDate,
-              tickets: widget.selectedTickets
-                  .map((ticket) => {
-                        'zoneId': ticket.zoneId,
-                        'quantity': ticket.quantity,
-                        'amount': ticket.price * ticket.quantity,
-                      })
-                  .toList(),
+            // S2/S4: fulfillment happens server-side. confirm-purchase
+            // re-verifies the reference with Paystack itself and creates the
+            // booking strictly from what paystack/initialize computed and
+            // recorded for it - the client can no longer insert a booking
+            // for a different zone/quantity than what was actually paid for.
+            final response = await Supabase.instance.client.functions.invoke(
+              'confirm-purchase',
+              body: {'reference': _reference},
             );
+            final data = response.data;
+            if (data is! Map || data['success'] != true) {
+              throw Exception(data is Map ? (data['error'] ?? 'Failed to confirm booking') : 'Failed to confirm booking');
+            }
+            final ids = (data['ids'] as List?)?.cast<String>() ?? const [];
+            if (ids.isEmpty) {
+              throw Exception('Booking confirmation returned no booking id');
+            }
 
-            debugPrint('Booking processed successfully');
+            debugPrint('Booking confirmed successfully');
 
             if (!mounted) return;
 
             // Use GoRouter for navigation
-            context.go('/booking-confirmation/${bookingIds.first['id']}');
+            context.go('/booking-confirmation/${ids.first}');
           } catch (e) {
-            debugPrint('Error processing booking: $e');
+            debugPrint('Error confirming booking: $e');
             if (!mounted) return;
             _handlePaymentError(context, e.toString());
           }

@@ -21,6 +21,27 @@ if [ ! -f "pubspec.yaml" ]; then
     exit 1
 fi
 
+echo "🔑 Step 0: Generating dart-defines from .env..."
+if [ ! -f ".env" ]; then
+    echo -e "${RED}Error: .env not found. Copy .env.example to .env and fill in real (live) values first.${NC}"
+    exit 1
+fi
+python3 tool/gen_dart_defines.py --env-file .env --out .dart-defines.json
+
+PAYSTACK_KEY=$(grep '"PAYSTACK_PUBLIC_KEY"' .dart-defines.json | sed -E 's/.*: *"([^"]*)".*/\1/')
+if [[ -z "$PAYSTACK_KEY" ]]; then
+    echo -e "${RED}Error: PAYSTACK_PUBLIC_KEY is not set in .env. A release build cannot ship without it.${NC}"
+    exit 1
+fi
+if [[ "$PAYSTACK_KEY" == pk_test_* ]]; then
+    echo -e "${YELLOW}⚠️  PAYSTACK_PUBLIC_KEY is a test key (pk_test_). This value isn't actually${NC}"
+    echo -e "${YELLOW}   used by the live payment flow (that goes through the paystack edge${NC}"
+    echo -e "${YELLOW}   function server-side), so this is informational only, not blocking.${NC}"
+    echo ""
+fi
+echo -e "${GREEN}✓ dart-defines generated with a live Paystack key${NC}"
+echo ""
+
 echo "📋 Step 1: Cleaning previous builds..."
 flutter clean
 echo -e "${GREEN}✓ Clean complete${NC}"
@@ -48,7 +69,7 @@ echo ""
 
 echo "📱 Step 5: Building iOS Release IPA..."
 echo "This may take several minutes..."
-flutter build ipa --release
+flutter build ipa --release --dart-define-from-file=.dart-defines.json
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Build successful!${NC}"
 else
@@ -70,4 +91,11 @@ echo "3. Test the IPA on physical device before submitting"
 echo ""
 echo "To open in Xcode for archiving:"
 echo "   open ios/Runner.xcworkspace"
+echo ""
+echo -e "${YELLOW}⚠️  Important: Xcode Archive reuses whatever dart-defines were last"
+echo -e "   written to ios/Flutter/Generated.xcconfig by a flutter build/run"
+echo -e "   command - it does NOT regenerate them itself. Archive right after"
+echo -e "   this script (which just set them correctly) and don't run"
+echo -e "   'flutter run' (debug/test key) in between, or you'll silently"
+echo -e "   re-archive with stale/test values again.${NC}"
 echo ""

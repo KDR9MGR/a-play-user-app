@@ -139,6 +139,48 @@ class UserChallengeProgress with _$UserChallengeProgress {
 }
 
 @freezed
+class PointRedemption with _$PointRedemption {
+  const factory PointRedemption({
+    required String id,
+    @JsonKey(name: 'user_id') required String userId,
+    @JsonKey(name: 'points_spent') required int pointsSpent,
+    @JsonKey(name: 'reward_type') required String rewardType,
+    @JsonKey(name: 'reward_value') @Default(0) double rewardValue,
+    @Default('') String description,
+    @Default('pending') String status,
+    @JsonKey(name: 'redemption_code') String? redemptionCode,
+    @JsonKey(name: 'affiliate_id') String? affiliateId,
+    @JsonKey(name: 'settlement_id') String? settlementId,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'expires_at') DateTime? expiresAt,
+    @JsonKey(name: 'redeemed_at') DateTime? redeemedAt,
+  }) = _PointRedemption;
+
+  factory PointRedemption.fromJson(Map<String, dynamic> json) =>
+      _$PointRedemptionFromJson(json);
+}
+
+@freezed
+class Affiliate with _$Affiliate {
+  const factory Affiliate({
+    required String id,
+    @JsonKey(name: 'business_name') required String businessName,
+    String? category,
+    @JsonKey(name: 'contact_name') String? contactName,
+    @JsonKey(name: 'contact_phone') String? contactPhone,
+    @JsonKey(name: 'contact_email') String? contactEmail,
+    String? address,
+    @JsonKey(name: 'point_value_ghs') double? pointValueGhs,
+    @JsonKey(name: 'is_active') @Default(true) bool isActive,
+    String? notes,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+  }) = _Affiliate;
+
+  factory Affiliate.fromJson(Map<String, dynamic> json) =>
+      _$AffiliateFromJson(json);
+}
+
+@freezed
 class TimeLimitedOffer with _$TimeLimitedOffer {
   const factory TimeLimitedOffer({
     required String id,

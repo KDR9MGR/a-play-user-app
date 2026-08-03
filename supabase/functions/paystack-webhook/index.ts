@@ -3,14 +3,22 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.0.0'
 import crypto from 'https://deno.land/std@0.168.0/node/crypto.ts';
 
-const PAYSTACK_SECRET = Deno.env.get('PAYSTACK_SECRET_KEY')
+// Temporary validation toggle: when PAYSTACK_TEST_MODE=true, verify webhook
+// signatures against PAYSTACK_TEST_SECRET_KEY instead of the live key - must
+// stay in sync with the same toggle in paystack/index.ts and
+// confirm-purchase/index.ts, since Paystack signs sandbox webhooks with the
+// test secret, not the live one.
+function resolvePaystackSecretKey(): string | undefined {
+  const testMode = (Deno.env.get('PAYSTACK_TEST_MODE') ?? '').toLowerCase() === 'true'
+  return testMode ? Deno.env.get('PAYSTACK_TEST_SECRET_KEY') : Deno.env.get('PAYSTACK_SECRET_KEY')
+}
 
 serve(async (req) => {
   const signature = req.headers.get('x-paystack-signature')
   const body = await req.text()
 
   // Verify PayStack signature
-  const hash = crypto.createHmac('sha512', PAYSTACK_SECRET).update(body).digest('hex')
+  const hash = crypto.createHmac('sha512', resolvePaystackSecretKey() ?? '').update(body).digest('hex')
 
   if (hash !== signature) {
     console.error('Invalid PayStack webhook signature')
@@ -45,6 +53,36 @@ serve(async (req) => {
       if (existingPayment) {
         console.log('Payment already processed:', reference)
         return new Response(JSON.stringify({ received: true, message: 'Already processed' }), { status: 200 })
+      }
+
+      // S3/S4: cross-check the actually-charged amount against what the
+      // paystack `initialize` function computed and recorded for this
+      // reference. If they don't match (or there's no intent on file), do
+      // NOT fulfil - this stops a tampered charge from ever granting a
+      // subscription/booking even if it somehow reached Paystack.
+      const { data: intent } = await supabase
+        .from('payment_intents')
+        .select('expected_amount_kobo')
+        .eq('reference', reference)
+        .maybeSingle()
+
+      if (!intent) {
+        console.warn('No payment_intent for reference, refusing to fulfil:', reference)
+        return new Response(
+          JSON.stringify({ received: true, message: 'No matching intent - not fulfilled' }),
+          { status: 200 },
+        )
+      }
+      if (Math.abs(Number(intent.expected_amount_kobo) - Number(event.data.amount)) > 1) {
+        console.error('Amount mismatch, refusing to fulfil:', {
+          reference,
+          expected: intent.expected_amount_kobo,
+          charged: event.data.amount,
+        })
+        return new Response(
+          JSON.stringify({ received: true, message: 'Amount mismatch - not fulfilled' }),
+          { status: 200 },
+        )
       }
 
       // Route based on payment type

@@ -19,6 +19,7 @@ class LocationNotifier extends StateNotifier<AsyncValue<LocationModel?>> {
     try {
       // First try to get saved location
       LocationModel? savedLocation = await _locationService.getSavedLocation();
+      if (!mounted) return;
       if (savedLocation != null) {
         state = AsyncValue.data(savedLocation);
         return;
@@ -26,14 +27,17 @@ class LocationNotifier extends StateNotifier<AsyncValue<LocationModel?>> {
 
       // If no saved location, try to get current location
       LocationModel? currentLocation = await _locationService.getCurrentLocation();
+      if (!mounted) return;
       if (currentLocation != null) {
         await _locationService.saveLocation(currentLocation);
+        if (!mounted) return;
         state = AsyncValue.data(currentLocation);
         return;
       }
 
       state = const AsyncValue.data(null);
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = AsyncValue.error(error, stackTrace);
     }
   }
@@ -42,13 +46,16 @@ class LocationNotifier extends StateNotifier<AsyncValue<LocationModel?>> {
     state = const AsyncValue.loading();
     try {
       LocationModel? currentLocation = await _locationService.getCurrentLocation();
+      if (!mounted) return;
       if (currentLocation != null) {
         await _locationService.saveLocation(currentLocation);
+        if (!mounted) return;
         state = AsyncValue.data(currentLocation);
       } else {
         state = const AsyncValue.data(null);
       }
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = AsyncValue.error(error, stackTrace);
     }
   }
@@ -57,8 +64,10 @@ class LocationNotifier extends StateNotifier<AsyncValue<LocationModel?>> {
     state = const AsyncValue.loading();
     try {
       await _locationService.clearSavedLocation();
+      if (!mounted) return;
       state = const AsyncValue.data(null);
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = AsyncValue.error(error, stackTrace);
     }
   }

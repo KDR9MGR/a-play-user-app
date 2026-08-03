@@ -15,6 +15,12 @@ class FeatureFlags {
   /// Authentication (Email, Google, Apple Sign In)
   static const bool enableAuth = true;
 
+  /// Google/Apple social login buttons on sign-in and sign-up. The
+  /// underlying sign-in/sign-up intent enforcement and Apple-hidden-email
+  /// payment fixes remain in place either way - this only controls whether
+  /// the buttons are shown.
+  static const bool enableSocialLogin = false;
+
   /// Event bookings with PayStack payment
   static const bool enableEventBookings = true;
 

@@ -1,8 +1,12 @@
-class SupabaseConfig {
-  // Hardcoded Supabase credentials
-  static const String _hardcodedProjectUrl = 'https://yvnfhsipyfxdmulajbgl.supabase.co';
-  static const String _hardcodedAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2bmZoc2lweWZ4ZG11bGFqYmdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2NDUwNTgsImV4cCI6MjA2MzIyMTA1OH0.9mw2t1IKIHJkh30CdWcAfB2JhuJYdHQ_e_iHOZWcIqs';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+class SupabaseConfig {
+  // .env is bundled as a Flutter asset and loaded at runtime via dotenv, so
+  // it works no matter how the app was launched (Xcode Run, Xcode Archive,
+  // `flutter run`, TestFlight, ...) - unlike --dart-define, which only gets
+  // baked in correctly if the specific build command that ran happened to
+  // pass it. dart-define is kept as a secondary source for build pipelines
+  // that intentionally don't bundle a .env file.
   static const String _projectUrlDefine =
       String.fromEnvironment('SUPABASE_URL', defaultValue: '');
   static const String _anonKeyDefine =
@@ -32,15 +36,16 @@ class SupabaseConfig {
   }
 
   static String get projectUrl {
-    // First try dart-define, then fall back to hardcoded value
-    if (_projectUrlDefine.isNotEmpty) return _normalize(_projectUrlDefine);
-    return _hardcodedProjectUrl;
+    final dotenvValue = _normalize(dotenv.env['SUPABASE_URL'] ?? '');
+    if (dotenvValue.isNotEmpty) return dotenvValue;
+    return _normalize(_projectUrlDefine);
   }
 
   static String get anonKey {
-    // First try dart-define, then fall back to hardcoded value
+    final dotenvValue = _normalize(dotenv.env['SUPABASE_ANON_KEY'] ?? '');
+    if (_looksLikeSupabaseKey(dotenvValue)) return dotenvValue;
+
     final defineValue = _normalize(_anonKeyDefine);
-    if (_looksLikeSupabaseKey(defineValue)) return defineValue;
-    return _hardcodedAnonKey;
+    return _looksLikeSupabaseKey(defineValue) ? defineValue : '';
   }
 }

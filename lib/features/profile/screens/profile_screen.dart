@@ -70,7 +70,7 @@ class ProfileScreen extends ConsumerWidget {
                           title: const Text('Edit Profile', style: TextStyle(color: Colors.white)),
                           onTap: () {
                             Navigator.of(sheetContext).pop();
-                            context.go('/profile/edit');
+                            context.push('/profile/edit');
                           },
                         ),
                         // MVP: Referrals hidden - Coming in v2.1
@@ -310,7 +310,7 @@ class ProfileScreen extends ConsumerWidget {
                 subtitle: 'Update your information',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  context.go('/profile/edit');
+                  context.push('/profile/edit');
                 },
               ),
               _SettingsCard(
@@ -521,7 +521,7 @@ class ProfileScreen extends ConsumerWidget {
           GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
-              context.go('/profile/edit');
+              context.push('/profile/edit');
             },
             child: Container(
               padding: const EdgeInsets.all(8),

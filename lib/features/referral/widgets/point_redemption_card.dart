@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 class PointRedemptionCard extends StatelessWidget {
-  final Future<void> Function(int points, String purpose) onRedeem;
+  final Future<void> Function(
+      int points, String purpose, String rewardType, double rewardValue) onRedeem;
 
   const PointRedemptionCard({
     super.key,
@@ -22,12 +23,14 @@ class PointRedemptionCard extends StatelessWidget {
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
-            
+
             // List of redemption options
             _buildRedemptionOption(
               context,
               title: 'GH₵500 Discount',
               points: 500,
+              rewardType: 'discount',
+              rewardValue: 500,
               icon: Iconsax.discount_shape,
               color: Colors.green,
             ),
@@ -36,6 +39,8 @@ class PointRedemptionCard extends StatelessWidget {
               context,
               title: '1 Free Premium Week',
               points: 1000,
+              rewardType: 'premium_week',
+              rewardValue: 0,
               icon: Iconsax.crown_1,
               color: Colors.purple,
             ),
@@ -44,6 +49,8 @@ class PointRedemptionCard extends StatelessWidget {
               context,
               title: 'Free VIP Upgrade',
               points: 2500,
+              rewardType: 'vip_upgrade',
+              rewardValue: 0,
               icon: Iconsax.medal_star,
               color: Colors.amber,
             ),
@@ -52,6 +59,8 @@ class PointRedemptionCard extends StatelessWidget {
               context,
               title: 'Access to Top Events',
               points: 5000,
+              rewardType: 'event_access',
+              rewardValue: 0,
               icon: Iconsax.ticket,
               color: Colors.red,
             ),
@@ -65,6 +74,8 @@ class PointRedemptionCard extends StatelessWidget {
     BuildContext context, {
     required String title,
     required int points,
+    required String rewardType,
+    required double rewardValue,
     required IconData icon,
     required Color color,
   }) {
@@ -86,9 +97,11 @@ class PointRedemptionCard extends StatelessWidget {
       trailing: ElevatedButton(
         onPressed: () {
           _confirmRedemption(
-            context, 
-            points: points, 
+            context,
+            points: points,
             title: title,
+            rewardType: rewardType,
+            rewardValue: rewardValue,
           );
         },
         style: ElevatedButton.styleFrom(
@@ -103,6 +116,8 @@ class PointRedemptionCard extends StatelessWidget {
     BuildContext context, {
     required int points,
     required String title,
+    required String rewardType,
+    required double rewardValue,
   }) {
     showDialog(
       context: context,
@@ -120,7 +135,7 @@ class PointRedemptionCard extends StatelessWidget {
             onPressed: () async {
               Navigator.of(context).pop();
               try {
-                await onRedeem(points, title);
+                await onRedeem(points, title, rewardType, rewardValue);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Successfully redeemed for $title')),
@@ -140,4 +155,4 @@ class PointRedemptionCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

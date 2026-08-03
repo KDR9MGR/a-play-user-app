@@ -137,7 +137,7 @@ class FriendsService {
     try {
       final currentUserId = _client.auth.currentUser!.id;
       final response = await _client
-          .from('profiles')
+          .from('public_profiles')
           .select('id, avatar_url, full_name, email')
           .neq('id', currentUserId) // Exclude current user
           .or('full_name.ilike.%$query%,email.ilike.%$query%')

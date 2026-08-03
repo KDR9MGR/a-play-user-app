@@ -15,7 +15,6 @@ import 'package:a_play/core/config/env.dart';
 import 'package:a_play/core/widgets/connectivity_overlay.dart';
 import 'package:a_play/core/widgets/auth_error_handler.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:a_play/features/subscription/service/platform_subscription_service.dart';
 import 'package:a_play/core/services/realtime_sync_service.dart';
 import 'package:a_play/core/services/notification_service.dart';
 import 'package:a_play/core/services/iap_service.dart';
@@ -23,7 +22,15 @@ import 'package:a_play/core/services/iap_service.dart';
 
 // Initialize app state provider
 final appInitializationProvider = StateProvider<bool>((ref) => false);
- 
+
+// Tracks whether the app has already successfully reached its first runApp()
+// call. Only errors that happen *before* that point are genuine bootstrap
+// failures worth replacing the whole UI for - once the app is running
+// normally, an uncaught async error elsewhere (a disposed provider, a
+// flaky network call, ...) should be logged, not treated as if the entire
+// app failed to start.
+bool _appStarted = false;
+
 Future<void> main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -94,6 +101,11 @@ Future<void> main() async {
       );
     }
 
+    // Force evaluation now so a misconfigured/missing Paystack key (or a test key
+    // in a release build) fails app startup instead of failing silently later,
+    // mid-checkout, in production.
+    Env.paystackPublicKey;
+
     await _bootstrapApp(supabaseUrl: supabaseUrl, supabaseAnonKey: supabaseAnonKey);
   }, (error, stackTrace) {
     // Firebase/Crashlytics temporarily disabled for testing
@@ -113,9 +125,14 @@ Future<void> main() async {
 
     // Log error to console
     if (kDebugMode) {
-      debugPrint('App initialization failed: $error');
+      debugPrint('${_appStarted ? "Uncaught app error" : "App initialization failed"}: $error');
       debugPrint('Stack trace: $stackTrace');
     }
+
+    // The app already started successfully - this is a runtime error
+    // somewhere else, not a bootstrap failure. Don't tear down the whole
+    // running UI over it.
+    if (_appStarted) return;
 
     runApp(
       MaterialApp(
@@ -161,10 +178,7 @@ Future<void> _bootstrapApp({
     await NotificationService().initialize(appId: oneSignalAppId);
   }
 
-  final platformService = PlatformSubscriptionService();
-  await platformService.initialize();
-
-  // Initialize new IAP service for subscription sync
+  // Initialize IAP service for subscription sync (the only IAP stack in the app)
   if (!kIsWeb) {
     await IAPService.instance.initialize();
   }
@@ -177,6 +191,7 @@ Future<void> _bootstrapApp({
       child: APlayApp(),
     ),
   );
+  _appStarted = true;
 }
 
 class APlayApp extends ConsumerWidget {

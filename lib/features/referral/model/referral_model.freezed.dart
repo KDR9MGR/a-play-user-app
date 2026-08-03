@@ -2308,6 +2308,865 @@ abstract class _UserChallengeProgress implements UserChallengeProgress {
       get copyWith => throw _privateConstructorUsedError;
 }
 
+PointRedemption _$PointRedemptionFromJson(Map<String, dynamic> json) {
+  return _PointRedemption.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PointRedemption {
+  String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id')
+  String get userId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'points_spent')
+  int get pointsSpent => throw _privateConstructorUsedError;
+  @JsonKey(name: 'reward_type')
+  String get rewardType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'reward_value')
+  double get rewardValue => throw _privateConstructorUsedError;
+  String get description => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'redemption_code')
+  String? get redemptionCode => throw _privateConstructorUsedError;
+  @JsonKey(name: 'affiliate_id')
+  String? get affiliateId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'settlement_id')
+  String? get settlementId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'expires_at')
+  DateTime? get expiresAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'redeemed_at')
+  DateTime? get redeemedAt => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $PointRedemptionCopyWith<PointRedemption> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PointRedemptionCopyWith<$Res> {
+  factory $PointRedemptionCopyWith(
+          PointRedemption value, $Res Function(PointRedemption) then) =
+      _$PointRedemptionCopyWithImpl<$Res, PointRedemption>;
+  @useResult
+  $Res call(
+      {String id,
+      @JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'points_spent') int pointsSpent,
+      @JsonKey(name: 'reward_type') String rewardType,
+      @JsonKey(name: 'reward_value') double rewardValue,
+      String description,
+      String status,
+      @JsonKey(name: 'redemption_code') String? redemptionCode,
+      @JsonKey(name: 'affiliate_id') String? affiliateId,
+      @JsonKey(name: 'settlement_id') String? settlementId,
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'expires_at') DateTime? expiresAt,
+      @JsonKey(name: 'redeemed_at') DateTime? redeemedAt});
+}
+
+/// @nodoc
+class _$PointRedemptionCopyWithImpl<$Res, $Val extends PointRedemption>
+    implements $PointRedemptionCopyWith<$Res> {
+  _$PointRedemptionCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? userId = null,
+    Object? pointsSpent = null,
+    Object? rewardType = null,
+    Object? rewardValue = null,
+    Object? description = null,
+    Object? status = null,
+    Object? redemptionCode = freezed,
+    Object? affiliateId = freezed,
+    Object? settlementId = freezed,
+    Object? createdAt = null,
+    Object? expiresAt = freezed,
+    Object? redeemedAt = freezed,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String,
+      pointsSpent: null == pointsSpent
+          ? _value.pointsSpent
+          : pointsSpent // ignore: cast_nullable_to_non_nullable
+              as int,
+      rewardType: null == rewardType
+          ? _value.rewardType
+          : rewardType // ignore: cast_nullable_to_non_nullable
+              as String,
+      rewardValue: null == rewardValue
+          ? _value.rewardValue
+          : rewardValue // ignore: cast_nullable_to_non_nullable
+              as double,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      redemptionCode: freezed == redemptionCode
+          ? _value.redemptionCode
+          : redemptionCode // ignore: cast_nullable_to_non_nullable
+              as String?,
+      affiliateId: freezed == affiliateId
+          ? _value.affiliateId
+          : affiliateId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      settlementId: freezed == settlementId
+          ? _value.settlementId
+          : settlementId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      expiresAt: freezed == expiresAt
+          ? _value.expiresAt
+          : expiresAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      redeemedAt: freezed == redeemedAt
+          ? _value.redeemedAt
+          : redeemedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$PointRedemptionImplCopyWith<$Res>
+    implements $PointRedemptionCopyWith<$Res> {
+  factory _$$PointRedemptionImplCopyWith(_$PointRedemptionImpl value,
+          $Res Function(_$PointRedemptionImpl) then) =
+      __$$PointRedemptionImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      @JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'points_spent') int pointsSpent,
+      @JsonKey(name: 'reward_type') String rewardType,
+      @JsonKey(name: 'reward_value') double rewardValue,
+      String description,
+      String status,
+      @JsonKey(name: 'redemption_code') String? redemptionCode,
+      @JsonKey(name: 'affiliate_id') String? affiliateId,
+      @JsonKey(name: 'settlement_id') String? settlementId,
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'expires_at') DateTime? expiresAt,
+      @JsonKey(name: 'redeemed_at') DateTime? redeemedAt});
+}
+
+/// @nodoc
+class __$$PointRedemptionImplCopyWithImpl<$Res>
+    extends _$PointRedemptionCopyWithImpl<$Res, _$PointRedemptionImpl>
+    implements _$$PointRedemptionImplCopyWith<$Res> {
+  __$$PointRedemptionImplCopyWithImpl(
+      _$PointRedemptionImpl _value, $Res Function(_$PointRedemptionImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? userId = null,
+    Object? pointsSpent = null,
+    Object? rewardType = null,
+    Object? rewardValue = null,
+    Object? description = null,
+    Object? status = null,
+    Object? redemptionCode = freezed,
+    Object? affiliateId = freezed,
+    Object? settlementId = freezed,
+    Object? createdAt = null,
+    Object? expiresAt = freezed,
+    Object? redeemedAt = freezed,
+  }) {
+    return _then(_$PointRedemptionImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String,
+      pointsSpent: null == pointsSpent
+          ? _value.pointsSpent
+          : pointsSpent // ignore: cast_nullable_to_non_nullable
+              as int,
+      rewardType: null == rewardType
+          ? _value.rewardType
+          : rewardType // ignore: cast_nullable_to_non_nullable
+              as String,
+      rewardValue: null == rewardValue
+          ? _value.rewardValue
+          : rewardValue // ignore: cast_nullable_to_non_nullable
+              as double,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      redemptionCode: freezed == redemptionCode
+          ? _value.redemptionCode
+          : redemptionCode // ignore: cast_nullable_to_non_nullable
+              as String?,
+      affiliateId: freezed == affiliateId
+          ? _value.affiliateId
+          : affiliateId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      settlementId: freezed == settlementId
+          ? _value.settlementId
+          : settlementId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      expiresAt: freezed == expiresAt
+          ? _value.expiresAt
+          : expiresAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      redeemedAt: freezed == redeemedAt
+          ? _value.redeemedAt
+          : redeemedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PointRedemptionImpl
+    with DiagnosticableTreeMixin
+    implements _PointRedemption {
+  const _$PointRedemptionImpl(
+      {required this.id,
+      @JsonKey(name: 'user_id') required this.userId,
+      @JsonKey(name: 'points_spent') required this.pointsSpent,
+      @JsonKey(name: 'reward_type') required this.rewardType,
+      @JsonKey(name: 'reward_value') this.rewardValue = 0,
+      this.description = '',
+      this.status = 'pending',
+      @JsonKey(name: 'redemption_code') this.redemptionCode,
+      @JsonKey(name: 'affiliate_id') this.affiliateId,
+      @JsonKey(name: 'settlement_id') this.settlementId,
+      @JsonKey(name: 'created_at') required this.createdAt,
+      @JsonKey(name: 'expires_at') this.expiresAt,
+      @JsonKey(name: 'redeemed_at') this.redeemedAt});
+
+  factory _$PointRedemptionImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PointRedemptionImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  @JsonKey(name: 'user_id')
+  final String userId;
+  @override
+  @JsonKey(name: 'points_spent')
+  final int pointsSpent;
+  @override
+  @JsonKey(name: 'reward_type')
+  final String rewardType;
+  @override
+  @JsonKey(name: 'reward_value')
+  final double rewardValue;
+  @override
+  @JsonKey()
+  final String description;
+  @override
+  @JsonKey()
+  final String status;
+  @override
+  @JsonKey(name: 'redemption_code')
+  final String? redemptionCode;
+  @override
+  @JsonKey(name: 'affiliate_id')
+  final String? affiliateId;
+  @override
+  @JsonKey(name: 'settlement_id')
+  final String? settlementId;
+  @override
+  @JsonKey(name: 'created_at')
+  final DateTime createdAt;
+  @override
+  @JsonKey(name: 'expires_at')
+  final DateTime? expiresAt;
+  @override
+  @JsonKey(name: 'redeemed_at')
+  final DateTime? redeemedAt;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'PointRedemption(id: $id, userId: $userId, pointsSpent: $pointsSpent, rewardType: $rewardType, rewardValue: $rewardValue, description: $description, status: $status, redemptionCode: $redemptionCode, affiliateId: $affiliateId, settlementId: $settlementId, createdAt: $createdAt, expiresAt: $expiresAt, redeemedAt: $redeemedAt)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'PointRedemption'))
+      ..add(DiagnosticsProperty('id', id))
+      ..add(DiagnosticsProperty('userId', userId))
+      ..add(DiagnosticsProperty('pointsSpent', pointsSpent))
+      ..add(DiagnosticsProperty('rewardType', rewardType))
+      ..add(DiagnosticsProperty('rewardValue', rewardValue))
+      ..add(DiagnosticsProperty('description', description))
+      ..add(DiagnosticsProperty('status', status))
+      ..add(DiagnosticsProperty('redemptionCode', redemptionCode))
+      ..add(DiagnosticsProperty('affiliateId', affiliateId))
+      ..add(DiagnosticsProperty('settlementId', settlementId))
+      ..add(DiagnosticsProperty('createdAt', createdAt))
+      ..add(DiagnosticsProperty('expiresAt', expiresAt))
+      ..add(DiagnosticsProperty('redeemedAt', redeemedAt));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PointRedemptionImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.pointsSpent, pointsSpent) ||
+                other.pointsSpent == pointsSpent) &&
+            (identical(other.rewardType, rewardType) ||
+                other.rewardType == rewardType) &&
+            (identical(other.rewardValue, rewardValue) ||
+                other.rewardValue == rewardValue) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.redemptionCode, redemptionCode) ||
+                other.redemptionCode == redemptionCode) &&
+            (identical(other.affiliateId, affiliateId) ||
+                other.affiliateId == affiliateId) &&
+            (identical(other.settlementId, settlementId) ||
+                other.settlementId == settlementId) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.expiresAt, expiresAt) ||
+                other.expiresAt == expiresAt) &&
+            (identical(other.redeemedAt, redeemedAt) ||
+                other.redeemedAt == redeemedAt));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      userId,
+      pointsSpent,
+      rewardType,
+      rewardValue,
+      description,
+      status,
+      redemptionCode,
+      affiliateId,
+      settlementId,
+      createdAt,
+      expiresAt,
+      redeemedAt);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PointRedemptionImplCopyWith<_$PointRedemptionImpl> get copyWith =>
+      __$$PointRedemptionImplCopyWithImpl<_$PointRedemptionImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PointRedemptionImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _PointRedemption implements PointRedemption {
+  const factory _PointRedemption(
+          {required final String id,
+          @JsonKey(name: 'user_id') required final String userId,
+          @JsonKey(name: 'points_spent') required final int pointsSpent,
+          @JsonKey(name: 'reward_type') required final String rewardType,
+          @JsonKey(name: 'reward_value') final double rewardValue,
+          final String description,
+          final String status,
+          @JsonKey(name: 'redemption_code') final String? redemptionCode,
+          @JsonKey(name: 'affiliate_id') final String? affiliateId,
+          @JsonKey(name: 'settlement_id') final String? settlementId,
+          @JsonKey(name: 'created_at') required final DateTime createdAt,
+          @JsonKey(name: 'expires_at') final DateTime? expiresAt,
+          @JsonKey(name: 'redeemed_at') final DateTime? redeemedAt}) =
+      _$PointRedemptionImpl;
+
+  factory _PointRedemption.fromJson(Map<String, dynamic> json) =
+      _$PointRedemptionImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  @JsonKey(name: 'user_id')
+  String get userId;
+  @override
+  @JsonKey(name: 'points_spent')
+  int get pointsSpent;
+  @override
+  @JsonKey(name: 'reward_type')
+  String get rewardType;
+  @override
+  @JsonKey(name: 'reward_value')
+  double get rewardValue;
+  @override
+  String get description;
+  @override
+  String get status;
+  @override
+  @JsonKey(name: 'redemption_code')
+  String? get redemptionCode;
+  @override
+  @JsonKey(name: 'affiliate_id')
+  String? get affiliateId;
+  @override
+  @JsonKey(name: 'settlement_id')
+  String? get settlementId;
+  @override
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt;
+  @override
+  @JsonKey(name: 'expires_at')
+  DateTime? get expiresAt;
+  @override
+  @JsonKey(name: 'redeemed_at')
+  DateTime? get redeemedAt;
+  @override
+  @JsonKey(ignore: true)
+  _$$PointRedemptionImplCopyWith<_$PointRedemptionImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+Affiliate _$AffiliateFromJson(Map<String, dynamic> json) {
+  return _Affiliate.fromJson(json);
+}
+
+/// @nodoc
+mixin _$Affiliate {
+  String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'business_name')
+  String get businessName => throw _privateConstructorUsedError;
+  String? get category => throw _privateConstructorUsedError;
+  @JsonKey(name: 'contact_name')
+  String? get contactName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'contact_phone')
+  String? get contactPhone => throw _privateConstructorUsedError;
+  @JsonKey(name: 'contact_email')
+  String? get contactEmail => throw _privateConstructorUsedError;
+  String? get address => throw _privateConstructorUsedError;
+  @JsonKey(name: 'point_value_ghs')
+  double? get pointValueGhs => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_active')
+  bool get isActive => throw _privateConstructorUsedError;
+  String? get notes => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $AffiliateCopyWith<Affiliate> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AffiliateCopyWith<$Res> {
+  factory $AffiliateCopyWith(Affiliate value, $Res Function(Affiliate) then) =
+      _$AffiliateCopyWithImpl<$Res, Affiliate>;
+  @useResult
+  $Res call(
+      {String id,
+      @JsonKey(name: 'business_name') String businessName,
+      String? category,
+      @JsonKey(name: 'contact_name') String? contactName,
+      @JsonKey(name: 'contact_phone') String? contactPhone,
+      @JsonKey(name: 'contact_email') String? contactEmail,
+      String? address,
+      @JsonKey(name: 'point_value_ghs') double? pointValueGhs,
+      @JsonKey(name: 'is_active') bool isActive,
+      String? notes,
+      @JsonKey(name: 'created_at') DateTime createdAt});
+}
+
+/// @nodoc
+class _$AffiliateCopyWithImpl<$Res, $Val extends Affiliate>
+    implements $AffiliateCopyWith<$Res> {
+  _$AffiliateCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? businessName = null,
+    Object? category = freezed,
+    Object? contactName = freezed,
+    Object? contactPhone = freezed,
+    Object? contactEmail = freezed,
+    Object? address = freezed,
+    Object? pointValueGhs = freezed,
+    Object? isActive = null,
+    Object? notes = freezed,
+    Object? createdAt = null,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      businessName: null == businessName
+          ? _value.businessName
+          : businessName // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: freezed == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
+      contactName: freezed == contactName
+          ? _value.contactName
+          : contactName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      contactPhone: freezed == contactPhone
+          ? _value.contactPhone
+          : contactPhone // ignore: cast_nullable_to_non_nullable
+              as String?,
+      contactEmail: freezed == contactEmail
+          ? _value.contactEmail
+          : contactEmail // ignore: cast_nullable_to_non_nullable
+              as String?,
+      address: freezed == address
+          ? _value.address
+          : address // ignore: cast_nullable_to_non_nullable
+              as String?,
+      pointValueGhs: freezed == pointValueGhs
+          ? _value.pointValueGhs
+          : pointValueGhs // ignore: cast_nullable_to_non_nullable
+              as double?,
+      isActive: null == isActive
+          ? _value.isActive
+          : isActive // ignore: cast_nullable_to_non_nullable
+              as bool,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$AffiliateImplCopyWith<$Res>
+    implements $AffiliateCopyWith<$Res> {
+  factory _$$AffiliateImplCopyWith(
+          _$AffiliateImpl value, $Res Function(_$AffiliateImpl) then) =
+      __$$AffiliateImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      @JsonKey(name: 'business_name') String businessName,
+      String? category,
+      @JsonKey(name: 'contact_name') String? contactName,
+      @JsonKey(name: 'contact_phone') String? contactPhone,
+      @JsonKey(name: 'contact_email') String? contactEmail,
+      String? address,
+      @JsonKey(name: 'point_value_ghs') double? pointValueGhs,
+      @JsonKey(name: 'is_active') bool isActive,
+      String? notes,
+      @JsonKey(name: 'created_at') DateTime createdAt});
+}
+
+/// @nodoc
+class __$$AffiliateImplCopyWithImpl<$Res>
+    extends _$AffiliateCopyWithImpl<$Res, _$AffiliateImpl>
+    implements _$$AffiliateImplCopyWith<$Res> {
+  __$$AffiliateImplCopyWithImpl(
+      _$AffiliateImpl _value, $Res Function(_$AffiliateImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? businessName = null,
+    Object? category = freezed,
+    Object? contactName = freezed,
+    Object? contactPhone = freezed,
+    Object? contactEmail = freezed,
+    Object? address = freezed,
+    Object? pointValueGhs = freezed,
+    Object? isActive = null,
+    Object? notes = freezed,
+    Object? createdAt = null,
+  }) {
+    return _then(_$AffiliateImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      businessName: null == businessName
+          ? _value.businessName
+          : businessName // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: freezed == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
+      contactName: freezed == contactName
+          ? _value.contactName
+          : contactName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      contactPhone: freezed == contactPhone
+          ? _value.contactPhone
+          : contactPhone // ignore: cast_nullable_to_non_nullable
+              as String?,
+      contactEmail: freezed == contactEmail
+          ? _value.contactEmail
+          : contactEmail // ignore: cast_nullable_to_non_nullable
+              as String?,
+      address: freezed == address
+          ? _value.address
+          : address // ignore: cast_nullable_to_non_nullable
+              as String?,
+      pointValueGhs: freezed == pointValueGhs
+          ? _value.pointValueGhs
+          : pointValueGhs // ignore: cast_nullable_to_non_nullable
+              as double?,
+      isActive: null == isActive
+          ? _value.isActive
+          : isActive // ignore: cast_nullable_to_non_nullable
+              as bool,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$AffiliateImpl with DiagnosticableTreeMixin implements _Affiliate {
+  const _$AffiliateImpl(
+      {required this.id,
+      @JsonKey(name: 'business_name') required this.businessName,
+      this.category,
+      @JsonKey(name: 'contact_name') this.contactName,
+      @JsonKey(name: 'contact_phone') this.contactPhone,
+      @JsonKey(name: 'contact_email') this.contactEmail,
+      this.address,
+      @JsonKey(name: 'point_value_ghs') this.pointValueGhs,
+      @JsonKey(name: 'is_active') this.isActive = true,
+      this.notes,
+      @JsonKey(name: 'created_at') required this.createdAt});
+
+  factory _$AffiliateImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AffiliateImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  @JsonKey(name: 'business_name')
+  final String businessName;
+  @override
+  final String? category;
+  @override
+  @JsonKey(name: 'contact_name')
+  final String? contactName;
+  @override
+  @JsonKey(name: 'contact_phone')
+  final String? contactPhone;
+  @override
+  @JsonKey(name: 'contact_email')
+  final String? contactEmail;
+  @override
+  final String? address;
+  @override
+  @JsonKey(name: 'point_value_ghs')
+  final double? pointValueGhs;
+  @override
+  @JsonKey(name: 'is_active')
+  final bool isActive;
+  @override
+  final String? notes;
+  @override
+  @JsonKey(name: 'created_at')
+  final DateTime createdAt;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'Affiliate(id: $id, businessName: $businessName, category: $category, contactName: $contactName, contactPhone: $contactPhone, contactEmail: $contactEmail, address: $address, pointValueGhs: $pointValueGhs, isActive: $isActive, notes: $notes, createdAt: $createdAt)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'Affiliate'))
+      ..add(DiagnosticsProperty('id', id))
+      ..add(DiagnosticsProperty('businessName', businessName))
+      ..add(DiagnosticsProperty('category', category))
+      ..add(DiagnosticsProperty('contactName', contactName))
+      ..add(DiagnosticsProperty('contactPhone', contactPhone))
+      ..add(DiagnosticsProperty('contactEmail', contactEmail))
+      ..add(DiagnosticsProperty('address', address))
+      ..add(DiagnosticsProperty('pointValueGhs', pointValueGhs))
+      ..add(DiagnosticsProperty('isActive', isActive))
+      ..add(DiagnosticsProperty('notes', notes))
+      ..add(DiagnosticsProperty('createdAt', createdAt));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AffiliateImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.businessName, businessName) ||
+                other.businessName == businessName) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.contactName, contactName) ||
+                other.contactName == contactName) &&
+            (identical(other.contactPhone, contactPhone) ||
+                other.contactPhone == contactPhone) &&
+            (identical(other.contactEmail, contactEmail) ||
+                other.contactEmail == contactEmail) &&
+            (identical(other.address, address) || other.address == address) &&
+            (identical(other.pointValueGhs, pointValueGhs) ||
+                other.pointValueGhs == pointValueGhs) &&
+            (identical(other.isActive, isActive) ||
+                other.isActive == isActive) &&
+            (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      businessName,
+      category,
+      contactName,
+      contactPhone,
+      contactEmail,
+      address,
+      pointValueGhs,
+      isActive,
+      notes,
+      createdAt);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AffiliateImplCopyWith<_$AffiliateImpl> get copyWith =>
+      __$$AffiliateImplCopyWithImpl<_$AffiliateImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AffiliateImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _Affiliate implements Affiliate {
+  const factory _Affiliate(
+          {required final String id,
+          @JsonKey(name: 'business_name') required final String businessName,
+          final String? category,
+          @JsonKey(name: 'contact_name') final String? contactName,
+          @JsonKey(name: 'contact_phone') final String? contactPhone,
+          @JsonKey(name: 'contact_email') final String? contactEmail,
+          final String? address,
+          @JsonKey(name: 'point_value_ghs') final double? pointValueGhs,
+          @JsonKey(name: 'is_active') final bool isActive,
+          final String? notes,
+          @JsonKey(name: 'created_at') required final DateTime createdAt}) =
+      _$AffiliateImpl;
+
+  factory _Affiliate.fromJson(Map<String, dynamic> json) =
+      _$AffiliateImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  @JsonKey(name: 'business_name')
+  String get businessName;
+  @override
+  String? get category;
+  @override
+  @JsonKey(name: 'contact_name')
+  String? get contactName;
+  @override
+  @JsonKey(name: 'contact_phone')
+  String? get contactPhone;
+  @override
+  @JsonKey(name: 'contact_email')
+  String? get contactEmail;
+  @override
+  String? get address;
+  @override
+  @JsonKey(name: 'point_value_ghs')
+  double? get pointValueGhs;
+  @override
+  @JsonKey(name: 'is_active')
+  bool get isActive;
+  @override
+  String? get notes;
+  @override
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt;
+  @override
+  @JsonKey(ignore: true)
+  _$$AffiliateImplCopyWith<_$AffiliateImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 TimeLimitedOffer _$TimeLimitedOfferFromJson(Map<String, dynamic> json) {
   return _TimeLimitedOffer.fromJson(json);
 }

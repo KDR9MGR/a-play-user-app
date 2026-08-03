@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:a_play/core/services/location_service.dart';
+import 'package:a_play/core/services/nominatim_service.dart';
 import 'package:a_play/core/theme/app_theme.dart';
 
 class SelectLocationScreen extends ConsumerStatefulWidget {
@@ -14,6 +14,7 @@ class SelectLocationScreen extends ConsumerStatefulWidget {
 
 class _SelectLocationScreenState extends ConsumerState<SelectLocationScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final NominatimService _nominatimService = NominatimService();
   bool _isLoading = false;
   List<LocationData> _searchResults = [];
 
@@ -32,17 +33,20 @@ class _SelectLocationScreenState extends ConsumerState<SelectLocationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final locations = await locationFromAddress(query);
-      final locationService = ref.read(locationServiceProvider);
-      
-      _searchResults = await Future.wait(
-        locations.map((location) async {
-          return locationService.getAddressFromCoordinates(
-            location.latitude,
-            location.longitude,
-          );
-        }),
-      );
+      // Use Nominatim (OpenStreetMap) for free location search
+      final results = await _nominatimService.searchLocation(query);
+
+      // Convert Nominatim results to LocationData
+      _searchResults = results.map((result) {
+        return LocationData(
+          latitude: result.latitude,
+          longitude: result.longitude,
+          city: result.cityName,
+          locality: result.suburb ?? result.neighbourhood ?? result.cityName,
+          fullAddress: result.displayName,
+          country: result.country ?? 'Ghana',
+        );
+      }).toList();
 
       setState(() => _isLoading = false);
     } catch (e) {
@@ -52,7 +56,7 @@ class _SelectLocationScreenState extends ConsumerState<SelectLocationScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error searching location')),
+          SnackBar(content: Text('Error searching location: ${e.toString()}')),
         );
       }
     }

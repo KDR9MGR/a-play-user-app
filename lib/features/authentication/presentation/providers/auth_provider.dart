@@ -133,7 +133,59 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
     }
   }
 
-  Future<void> signInWithGoogle() async {
+  /// Social auth intent enforcement. `signInWithIdToken` is Supabase's
+  /// combined sign-in-or-sign-up: it silently CREATES an account when none
+  /// exists. That caused two real bugs before the social buttons were pulled
+  /// from the UI: tapping "sign in" without an account logged you straight
+  /// into a brand-new empty account, and "sign up" with an existing account
+  /// gave no indication it already existed. This restores the distinction:
+  /// - sign-in intent + account didn't exist -> the accidentally created
+  ///   account is deleted again (delete-account edge function), session is
+  ///   dropped, and a clear "please sign up first" error is thrown.
+  /// - sign-up intent + account already existed -> session is dropped and a
+  ///   clear "already exists, please sign in" error is thrown.
+  /// New-account detection compares the server-side created_at and
+  /// last_sign_in_at timestamps (both set by Supabase, so no client clock
+  /// skew): they only coincide on the very first sign-in.
+  Future<bool> _enforceSocialAuthIntent({
+    required User user,
+    required bool isSignUp,
+    required String providerLabel,
+  }) async {
+    final createdAt = DateTime.parse(user.createdAt);
+    final lastSignIn =
+        user.lastSignInAt != null ? DateTime.parse(user.lastSignInAt!) : createdAt;
+    final isNewAccount = lastSignIn.difference(createdAt).inSeconds.abs() < 15;
+
+    if (!isSignUp && isNewAccount) {
+      debugPrint('[AUTH-PROVIDER] Sign-in intent but no pre-existing account - undoing implicit signup');
+      try {
+        await _client.functions.invoke('delete-account');
+      } catch (e) {
+        debugPrint('[AUTH-PROVIDER] Cleanup of implicit account failed (non-critical): $e');
+      }
+      try {
+        await _client.auth.signOut(scope: SignOutScope.local);
+      } catch (_) {}
+      throw AuthException(
+        'No account found for this $providerLabel account. Please sign up first.',
+      );
+    }
+
+    if (isSignUp && !isNewAccount) {
+      debugPrint('[AUTH-PROVIDER] Sign-up intent but account already exists');
+      try {
+        await _client.auth.signOut(scope: SignOutScope.local);
+      } catch (_) {}
+      throw AuthException(
+        'An account with this $providerLabel account already exists. Please sign in instead.',
+      );
+    }
+
+    return isNewAccount;
+  }
+
+  Future<void> signInWithGoogle({required bool isSignUp}) async {
     try {
       debugPrint('🔵 [AUTH-PROVIDER] Starting Google sign-in');
       state = const AsyncValue.loading();
@@ -187,22 +239,25 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         throw const AuthException('Failed to sign in with Google - no user returned');
       }
 
-      debugPrint('🔵 [AUTH-PROVIDER] ✓ Supabase user created: ${user.email} (ID: ${user.id})');
+      debugPrint('🔵 [AUTH-PROVIDER] ✓ Supabase user authenticated: ${user.email} (ID: ${user.id})');
 
-      // Check if profile exists and is valid
-      debugPrint('🔵 [AUTH-PROVIDER] Checking profile existence...');
+      // Enforce sign-in vs sign-up intent (throws on mismatch)
+      final isNewUser = await _enforceSocialAuthIntent(
+        user: user,
+        isSignUp: isSignUp,
+        providerLabel: 'Google',
+      );
+
+      // Profile is normally created by the handle_new_user DB trigger;
+      // create manually only as a fallback if it's somehow missing.
       final profile = await _client
           .from('profiles')
-          .select('id, email, full_name, created_at')
+          .select('id')
           .eq('id', user.id)
           .maybeSingle();
 
-      bool isNewUser = false;
-
       if (profile == null) {
-        // Profile doesn't exist - create it manually
         debugPrint('🔵 [AUTH-PROVIDER] ⚠ No profile found, creating manually');
-
         try {
           await _client.from('profiles').insert({
             'id': user.id,
@@ -212,22 +267,15 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
                          user.email?.split('@')[0] ?? 'User',
             'created_at': DateTime.now().toIso8601String(),
           });
-
-          isNewUser = true;
           debugPrint('🔵 [AUTH-PROVIDER] ✓ Profile created manually');
         } catch (e) {
           debugPrint('🔵 [AUTH-PROVIDER] ✗ Failed to create profile: $e');
           throw AuthException('Failed to create user profile: ${e.toString()}');
         }
-      } else {
-        // Profile exists - check if it's a new user (created within last 30 seconds)
-        final createdAt = DateTime.parse(profile['created_at'] as String);
-        isNewUser = createdAt.isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
-        debugPrint('🔵 [AUTH-PROVIDER] Profile found (created: ${profile['created_at']}), isNewUser: $isNewUser');
       }
 
       // Send welcome email for new OAuth users
-      if (isNewUser) {
+      if (isNewUser && user.email != null && user.email!.isNotEmpty) {
         try {
           final userName = user.userMetadata?['full_name'] ??
                           user.userMetadata?['name'] ??
@@ -281,7 +329,7 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
     return digest.toString();
   }
 
-  Future<void> signInWithApple() async {
+  Future<void> signInWithApple({required bool isSignUp}) async {
     try {
       debugPrint('🍎 [AUTH-PROVIDER] Starting Apple sign-in');
       state = const AsyncValue.loading();
@@ -337,22 +385,25 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         throw const AuthException('Failed to sign in with Apple - no user returned');
       }
 
-      debugPrint('🍎 [AUTH-PROVIDER] ✓ Supabase user created: ${user.email ?? "no-email"} (ID: ${user.id})');
+      debugPrint('🍎 [AUTH-PROVIDER] ✓ Supabase user authenticated: ${user.email ?? "no-email"} (ID: ${user.id})');
 
-      // Check if profile exists and is valid
-      debugPrint('🍎 [AUTH-PROVIDER] Checking profile existence...');
+      // Enforce sign-in vs sign-up intent (throws on mismatch)
+      final isNewUser = await _enforceSocialAuthIntent(
+        user: user,
+        isSignUp: isSignUp,
+        providerLabel: 'Apple',
+      );
+
+      // Profile is normally created by the handle_new_user DB trigger;
+      // create manually only as a fallback if it's somehow missing.
       final profile = await _client
           .from('profiles')
-          .select('id, email, full_name, created_at')
+          .select('id')
           .eq('id', user.id)
           .maybeSingle();
 
-      bool isNewUser = false;
-
       if (profile == null) {
-        // Profile doesn't exist - create it manually
         debugPrint('🍎 [AUTH-PROVIDER] ⚠ No profile found, creating manually');
-
         try {
           await _client.from('profiles').insert({
             'id': user.id,
@@ -362,30 +413,21 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
                          user.email?.split('@')[0] ?? 'User',
             'created_at': DateTime.now().toIso8601String(),
           });
-
-          isNewUser = true;
           debugPrint('🍎 [AUTH-PROVIDER] ✓ Profile created manually');
         } catch (e) {
           debugPrint('🍎 [AUTH-PROVIDER] ✗ Failed to create profile: $e');
           throw AuthException('Failed to create user profile: ${e.toString()}');
         }
-      } else {
-        // Profile exists - check if it's a new user (created within last 30 seconds)
-        final createdAt = DateTime.parse(profile['created_at'] as String);
-        isNewUser = createdAt.isAfter(DateTime.now().subtract(const Duration(seconds: 30)));
-        debugPrint('🍎 [AUTH-PROVIDER] Profile found (created: ${profile['created_at']}), isNewUser: $isNewUser');
-
-        // Update profile with the user's name if available from Apple (only on first sign-in)
-        // CRITICAL: Apple only provides the name on the FIRST sign-in, so we must save it
-        if (fullName != null && fullName.isNotEmpty) {
-          try {
-            await _client.from('profiles').update({
-              'full_name': fullName,
-            }).eq('id', user.id);
-            debugPrint('🍎 [AUTH-PROVIDER] ✓ Profile updated with Apple name');
-          } catch (e) {
-            debugPrint('🍎 [AUTH-PROVIDER] ⚠ Failed to update profile name (non-critical): $e');
-          }
+      } else if (fullName != null && fullName.isNotEmpty) {
+        // Apple only provides the name on the FIRST authorization, so persist
+        // it whenever we do get one.
+        try {
+          await _client.from('profiles').update({
+            'full_name': fullName,
+          }).eq('id', user.id);
+          debugPrint('🍎 [AUTH-PROVIDER] ✓ Profile updated with Apple name');
+        } catch (e) {
+          debugPrint('🍎 [AUTH-PROVIDER] ⚠ Failed to update profile name (non-critical): $e');
         }
       }
 
@@ -512,38 +554,38 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
     try {
       debugPrint('🔑 [RESET] Starting password reset for: $email');
 
-      // Use different redirect URLs for web vs mobile
+      // Mobile: THIS app's registered scheme (io.supabase.aplay), allowlisted
+      // in Supabase auth config. supabase_flutter consumes the deep link,
+      // establishes a recovery session, and fires
+      // AuthChangeEvent.passwordRecovery, which the router listens for to
+      // show the update-password screen.
       final redirectUrl = kIsWeb
           ? 'https://www.aplayworld.com/reset-password' // Production web URL
-          : 'aplayorganiser://reset-password'; // Mobile deep link
+          : 'io.supabase.aplay://reset-callback/'; // Mobile deep link
 
       debugPrint('🔑 [RESET] Using redirect URL: $redirectUrl');
 
-      // Trigger Supabase password reset flow
       await _client.auth.resetPasswordForEmail(
         email,
         redirectTo: redirectUrl,
       );
 
       debugPrint('🔑 [RESET] ✓ Password reset email sent');
-
-      // Send branded password reset email via Resend
-      try {
-        // Use email prefix as fallback name since user isn't logged in
-        final userName = email.split('@').first;
-        await EmailService().sendPasswordResetEmail(
-          toEmail: email,
-          userName: userName,
-          resetLink: 'io.supabase.aplay://reset-callback/', // Will be replaced by actual reset link in production
-        );
-      } catch (e) {
-        // Non-critical: Supabase already sent a reset email
-        debugPrint('Failed to send custom password reset email: $e');
-      }
+      // NOTE: no additional custom email here. Supabase's own reset email
+      // carries the actual recovery token; a second branded email with a
+      // tokenless link only confuses users into tapping the dead one.
     } catch (e) {
       // Propagate the error to the UI
       rethrow;
     }
+  }
+
+  /// Sets a new password for the current session. Used by the
+  /// update-password screen after a passwordRecovery deep link established
+  /// a recovery session.
+  Future<void> updatePassword(String newPassword) async {
+    _validatePasswordOrThrow(newPassword);
+    await _client.auth.updateUser(UserAttributes(password: newPassword));
   }
 
   Future<void> updateProfile({
@@ -576,7 +618,12 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
   }
 
   /// Delete user account and all associated data (Apple App Store requirement 5.1.1)
-  /// This permanently removes the user's account and data from Supabase
+  /// This permanently removes the user's account and data from Supabase via
+  /// the delete-account edge function: the caller is identified from their
+  /// JWT server-side, user data is cleaned up with the service role, and the
+  /// auth user itself is deleted (profiles + dependents cascade from it).
+  /// Client-side table deletes were removed - they were silently blocked by
+  /// RLS and never actually deleted anything.
   Future<void> deleteAccount() async {
     try {
       state = const AsyncValue.loading();
@@ -586,48 +633,18 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         throw const AuthException('No user logged in');
       }
 
-      final userId = user.id;
-
-      // Delete user data from all related tables
-      // Order matters due to foreign key constraints
-      try {
-        // Delete user's bookings
-        await _client.from('bookings').delete().eq('user_id', userId);
-
-        // Delete user's subscriptions
-        await _client.from('user_subscriptions').delete().eq('user_id', userId);
-
-        // Delete user's feed posts
-        await _client.from('feeds').delete().eq('user_id', userId);
-
-        // Delete user's feed reports
-        await _client.from('feed_reports').delete().eq('reporter_id', userId);
-
-        // Delete user's blocks (both directions)
-        await _client.from('user_blocks').delete().eq('blocker_id', userId);
-        await _client.from('user_blocks').delete().eq('blocked_id', userId);
-
-        // Delete user's chat messages
-        await _client.from('chat_messages').delete().eq('sender_id', userId);
-
-        // Delete user's referrals
-        await _client.from('referrals').delete().eq('referrer_id', userId);
-        await _client.from('referrals').delete().eq('referred_id', userId);
-
-        // Delete user's points
-        await _client.from('user_points').delete().eq('user_id', userId);
-
-        // Delete user profile
-        await _client.from('profiles').delete().eq('id', userId);
-      } catch (e) {
-        // Log but continue - some tables may not exist or have data
-        // The auth deletion is the critical part
+      final response = await _client.functions.invoke('delete-account');
+      final data = response.data;
+      if (data is! Map || data['success'] != true) {
+        final message = data is Map ? (data['error'] ?? 'Unknown error') : 'Unknown error';
+        throw AuthException('Account deletion failed: $message');
       }
 
-      // Sign out and delete auth user
-      // Note: Supabase requires admin API for full user deletion
-      // This signs out and the user can request full deletion via support
-      await _client.auth.signOut();
+      // The server already deleted the auth user - just clear local session
+      // state. signOut may fail since the user no longer exists; ignore it.
+      try {
+        await _client.auth.signOut(scope: SignOutScope.local);
+      } catch (_) {}
 
       state = const AsyncValue.data(null);
     } on AuthException catch (e, stack) {

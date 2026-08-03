@@ -32,7 +32,7 @@ class ChatService {
       if (userId == null) throw Exception('User not authenticated');
 
       final response = await _client
-          .from('profiles')
+          .from('public_profiles')
           .select('''
             id,
             full_name,
@@ -278,7 +278,7 @@ class ChatService {
       if (userId == null) throw Exception('User not authenticated');
 
       final response = await _client
-          .from('profiles')
+          .from('public_profiles')
           .select('''
             id,
             full_name,
@@ -482,7 +482,7 @@ class ChatService {
       final profilesResponse = friendIds.isEmpty
           ? <Map<String, dynamic>>[]
           : (await _client
-                  .from('profiles')
+                  .from('public_profiles')
                   .select('id,full_name,email,avatar_url')
                   .inFilter('id', friendIds) as List)
               .cast<Map<String, dynamic>>();
@@ -519,7 +519,7 @@ class ChatService {
           .single();
 
       final friendProfile = await _client
-          .from('profiles')
+          .from('public_profiles')
           .select('id,full_name,email,avatar_url')
           .eq('id', friendId)
           .maybeSingle();

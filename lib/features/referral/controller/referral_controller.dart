@@ -67,13 +67,35 @@ class UserPointsNotifier extends StateNotifier<AsyncValue<UserPoints?>> {
     }
   }
 
-  Future<void> redeemPoints(int points, String purpose) async {
+  Future<void> redeemPoints(
+    int points,
+    String purpose,
+    String rewardType, {
+    double rewardValue = 0,
+  }) async {
     try {
-      await _referralService.redeemPoints(points, purpose);
+      await _referralService.redeemPoints(points, purpose, rewardType,
+          rewardValue: rewardValue);
       _fetchUserPoints(); // Refresh points after redemption
       _ref.refresh(pointTransactionsProvider); // Refresh transactions as well
+      _ref.invalidate(pointRedemptionsProvider); // Refresh redemption history
     } catch (e) {
       // Handle error
+      rethrow;
+    }
+  }
+
+  // Redeem points at an affiliate/partner business
+  Future<PointRedemption> redeemAtAffiliate(
+      String affiliateId, int points) async {
+    try {
+      final redemption =
+          await _referralService.redeemAtAffiliate(affiliateId, points);
+      _fetchUserPoints(); // Refresh points after redemption
+      _ref.invalidate(pointTransactionsProvider);
+      _ref.invalidate(pointRedemptionsProvider);
+      return redemption;
+    } catch (e) {
       rethrow;
     }
   }
@@ -242,4 +264,62 @@ class UserChallengesNotifier extends StateNotifier<AsyncValue<List<UserChallenge
       state = AsyncError(e, StackTrace.current);
     }
   }
-} 
+}
+
+// Point Redemptions provider (redemption history)
+final pointRedemptionsProvider = StateNotifierProvider<
+    PointRedemptionsNotifier, AsyncValue<List<PointRedemption>>>((ref) {
+  final referralService = ref.watch(referralServiceProvider);
+  return PointRedemptionsNotifier(referralService);
+});
+
+class PointRedemptionsNotifier
+    extends StateNotifier<AsyncValue<List<PointRedemption>>> {
+  final ReferralService _referralService;
+
+  PointRedemptionsNotifier(this._referralService)
+      : super(const AsyncLoading()) {
+    _fetchRedemptions();
+  }
+
+  Future<void> _fetchRedemptions() async {
+    try {
+      state = const AsyncLoading();
+      final redemptions = await _referralService.getMyRedemptions();
+      state = AsyncData(redemptions);
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+    }
+  }
+
+  Future<void> refresh() => _fetchRedemptions();
+}
+
+// Active Affiliates provider
+final activeAffiliatesProvider = StateNotifierProvider<
+    ActiveAffiliatesNotifier, AsyncValue<List<Affiliate>>>((ref) {
+  final referralService = ref.watch(referralServiceProvider);
+  return ActiveAffiliatesNotifier(referralService);
+});
+
+class ActiveAffiliatesNotifier
+    extends StateNotifier<AsyncValue<List<Affiliate>>> {
+  final ReferralService _referralService;
+
+  ActiveAffiliatesNotifier(this._referralService)
+      : super(const AsyncLoading()) {
+    _fetchAffiliates();
+  }
+
+  Future<void> _fetchAffiliates() async {
+    try {
+      state = const AsyncLoading();
+      final affiliates = await _referralService.getActiveAffiliates();
+      state = AsyncData(affiliates);
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+    }
+  }
+
+  Future<void> refresh() => _fetchAffiliates();
+}

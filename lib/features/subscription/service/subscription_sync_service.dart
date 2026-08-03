@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'subscription_service.dart';
 
 /// Service to sync subscription state between StoreKit and Database
 class SubscriptionSyncService {
@@ -133,71 +136,20 @@ class SubscriptionSyncService {
         throw Exception('User not authenticated');
       }
 
-      // Map product ID to plan details
-      final planId = _mapProductToPlanId(productId);
-      final planType = _mapProductToPlanType(productId);
-      final tier = _getTier(productId);
-      final duration = _getDuration(productId);
-      final amount = _getAmount(productId);
-
-      final now = DateTime.now();
-      final endDate = now.add(duration);
-
-      // Check if ANY active subscription already exists for this user
-      final existingActive = await _supabase
-          .from('user_subscriptions')
-          .select()
-          .eq('user_id', userId)
-          .eq('status', 'active')
-          .maybeSingle();
-
-      if (existingActive != null) {
-        debugPrint('SubscriptionSync: User already has active subscription: ${existingActive['plan_id']}');
-
-        // If it's the same plan, just update the dates
-        if (existingActive['plan_id'] == planId) {
-          debugPrint('SubscriptionSync: Updating existing subscription end_date');
-          await _supabase.from('user_subscriptions').update({
-            'end_date': endDate.toIso8601String(),
-            'updated_at': now.toIso8601String(),
-          }).eq('id', existingActive['id']);
-
-          await _supabase.from('profiles').update({
-            'subscription_expires_at': endDate.toIso8601String(),
-            'updated_at': now.toIso8601String(),
-          }).eq('id', userId);
-
-          debugPrint('SubscriptionSync: ✓ Subscription dates updated');
-          return;
-        }
-
-        // Different plan - mark old as cancelled and create new
-        debugPrint('SubscriptionSync: Cancelling old plan and activating new one');
-        await _supabase.from('user_subscriptions').update({
-          'status': 'cancelled',
-          'updated_at': now.toIso8601String(),
-        }).eq('id', existingActive['id']);
+      // S2: this previously granted an active subscription purely from a
+      // client-supplied productId, with ZERO Apple contact - anyone could
+      // trigger a "restore" and get premium for free. It now fetches the
+      // real App Store receipt and has it verified (and written) server-side
+      // by verify-apple-receipt, exactly like a fresh purchase.
+      final receiptData = await SKReceiptManager.retrieveReceiptData();
+      if (receiptData.isEmpty) {
+        throw Exception('No App Store receipt available to verify');
       }
 
-      // Create subscription record (profile will be updated by trigger)
-      final subscriptionData = {
-        'user_id': userId,
-        'plan_id': planId,
-        'plan_type': planType,
-        'tier': tier,
-        'status': 'active',
-        'subscription_type': 'premium',
-        'billing_cycle': 'lifetime',
-        'amount': amount,
-        'currency': 'USD',
-        'start_date': now.toIso8601String(),
-        'end_date': endDate.toIso8601String(),
-        'payment_method': 'apple_iap',
-        'tier_points_earned': _getTierPoints(productId),
-        'created_at': now.toIso8601String(),
-      };
-
-      await _supabase.from('user_subscriptions').insert(subscriptionData);
+      await SubscriptionService().verifyAndActivateAppleSubscription(
+        productId: productId,
+        receiptData: receiptData,
+      );
 
       debugPrint('SubscriptionSync: ✓ Subscription synced successfully');
       debugPrint('SubscriptionSync: ℹ️  Profile will be updated by database trigger');
@@ -207,93 +159,4 @@ class SubscriptionSyncService {
     }
   }
 
-  String _mapProductToPlanId(String productId) {
-    switch (productId) {
-      case '7day':
-        return 'weekly_plan';
-      case '1month':
-        return 'monthly_plan';
-      case '3SUB':
-        return 'quarterly_plan';
-      case '365day':
-        return 'annual_plan';
-      default:
-        return 'unknown';
-    }
-  }
-
-  String _mapProductToPlanType(String productId) {
-    switch (productId) {
-      case '7day':
-        return 'weekly';
-      case '1month':
-        return 'monthly';
-      case '3SUB':
-        return 'quarterly';
-      case '365day':
-        return 'annual';
-      default:
-        return 'unknown';
-    }
-  }
-
-  Duration _getDuration(String productId) {
-    switch (productId) {
-      case '7day':
-        return const Duration(days: 7);
-      case '1month':
-        return const Duration(days: 30);
-      case '3SUB':
-        return const Duration(days: 90);
-      case '365day':
-        return const Duration(days: 365);
-      default:
-        return const Duration(days: 30);
-    }
-  }
-
-  int _getTierPoints(String productId) {
-    switch (productId) {
-      case '7day':
-        return 50;
-      case '1month':
-        return 200;
-      case '3SUB':
-        return 650;
-      case '365day':
-        return 3000;
-      default:
-        return 0;
-    }
-  }
-
-  String _getTier(String productId) {
-    switch (productId) {
-      case '7day':
-        return 'Gold';
-      case '1month':
-        return 'Platinum';
-      case '3SUB':
-        return 'Platinum';
-      case '365day':
-        return 'Black';
-      default:
-        return 'Gold';
-    }
-  }
-
-  double _getAmount(String productId) {
-    switch (productId) {
-      case '7day':
-        return 3.99;
-      case '1month':
-        return 12.99;
-      case '3SUB':
-        return 36.99;
-      case '365day':
-        return 146.99;
-      default:
-        return 0.0;
-    }
-  }
 }

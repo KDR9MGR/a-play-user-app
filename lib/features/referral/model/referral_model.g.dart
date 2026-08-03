@@ -163,6 +163,76 @@ Map<String, dynamic> _$$UserChallengeProgressImplToJson(
       'challenge': instance.challenge,
     };
 
+_$PointRedemptionImpl _$$PointRedemptionImplFromJson(
+        Map<String, dynamic> json) =>
+    _$PointRedemptionImpl(
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      pointsSpent: (json['points_spent'] as num).toInt(),
+      rewardType: json['reward_type'] as String,
+      rewardValue: (json['reward_value'] as num?)?.toDouble() ?? 0,
+      description: json['description'] as String? ?? '',
+      status: json['status'] as String? ?? 'pending',
+      redemptionCode: json['redemption_code'] as String?,
+      affiliateId: json['affiliate_id'] as String?,
+      settlementId: json['settlement_id'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      expiresAt: json['expires_at'] == null
+          ? null
+          : DateTime.parse(json['expires_at'] as String),
+      redeemedAt: json['redeemed_at'] == null
+          ? null
+          : DateTime.parse(json['redeemed_at'] as String),
+    );
+
+Map<String, dynamic> _$$PointRedemptionImplToJson(
+        _$PointRedemptionImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'user_id': instance.userId,
+      'points_spent': instance.pointsSpent,
+      'reward_type': instance.rewardType,
+      'reward_value': instance.rewardValue,
+      'description': instance.description,
+      'status': instance.status,
+      'redemption_code': instance.redemptionCode,
+      'affiliate_id': instance.affiliateId,
+      'settlement_id': instance.settlementId,
+      'created_at': instance.createdAt.toIso8601String(),
+      'expires_at': instance.expiresAt?.toIso8601String(),
+      'redeemed_at': instance.redeemedAt?.toIso8601String(),
+    };
+
+_$AffiliateImpl _$$AffiliateImplFromJson(Map<String, dynamic> json) =>
+    _$AffiliateImpl(
+      id: json['id'] as String,
+      businessName: json['business_name'] as String,
+      category: json['category'] as String?,
+      contactName: json['contact_name'] as String?,
+      contactPhone: json['contact_phone'] as String?,
+      contactEmail: json['contact_email'] as String?,
+      address: json['address'] as String?,
+      pointValueGhs: (json['point_value_ghs'] as num?)?.toDouble(),
+      isActive: json['is_active'] as bool? ?? true,
+      notes: json['notes'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+
+Map<String, dynamic> _$$AffiliateImplToJson(_$AffiliateImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'business_name': instance.businessName,
+      'category': instance.category,
+      'contact_name': instance.contactName,
+      'contact_phone': instance.contactPhone,
+      'contact_email': instance.contactEmail,
+      'address': instance.address,
+      'point_value_ghs': instance.pointValueGhs,
+      'is_active': instance.isActive,
+      'notes': instance.notes,
+      'created_at': instance.createdAt.toIso8601String(),
+    };
+
 _$TimeLimitedOfferImpl _$$TimeLimitedOfferImplFromJson(
         Map<String, dynamic> json) =>
     _$TimeLimitedOfferImpl(

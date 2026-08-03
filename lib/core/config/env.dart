@@ -1,21 +1,29 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Env {
-  // TEST PayStack key - for testing only
-  static const String _hardcodedPaystackKey = 'pk_test_f396c0cdcfed4c303906d61f6b1be25eb6e5ae36';
-
-  // LIVE PayStack key - commented out for testing
-  // static const String _hardcodedPaystackKey = 'pk_live_YOUR_LIVE_KEY';
-
+  // NOTE: this client-side public key is not actually used by the live
+  // payment flow - PaystackService.initializeTransaction() calls the
+  // `paystack` Supabase edge function, which uses PAYSTACK_SECRET_KEY
+  // server-side and returns a checkout URL the app just opens in a webview.
+  // Whether payments run in test or live mode is controlled entirely by
+  // that server-side secret (managed separately via Supabase secrets), not
+  // by this value, so it's not safe/meaningful to crash app startup over
+  // it being a pk_test_ key. Still throws on a genuinely missing value
+  // since some plumbing does read it (paystackPublicKeyProvider etc), even
+  // though nothing currently calls that plumbing from the UI.
   static String get paystackPublicKey {
-    // Try flutter_dotenv first, then dart-define, then fall back to hardcoded
     final dotenvKey = dotenv.env['PAYSTACK_PUBLIC_KEY'] ?? '';
-    if (dotenvKey.isNotEmpty) return dotenvKey;
-
     final envKey = const String.fromEnvironment('PAYSTACK_PUBLIC_KEY', defaultValue: '');
-    if (envKey.isNotEmpty) return envKey;
+    final key = dotenvKey.isNotEmpty ? dotenvKey : envKey;
 
-    return _hardcodedPaystackKey;
+    if (key.isEmpty) {
+      throw StateError(
+        'Missing PAYSTACK_PUBLIC_KEY. Pass it via --dart-define, '
+        '--dart-define-from-file, or a .env file.',
+      );
+    }
+
+    return key;
   }
 
   // OneSignal App ID
