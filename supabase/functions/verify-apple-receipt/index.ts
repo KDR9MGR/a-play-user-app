@@ -13,14 +13,36 @@
 // calling this function entirely and just POST directly to
 // /rest/v1/user_subscriptions (that path is now blocked by a DB trigger -
 // see guard_subscription_booking_inserts).
+//
+// S3 (2026-08-15): the client's in_app_purchase_storekit plugin (^0.4.8+1)
+// uses StoreKit 2 on iOS 15+, so PurchaseDetails.verificationData.
+// serverVerificationData is a signed JWS transaction (header.payload.
+// signature, dot-separated), NOT the legacy whole-app base64 PKCS#7 receipt
+// blob the old /verifyReceipt flow expects. Every purchase was hitting
+// "Invalid receipt data format. Must be base64 encoded." - not a sandbox
+// flakiness issue, a hard format mismatch that blocked 100% of purchases.
+// This now detects JWS input and verifies it locally: validates the x5c
+// certificate chain in the JWS header terminates at a pinned genuine Apple
+// Root CA - G3 certificate (downloaded directly from
+// https://www.apple.com/certificateauthority/AppleRootCA-G3.cer, sha256
+// fingerprint 63:34:3A:BF:B8:9A:6A:03:EB:B5:7E:9B:3F:5F:A7:BE:7C:4F:5C:75:
+// 6F:30:17:B3:A8:C4:88:C3:65:3E:91:79), then verifies the JWS signature
+// against the leaf certificate's public key. This is the same trust model
+// Apple's own server libraries use, just implemented directly since Apple
+// doesn't publish an official Deno library. The legacy /verifyReceipt path
+// is kept as a fallback for any old app version still submitting whole
+// receipts.
 
+import 'npm:reflect-metadata';
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { importX509, compactVerify } from 'npm:jose@5'
+import { X509Certificate, BasicConstraintsExtension } from 'npm:@peculiar/x509@1'
 
 type VerifyRequest = {
   userId: string;
   planId?: string; // client hint only, never trusted for the DB write
   transactionId?: string; // optional: omitted for restore/resync calls
-  receiptData: string; // base64 string
+  receiptData: string; // base64 legacy receipt, OR a JWS compact string (StoreKit 2)
 };
 
 type AppleVerifyResponse = {
@@ -51,6 +73,22 @@ type EnhancedResponse = {
   timestamp: string;
 };
 
+// Common shape both the JWS path and the legacy /verifyReceipt path
+// normalize into, so the DB-write logic below only has to be written once.
+type NormalizedVerification = {
+  valid: boolean;
+  environment: string;
+  appleStatus: number;
+  matched: boolean;
+  appleProductId: string | null;
+  appleTransactionId: string | null;
+  originalTransactionId: string | null;
+  expiresDateMs: string | null;
+  isExpired: boolean;
+  subscriptionStatus: 'active' | 'expired' | 'cancelled' | 'pending';
+  autoRenewStatus: boolean;
+};
+
 // Apple product ID -> internal plan ID / tier. Must match App Store Connect
 // config and subscription_plans.id (mirrors the client's now-unused mapping
 // in subscription_service.dart - kept here because this is the trust boundary).
@@ -69,6 +107,42 @@ const APPLE_PRODUCT_TO_TIER: Record<string, string> = {
 
 const APPLE_PRODUCTION_URL = "https://buy.itunes.apple.com/verifyReceipt";
 const APPLE_SANDBOX_URL = "https://sandbox.itunes.apple.com/verifyReceipt";
+
+// App's iOS bundle ID - defense in depth, reject a validly-signed JWS
+// transaction that belongs to some other app.
+const EXPECTED_BUNDLE_ID = 'com.a.aPlayWorld';
+
+// Apple-specific certificate policy OIDs, present on genuine Apple-issued
+// StoreKit certificates (leaf = In-App Purchase signing cert, intermediate
+// = WWDR CA). Checking these - not just the signature chain - mirrors
+// Apple's own official app-store-server-library reference implementation
+// (github.com/apple/app-store-server-library-node, jws_verification.ts)
+// exactly, so a chain that merely chains to our pinned root but was issued
+// for some unrelated purpose is still rejected.
+const APPLE_LEAF_POLICY_OID = '1.2.840.113635.100.6.11.1';
+const APPLE_INTERMEDIATE_POLICY_OID = '1.2.840.113635.100.6.2.1';
+
+// Apple Root CA - G3, DER bytes (standard base64), fetched directly from
+// https://www.apple.com/certificateauthority/AppleRootCA-G3.cer on
+// 2026-08-15. sha256 fingerprint: 63:34:3A:BF:B8:9A:6A:03:EB:B5:7E:9B:3F:5F:
+// A7:BE:7C:4F:5C:75:6F:30:17:B3:A8:C4:88:C3:65:3E:91:79. StoreKit 2 JWS
+// transactions are signed by a chain that must terminate at this exact
+// certificate - pinning it (rather than trusting whatever root the client
+// sends) is what stops a forged receipt from being accepted.
+const APPLE_ROOT_CA_G3_B64 =
+  "MIICQzCCAcmgAwIBAgIILcX8iNLFS5UwCgYIKoZIzj0EAwMwZzEbMBkGA1UEAwwS" +
+  "QXBwbGUgUm9vdCBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9u" +
+  "IEF1dGhvcml0eTETMBEGA1UECgwKQXBwbGUgSW5jLjELMAkGA1UEBhMCVVMwHhcN" +
+  "MTQwNDMwMTgxOTA2WhcNMzkwNDMwMTgxOTA2WjBnMRswGQYDVQQDDBJBcHBsZSBS" +
+  "b290IENBIC0gRzMxJjAkBgNVBAsMHUFwcGxlIENlcnRpZmljYXRpb24gQXV0aG9y" +
+  "aXR5MRMwEQYDVQQKDApBcHBsZSBJbmMuMQswCQYDVQQGEwJVUzB2MBAGByqGSM49" +
+  "AgEGBSuBBAAiA2IABJjpLz1AcqTtkyJygRMc3RCV8cWjTnHcFBbZDuWmBSp3ZHtf" +
+  "TjjTuxxEtX/1H7YyYl3J6YRbTzBPEVoA/VhYDKX1DyxNB0cTddqXl5dvMVztK517" +
+  "IDvYuVTZXpmkOlEKMaNCMEAwHQYDVR0OBBYEFLuw3qFYM4iapIqZ3r6966/ayySr" +
+  "MA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMAoGCCqGSM49BAMDA2gA" +
+  "MGUCMQCD6cHEFl4aXTQY2e3v9GwOAEZLuN+yRhHFD/3meoyhpmvOwgPUnPWTxnS4" +
+  "at+qIxUCMG1mihDK1A3UT82NQz60imOlM27jbdoXt2QfyFMm+YhidDkLF1vLUagM" +
+  "6BgD56KyKA==";
 
 // Apple status codes mapping
 const APPLE_STATUS_CODES: Record<number, string> = {
@@ -134,6 +208,146 @@ function errorResponse(message: string, status = 400): Response {
     status,
   });
 }
+
+// ============================== StoreKit 2 JWS path ==============================
+
+type JWSTransactionPayload = {
+  transactionId: string;
+  originalTransactionId: string;
+  bundleId: string;
+  productId: string;
+  purchaseDate: number;
+  originalPurchaseDate?: number;
+  expiresDate?: number;
+  type: string;
+  inAppOwnershipType?: string;
+  signedDate: number;
+  environment: 'Sandbox' | 'Production';
+  revocationDate?: number;
+  revocationReason?: number;
+};
+
+function certFromStdB64(b64: string): X509Certificate {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new X509Certificate(bytes);
+}
+
+function base64UrlDecodeToString(segment: string): string {
+  const b64 = segment.replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+// x5c (per RFC 7515) is leaf-first, standard (not url-safe) base64 DER
+// certs. Apple always sends exactly 3: [leaf, intermediate, root]. Mirrors
+// apple/app-store-server-library-node's verifyCertificateChainWithoutCaching
+// precisely: only certs [0] and [1] are used cryptographically (the 3rd,
+// root, entry in x5c is not trusted - our own pinned root is used instead);
+// intermediate must chain to our pinned root by signature AND issuer/subject
+// string match, intermediate must carry the CA basic-constraint, leaf and
+// intermediate must carry Apple's own StoreKit/WWDR policy OIDs, and every
+// cert in the chain must be within its validity window right now. Returns
+// the leaf cert for JWS signature verification.
+async function verifyAppleCertChain(x5c: string[]): Promise<X509Certificate> {
+  if (!x5c || x5c.length !== 3) {
+    throw new Error(`x5c must contain exactly 3 certificates, got ${x5c?.length ?? 0}`);
+  }
+  const [leaf, intermediate] = x5c.slice(0, 2).map(certFromStdB64);
+  const pinnedRoot = certFromStdB64(APPLE_ROOT_CA_G3_B64);
+
+  const intermediateSignedByRoot = await intermediate.verify({ publicKey: pinnedRoot.publicKey });
+  if (!intermediateSignedByRoot || intermediate.issuer !== pinnedRoot.subject) {
+    throw new Error('Intermediate certificate is not signed by the pinned Apple Root CA - G3');
+  }
+
+  const leafSignedByIntermediate = await leaf.verify({ publicKey: intermediate.publicKey });
+  if (!leafSignedByIntermediate || leaf.issuer !== intermediate.subject) {
+    throw new Error('Leaf certificate is not signed by the intermediate certificate');
+  }
+
+  const basicConstraints = intermediate.getExtension(BasicConstraintsExtension);
+  if (!basicConstraints?.ca) {
+    throw new Error('Intermediate certificate is not a valid CA certificate');
+  }
+
+  if (!leaf.getExtension(APPLE_LEAF_POLICY_OID)) {
+    throw new Error('Leaf certificate is missing the Apple In-App Purchase policy extension');
+  }
+  if (!intermediate.getExtension(APPLE_INTERMEDIATE_POLICY_OID)) {
+    throw new Error('Intermediate certificate is missing the Apple WWDR policy extension');
+  }
+
+  const now = new Date();
+  for (const cert of [leaf, intermediate, pinnedRoot]) {
+    if (now < cert.notBefore || now > cert.notAfter) {
+      throw new Error('A certificate in the chain is outside its validity period');
+    }
+  }
+
+  return leaf;
+}
+
+async function verifyAndDecodeJWSTransaction(jws: string): Promise<JWSTransactionPayload> {
+  const parts = jws.split('.');
+  if (parts.length !== 3) {
+    throw new Error('Not a valid JWS compact serialization');
+  }
+
+  const headerJson = JSON.parse(base64UrlDecodeToString(parts[0])) as { alg?: string; x5c?: string[] };
+  const x5c = headerJson.x5c;
+  if (!x5c || x5c.length === 0) {
+    throw new Error('JWS header missing x5c certificate chain');
+  }
+
+  await verifyAppleCertChain(x5c);
+
+  const leafPem = `-----BEGIN CERTIFICATE-----\n${(x5c[0].match(/.{1,64}/g) ?? [x5c[0]]).join('\n')}\n-----END CERTIFICATE-----`;
+  const publicKey = await importX509(leafPem, headerJson.alg ?? 'ES256');
+
+  const { payload } = await compactVerify(jws, publicKey);
+  const decoded = JSON.parse(new TextDecoder().decode(payload)) as JWSTransactionPayload;
+
+  if (decoded.bundleId !== EXPECTED_BUNDLE_ID) {
+    throw new Error(`Transaction bundleId "${decoded.bundleId}" does not match app bundleId "${EXPECTED_BUNDLE_ID}"`);
+  }
+
+  return decoded;
+}
+
+function normalizeFromJWS(payload: JWSTransactionPayload): NormalizedVerification {
+  const now = Date.now();
+  const isRevoked = payload.revocationDate != null;
+  const isExpired = isRevoked ? true : (payload.expiresDate ? payload.expiresDate < now : false);
+  const subscriptionStatus: NormalizedVerification['subscriptionStatus'] = isRevoked
+    ? 'cancelled'
+    : isExpired
+      ? 'expired'
+      : 'active';
+
+  return {
+    valid: !isRevoked,
+    environment: payload.environment,
+    appleStatus: 0,
+    matched: true,
+    appleProductId: payload.productId,
+    appleTransactionId: payload.transactionId,
+    originalTransactionId: payload.originalTransactionId ?? payload.transactionId,
+    expiresDateMs: payload.expiresDate != null ? String(payload.expiresDate) : null,
+    isExpired,
+    subscriptionStatus,
+    // No separate renewal-info JWS is sent by the client for a single
+    // purchase confirmation, so this is a best-effort default (true unless
+    // we already know the transaction is expired/revoked) - informational
+    // only, does not gate access.
+    autoRenewStatus: !isExpired && !isRevoked,
+  };
+}
+
+// ============================== Legacy /verifyReceipt path ==============================
 
 async function verifyWithApple(
   url: string,
@@ -225,6 +439,55 @@ function determineSubscriptionStatus(
   return { isExpired, subscriptionStatus, autoRenewStatus };
 }
 
+async function verifyLegacyReceipt(
+  receiptData: string,
+  transactionId: string | undefined,
+  planIdHint: string | undefined,
+  sharedSecret: string,
+): Promise<NormalizedVerification> {
+  let apple = await verifyWithApple(APPLE_PRODUCTION_URL, receiptData, sharedSecret);
+  let environment = "Production";
+
+  // If this is a sandbox receipt in production, switch to sandbox per Apple docs
+  if (apple.status === 21007) {
+    console.log("Sandbox receipt detected, switching to sandbox environment");
+    apple = await verifyWithApple(APPLE_SANDBOX_URL, receiptData, sharedSecret);
+    environment = "Sandbox";
+  }
+
+  if (apple.status !== 0 && apple.status !== 21006) {
+    const errorMessage = APPLE_STATUS_CODES[apple.status] || `Unknown Apple status: ${apple.status}`;
+    throw Object.assign(new Error(errorMessage), { appleStatus: apple.status, environment });
+  }
+
+  const clientProductHint = planIdHint
+    ? Object.entries(APPLE_PRODUCT_TO_PLAN_ID).find(([, v]) => v === planIdHint)?.[0]
+    : undefined;
+  const { match, matched } = findMatchingInfo(apple, transactionId, clientProductHint);
+  const valid = apple.status === 0 || apple.status === 21006; // 21006 means valid but expired
+
+  const { isExpired, subscriptionStatus, autoRenewStatus } = determineSubscriptionStatus(
+    match,
+    apple.pending_renewal_info
+  );
+
+  return {
+    valid,
+    environment: apple.environment ?? environment,
+    appleStatus: apple.status,
+    matched,
+    appleProductId: match?.product_id as string | undefined ?? null,
+    appleTransactionId: match?.transaction_id as string | undefined ?? null,
+    originalTransactionId: match?.original_transaction_id as string | undefined ?? null,
+    expiresDateMs: match?.expires_date_ms as string ?? null,
+    isExpired,
+    subscriptionStatus,
+    autoRenewStatus,
+  };
+}
+
+// ============================== Handler ==============================
+
 Deno.serve(async (req: Request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -234,20 +497,6 @@ Deno.serve(async (req: Request) => {
   try {
     if (req.method !== "POST") {
       return errorResponse("Method not allowed", 405);
-    }
-
-    const sharedSecret =
-      Deno.env.get("APPLE_SHARED_SECRET") || Deno.env.get("IOS_SHARED_SECRET") || "";
-    if (!sharedSecret) {
-      await logIapEvent(admin, {
-        event: 'verify_config_error',
-        level: 'error',
-        message: 'APPLE_SHARED_SECRET not configured on the edge function',
-      });
-      return errorResponse(
-        "Missing APPLE_SHARED_SECRET. Set with `supabase secrets set APPLE_SHARED_SECRET=...`",
-        500,
-      );
     }
 
     payload = (await req.json()) as Partial<VerifyRequest>;
@@ -294,56 +543,69 @@ Deno.serve(async (req: Request) => {
       message: 'Receipt verification request received',
     });
 
-    // Validate receipt data format
-    try {
-      atob(receiptData); // Test if it's valid base64
-    } catch {
-      await logIapEvent(admin, {
-        userId, event: 'verify_bad_request', level: 'error', transactionId,
-        message: 'Invalid receipt data format (not base64)',
-      });
-      return errorResponse("Invalid receipt data format. Must be base64 encoded.");
+    const isJWS = receiptData.split('.').length === 3;
+    let normalized: NormalizedVerification;
+
+    if (isJWS) {
+      try {
+        const decoded = await verifyAndDecodeJWSTransaction(receiptData);
+        normalized = normalizeFromJWS(decoded);
+        await logIapEvent(admin, {
+          userId, event: 'verify_jws_decoded', transactionId: decoded.transactionId,
+          productId: decoded.productId,
+          message: `environment=${decoded.environment} revoked=${decoded.revocationDate != null}`,
+        });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        await logIapEvent(admin, {
+          userId, event: 'verify_jws_invalid', level: 'error', transactionId,
+          message,
+        });
+        return errorResponse(`Invalid StoreKit transaction: ${message}`, 422);
+      }
+    } else {
+      const sharedSecret =
+        Deno.env.get("APPLE_SHARED_SECRET") || Deno.env.get("IOS_SHARED_SECRET") || "";
+      if (!sharedSecret) {
+        await logIapEvent(admin, {
+          event: 'verify_config_error',
+          level: 'error',
+          message: 'APPLE_SHARED_SECRET not configured on the edge function',
+        });
+        return errorResponse(
+          "Missing APPLE_SHARED_SECRET. Set with `supabase secrets set APPLE_SHARED_SECRET=...`",
+          500,
+        );
+      }
+
+      try {
+        atob(receiptData); // Test if it's valid base64
+      } catch {
+        await logIapEvent(admin, {
+          userId, event: 'verify_bad_request', level: 'error', transactionId,
+          message: 'Invalid receipt data format (not base64, not a 3-part JWS)',
+        });
+        return errorResponse("Invalid receipt data format. Must be base64 encoded or a StoreKit 2 JWS.");
+      }
+
+      try {
+        normalized = await verifyLegacyReceipt(receiptData, transactionId, payload.planId, sharedSecret);
+      } catch (e) {
+        const err = e as Error & { appleStatus?: number; environment?: string };
+        await logIapEvent(admin, {
+          userId, event: 'verify_apple_rejected', level: 'error', transactionId,
+          message: err.message,
+          detail: { appleStatus: err.appleStatus, environment: err.environment },
+        });
+        return errorResponse(`Apple receipt validation failed: ${err.message}`, 422);
+      }
     }
 
-    // First attempt: Production
-    let apple = await verifyWithApple(APPLE_PRODUCTION_URL, receiptData, sharedSecret);
-    let environment = "Production";
+    const {
+      valid, environment, appleStatus, matched, appleProductId, appleTransactionId,
+      originalTransactionId, expiresDateMs, isExpired, subscriptionStatus, autoRenewStatus,
+    } = normalized;
 
-    // If this is a sandbox receipt in production, switch to sandbox per Apple docs
-    if (apple.status === 21007) {
-      console.log("Sandbox receipt detected, switching to sandbox environment");
-      apple = await verifyWithApple(APPLE_SANDBOX_URL, receiptData, sharedSecret);
-      environment = "Sandbox";
-    }
-
-    // Handle specific error cases
-    if (apple.status !== 0 && apple.status !== 21006) {
-      const errorMessage = APPLE_STATUS_CODES[apple.status] || `Unknown Apple status: ${apple.status}`;
-      await logIapEvent(admin, {
-        userId, event: 'verify_apple_rejected', level: 'error', transactionId,
-        message: errorMessage,
-        detail: { appleStatus: apple.status, environment },
-      });
-      return errorResponse(`Apple receipt validation failed: ${errorMessage}`, 422);
-    }
-
-    // Build response with enhanced information. Client's planId is used
-    // only as a hint for matching when neither transactionId nor a
-    // productId-derived match is available - the actual DB write below
-    // always uses Apple's own confirmed product_id.
-    const clientProductHint = payload.planId
-      ? Object.entries(APPLE_PRODUCT_TO_PLAN_ID).find(([, v]) => v === payload.planId)?.[0]
-      : undefined;
-    const { match, matched } = findMatchingInfo(apple, transactionId, clientProductHint);
-    const valid = apple.status === 0 || apple.status === 21006; // 21006 means valid but expired
-
-    const { isExpired, subscriptionStatus, autoRenewStatus } = determineSubscriptionStatus(
-      match,
-      apple.pending_renewal_info
-    );
-
-    const appleProductId = match?.product_id as string | undefined ?? null;
-    const appleTransactionId = match?.transaction_id as string | undefined ?? null;
     const derivedPlanId = appleProductId ? APPLE_PRODUCT_TO_PLAN_ID[appleProductId] ?? null : null;
     const derivedTier = appleProductId ? APPLE_PRODUCT_TO_TIER[appleProductId] ?? null : null;
 
@@ -368,7 +630,6 @@ Deno.serve(async (req: Request) => {
           .eq('id', derivedPlanId)
           .maybeSingle();
 
-        const expiresDateMs = match?.expires_date_ms as string | undefined;
         const endDate = expiresDateMs
           ? new Date(parseInt(expiresDateMs))
           : new Date(Date.now() + (plan?.duration_days ?? 30) * 86400000);
@@ -394,7 +655,7 @@ Deno.serve(async (req: Request) => {
             payment_reference: appleTransactionId,
             payment_method: 'apple_iap',
             transaction_id: appleTransactionId,
-            original_transaction_id: (match?.original_transaction_id as string | undefined) ?? appleTransactionId,
+            original_transaction_id: originalTransactionId ?? appleTransactionId,
             platform: 'ios',
             auto_renew_status: autoRenewStatus,
             receipt_data: receiptData,
@@ -439,13 +700,13 @@ Deno.serve(async (req: Request) => {
 
     const response: EnhancedResponse = {
       valid,
-      environment: apple.environment ?? environment,
-      status: apple.status,
+      environment,
+      status: appleStatus,
       matchedTransaction: matched,
       productId: appleProductId,
       transactionId: appleTransactionId,
-      originalTransactionId: match?.original_transaction_id as string ?? null,
-      expiresDateMs: match?.expires_date_ms as string ?? null,
+      originalTransactionId: originalTransactionId ?? null,
+      expiresDateMs: expiresDateMs ?? null,
       isExpired,
       subscriptionStatus,
       autoRenewStatus,

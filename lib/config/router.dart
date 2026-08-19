@@ -27,6 +27,7 @@ import 'package:a_play/features/subscription/provider/subscription_status_provid
 import 'package:a_play/features/booking/providers/bookin_history_provider.dart';
 import 'package:a_play/features/profile/providers/profile_provider.dart';
 import 'package:a_play/features/referral/controller/referral_controller.dart';
+import 'package:a_play/features/referral/view/referral_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +38,8 @@ import '../features/authentication/presentation/screens/update_password_screen.d
 import '../features/authentication/presentation/screens/sign_in_screen.dart';
 import '../features/authentication/presentation/screens/sign_up_screen.dart';
 import '../features/profile/screens/help_support_page.dart';
+import '../features/profile/screens/blocked_users_screen.dart';
+import '../features/profile/screens/notification_settings_screen.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -187,6 +190,22 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/profile/edit',
           builder: (context, state) => const EditProfilePage(),
+        ),
+        GoRoute(
+          path: '/profile/referral',
+          builder: (context, state) => const ReferralScreen(),
+        ),
+        GoRoute(
+          path: '/profile/change-password',
+          builder: (context, state) => const UpdatePasswordScreen(fromSettings: true),
+        ),
+        GoRoute(
+          path: '/profile/blocked-users',
+          builder: (context, state) => const BlockedUsersScreen(),
+        ),
+        GoRoute(
+          path: '/profile/notifications',
+          builder: (context, state) => const NotificationSettingsScreen(),
         ),
         GoRoute(
           path: '/help-support',

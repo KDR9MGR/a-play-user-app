@@ -4,12 +4,17 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
 
-/// Shown after the user taps the password-reset link in their email.
-/// By this point supabase_flutter has consumed the recovery deep link and
-/// established a temporary recovery session, so updating the password just
-/// requires setting the new one.
+/// Shown either (a) after the user taps the password-reset link in their
+/// email - by this point supabase_flutter has consumed the recovery deep
+/// link and established a temporary recovery session, so updating the
+/// password just requires setting the new one - or (b) from Settings, when
+/// an already-logged-in user wants to change their password proactively.
+/// Both cases call the same `updateUser(password: ...)`; [fromSettings] only
+/// changes what happens after success (return to Settings vs go to Home).
 class UpdatePasswordScreen extends ConsumerStatefulWidget {
-  const UpdatePasswordScreen({super.key});
+  final bool fromSettings;
+
+  const UpdatePasswordScreen({super.key, this.fromSettings = false});
 
   @override
   ConsumerState<UpdatePasswordScreen> createState() => _UpdatePasswordScreenState();
@@ -42,11 +47,15 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Password updated successfully. You are signed in.'),
+            content: Text('Password updated successfully.'),
             backgroundColor: Colors.green,
           ),
         );
-        context.go('/home');
+        if (widget.fromSettings) {
+          context.pop();
+        } else {
+          context.go('/home');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -65,7 +74,7 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Set New Password')),
+      appBar: AppBar(title: Text(widget.fromSettings ? 'Change Password' : 'Set New Password')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

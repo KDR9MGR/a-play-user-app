@@ -23,6 +23,23 @@ class SubscriptionSuccessScreen extends ConsumerStatefulWidget {
       _SubscriptionSuccessScreenState();
 }
 
+// Mirrors the productId -> tier mapping in verify-apple-receipt/index.ts and
+// confirm-purchase/index.ts (the actual trust boundary that sets the tier) -
+// this is display-only, purely to theme the success screen to match what the
+// user actually bought instead of a flat generic orange for every tier.
+const Map<String, ({String label, Color color})> _tierByProductId = {
+  '7day': (label: 'Gold', color: Color(0xFFFFD700)),
+  '1month': (label: 'Platinum', color: Color(0xFFE5E4E2)),
+  '3SUB': (label: 'Platinum', color: Color(0xFFE5E4E2)),
+  '365day': (label: 'Black', color: Color(0xFF2A2A2A)),
+};
+
+const Map<String, List<String>> _tierFeatures = {
+  'Gold': ['Priority Booking', 'Exclusive Events', 'Special Discounts'],
+  'Platinum': ['Priority Booking', 'Exclusive Events', 'VIP Support', 'Special Discounts'],
+  'Black': ['Unlimited Access', 'Personal Concierge', 'VIP Support', 'Backstage Passes'],
+};
+
 class _SubscriptionSuccessScreenState
     extends ConsumerState<SubscriptionSuccessScreen>
     with SingleTickerProviderStateMixin {
@@ -72,14 +89,19 @@ class _SubscriptionSuccessScreenState
     super.dispose();
   }
 
+  ({String label, Color color}) _resolveTier(String? productId) {
+    return _tierByProductId[productId] ?? (label: 'Premium', color: AppTheme.primary);
+  }
+
   @override
   Widget build(BuildContext context) {
     final subscriptionStatus = ref.watch(backendSubscriptionStatusProvider);
+    final tier = _resolveTier(subscriptionStatus.value?.productId);
 
-    return WillPopScope(
-      onWillPop: () async {
-        _navigateToHome();
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _navigateToHome();
       },
       child: Scaffold(
         backgroundColor: AppTheme.backgroundStart,
@@ -123,24 +145,24 @@ class _SubscriptionSuccessScreenState
                         height: 120,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFF4707), Color(0xFFFF6B35)],
+                          gradient: LinearGradient(
+                            colors: [tier.color, tier.color.withValues(alpha: 0.7)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.primary.withValues(alpha: 0.5),
+                              color: tier.color.withValues(alpha: 0.5),
                               blurRadius: 30,
                               spreadRadius: 5,
                               offset: const Offset(0, 10),
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Iconsax.crown_15,
                           size: 60,
-                          color: Colors.white,
+                          color: tier.label == 'Platinum' ? Colors.black87 : Colors.white,
                         ),
                       ),
                     ),
@@ -153,13 +175,31 @@ class _SubscriptionSuccessScreenState
                       child: Column(
                         children: [
                           Text(
-                            'Welcome to Premium!',
+                            'Welcome to ${tier.label}!',
                             style: GoogleFonts.poppins(
                               fontSize: 32,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
                             textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: tier.color.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: tier.color.withValues(alpha: 0.5)),
+                            ),
+                            child: Text(
+                              '${tier.label.toUpperCase()} TIER',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1,
+                                color: tier.label == 'Platinum' ? Colors.black87 : tier.color,
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -190,7 +230,7 @@ class _SubscriptionSuccessScreenState
                           ),
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: AppTheme.primary.withValues(alpha: 0.3),
+                            color: tier.color.withValues(alpha: 0.4),
                             width: 1,
                           ),
                         ),
@@ -198,6 +238,12 @@ class _SubscriptionSuccessScreenState
                           data: (status) {
                             return Column(
                               children: [
+                                _buildDetailRow(
+                                  icon: Iconsax.crown_1,
+                                  label: 'Tier',
+                                  value: tier.label,
+                                ),
+                                const SizedBox(height: 16),
                                 _buildDetailRow(
                                   icon: Iconsax.tag,
                                   label: 'Plan',
@@ -239,6 +285,12 @@ class _SubscriptionSuccessScreenState
                           error: (_, __) => Column(
                             children: [
                               _buildDetailRow(
+                                icon: Iconsax.crown_1,
+                                label: 'Tier',
+                                value: tier.label,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildDetailRow(
                                 icon: Iconsax.tag,
                                 label: 'Plan',
                                 value: widget.planName,
@@ -275,12 +327,9 @@ class _SubscriptionSuccessScreenState
                             spacing: 12,
                             runSpacing: 12,
                             alignment: WrapAlignment.center,
-                            children: [
-                              _buildFeatureChip('Priority Booking'),
-                              _buildFeatureChip('Exclusive Events'),
-                              _buildFeatureChip('VIP Support'),
-                              _buildFeatureChip('Special Discounts'),
-                            ],
+                            children: (_tierFeatures[tier.label] ?? _tierFeatures['Gold']!)
+                                .map((f) => _buildFeatureChip(f, tier.color))
+                                .toList(),
                           ),
                         ],
                       ),
@@ -401,24 +450,24 @@ class _SubscriptionSuccessScreenState
     );
   }
 
-  Widget _buildFeatureChip(String label) {
+  Widget _buildFeatureChip(String label, Color accentColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withValues(alpha: 0.1),
+        color: accentColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppTheme.primary.withValues(alpha: 0.3),
+          color: accentColor.withValues(alpha: 0.4),
           width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Iconsax.tick_circle5,
             size: 16,
-            color: AppTheme.primary,
+            color: accentColor,
           ),
           const SizedBox(width: 6),
           Text(

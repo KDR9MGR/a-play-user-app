@@ -92,9 +92,18 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
       _iapService.onPurchaseError = _handlePurchaseError;
       _iapService.onPurchaseCancelled = _handlePurchaseCancelled;
 
-      // STEP 3: Initialize IAP
+      // STEP 3: Initialize IAP (or, if this is a retry after the first
+      // attempt already initialized but came up with 0 products - e.g. a
+      // transient StoreKit/network failure - just re-query products.
+      // initialize() itself is a one-shot no-op once _isInitialized is true,
+      // so calling it again here would silently do nothing and "Retry"
+      // would never actually retry anything).
       try {
-        await _iapService.initialize();
+        if (_iapService.isInitialized) {
+          await _iapService.reloadProducts();
+        } else {
+          await _iapService.initialize();
+        }
       } catch (e) {
         debugPrint('SubscriptionScreen: IAP initialization failed: $e');
         // Don't set error - will fall back to PayStack plans

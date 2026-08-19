@@ -5,6 +5,7 @@ import 'package:a_play/data/models/unified_booking_model.dart';
 import 'package:a_play/features/booking/screens/cancel_booking_screen.dart';
 import 'package:a_play/features/booking/service/booking_service.dart';
 import 'package:a_play/features/restaurant/model/restaurant_booking_model.dart';
+import 'package:a_play/features/club_booking/model/club_booking_history_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,9 +32,8 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
   @override
   void initState() {
     super.initState();
-    // MVP: Show only Events tab (Restaurant bookings hidden)
     _tabController = TabController(
-      length: FeatureFlags.enableRestaurants ? 2 : 1,
+      length: 1 + (FeatureFlags.enableRestaurants ? 1 : 0) + (FeatureFlags.enableClubs ? 1 : 0),
       vsync: this,
     );
     ref.read(myBookingsProvider.future);
@@ -98,6 +98,17 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
                   ],
                 ),
               ),
+            if (FeatureFlags.enableClubs)
+              const Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Iconsax.reserve, size: 18),
+                    SizedBox(width: 8),
+                    Text('Clubs'),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
@@ -133,6 +144,25 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
                   padding: const EdgeInsets.all(16),
                   itemCount: restaurantBookings.length,
                   itemBuilder: (context, index) => RestaurantBookingCard(booking: restaurantBookings[index].restaurantBooking!),
+                );
+              },
+              error: (error, stack) => Center(child: Text('Error: $error')),
+              loading: () => const Center(child: CircularProgressIndicator()),
+            ),
+
+          // Club table bookings - previously had a creation flow but no way
+          // to see them again afterwards.
+          if (FeatureFlags.enableClubs)
+            myBookings.when(
+              data: (bookings) {
+                final clubBookings = bookings.where((b) => b.type == BookingType.club).toList();
+                if (clubBookings.isEmpty) {
+                  return const Center(child: Text('No club table bookings yet.'));
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: clubBookings.length,
+                  itemBuilder: (context, index) => ClubBookingCard(booking: clubBookings[index].clubBooking!),
                 );
               },
               error: (error, stack) => Center(child: Text('Error: $error')),
@@ -711,6 +741,72 @@ class RestaurantBookingCard extends ConsumerWidget {
                   ref.refresh(myBookingsProvider);
                 },
                 child: const Text('Cancel'),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ClubBookingCard extends ConsumerWidget {
+  final ClubBookingHistory booking;
+
+  const ClubBookingCard({super.key, required this.booking});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formattedDate = DateFormat('EEE, MMM d').format(booking.bookingDate);
+    final formattedStart = DateFormat('h:mm a').format(booking.startTime);
+    final formattedEnd = DateFormat('h:mm a').format(booking.endTime);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                if (booking.clubLogoUrl != null) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: CachedNetworkImage(
+                      imageUrl: booking.clubLogoUrl!,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => const Icon(Iconsax.reserve),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: Text(
+                    booking.clubName ?? 'Club',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (booking.tableName != null) Text('Table: ${booking.tableName}'),
+            Text('Date: $formattedDate'),
+            Text('Time: $formattedStart - $formattedEnd'),
+            Text('Total: GHS ${booking.totalPrice.toStringAsFixed(2)}'),
+            Text('Status: ${booking.status}'),
+            if (booking.status == 'confirmed')
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () async {
+                    await ref.read(unifiedBookingServiceProvider).cancelClubBooking(booking.id);
+                    ref.refresh(myBookingsProvider);
+                  },
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: const Text('Cancel'),
+                ),
               ),
           ],
         ),

@@ -499,9 +499,16 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
 
       _validatePasswordOrThrow(password);
       
+      // Same reasoning as resetPassword's redirectUrl below: a plain https
+      // link always opens reliably, unlike the old io.supabase.aplay://
+      // custom scheme (server-redirected links to a non-http(s) scheme are
+      // unreliable in Safari/Mail). Without this, Supabase falls back to the
+      // bare site_url - the user lands on the plain homepage with no
+      // acknowledgment that their email was actually confirmed.
       final response = await _client.auth.signUp(
         email: email,
         password: password,
+        emailRedirectTo: 'https://www.aplayworld.com/confirm-email',
         data: {
           if (displayName != null) 'full_name': displayName,
         },
@@ -554,14 +561,18 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
     try {
       debugPrint('🔑 [RESET] Starting password reset for: $email');
 
-      // Mobile: THIS app's registered scheme (io.supabase.aplay), allowlisted
-      // in Supabase auth config. supabase_flutter consumes the deep link,
-      // establishes a recovery session, and fires
-      // AuthChangeEvent.passwordRecovery, which the router listens for to
-      // show the update-password screen.
-      final redirectUrl = kIsWeb
-          ? 'https://www.aplayworld.com/reset-password' // Production web URL
-          : 'io.supabase.aplay://reset-callback/'; // Mobile deep link
+      // Always use the web reset-password page, even from the mobile app.
+      // The custom io.supabase.aplay:// scheme used to be used on mobile,
+      // but Supabase's /verify endpoint does a server-side 303 redirect to
+      // it, and Safari/Mail are unreliable about following a redirect to a
+      // non-http(s) scheme (as opposed to a direct link tap, which works
+      // fine) - in practice this meant the reset link would silently land
+      // back on the site's homepage instead of opening the app. A plain
+      // https:// link always opens reliably; the web page itself (already
+      // built, aplayworld.com/reset-password) lets the user set their new
+      // password right there in the browser, then they just return to the
+      // app and log in - no deep link handoff required at all.
+      final redirectUrl = 'https://www.aplayworld.com/reset-password';
 
       debugPrint('🔑 [RESET] Using redirect URL: $redirectUrl');
 

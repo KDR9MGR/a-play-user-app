@@ -9,7 +9,7 @@
       }
     ]
   },
-  "identifier" : "74F13405",
+  "identifier" : "03529656",
   "nonRenewingSubscriptions" : [
 
   ],
@@ -18,19 +18,19 @@
   ],
   "settings" : {
     "_applicationInternalID" : "6745157402",
-    "_askToBuyEnabled" : true,
+    "_askToBuyEnabled" : false,
     "_billingGracePeriodEnabled" : false,
-    "_billingIssuesEnabled" : true,
+    "_billingIssuesEnabled" : false,
     "_compatibilityTimeRate" : {
       "3" : 6
     },
     "_developerTeamID" : "TUKQ9KBCN8",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 798125085.43260896,
+    "_lastSynchronizedDate" : 808513624.99680305,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
-    "_storefront" : "GHA",
+    "_storefront" : "USA",
     "_storeKitErrors" : [
 
     ],
@@ -51,7 +51,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "36.99",
+          "displayPrice" : "29.99",
           "familyShareable" : false,
           "groupNumber" : 3,
           "internalID" : "6757355885",
@@ -59,7 +59,7 @@
           "localizations" : [
             {
               "description" : "Premium Access to All Fun",
-              "displayName" : "3 Month's Premium",
+              "displayName" : "3 Month Fun",
               "locale" : "en_US"
             }
           ],
@@ -79,7 +79,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "146.99",
+          "displayPrice" : "119.99",
           "familyShareable" : false,
           "groupNumber" : 4,
           "internalID" : "6757356046",
@@ -87,7 +87,7 @@
           "localizations" : [
             {
               "description" : "Premium Access to All Fun",
-              "displayName" : "Fun for a year",
+              "displayName" : "365 day Fun",
               "locale" : "en_US"
             }
           ],
@@ -107,7 +107,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "3.99",
+          "displayPrice" : "2.99",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "6757355931",
@@ -115,7 +115,7 @@
           "localizations" : [
             {
               "description" : "Premium Access to All Fun",
-              "displayName" : "7 Day Fun",
+              "displayName" : "7 Heaven",
               "locale" : "en_US"
             }
           ],
@@ -135,7 +135,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "12.99",
+          "displayPrice" : "9.99",
           "familyShareable" : false,
           "groupNumber" : 2,
           "internalID" : "6757356059",
@@ -143,7 +143,7 @@
           "localizations" : [
             {
               "description" : "Premium Access to All Fun",
-              "displayName" : "A Month Fun",
+              "displayName" : "A month fun",
               "locale" : "en_US"
             }
           ],

@@ -173,6 +173,7 @@ class ProfileScreen extends ConsumerWidget {
                       subtitle: 'View reservations',
                       onTap: () {
                         HapticFeedback.lightImpact();
+                        context.push('/my-tickets');
                       },
                     ),
                   ),
@@ -314,6 +315,33 @@ class ProfileScreen extends ConsumerWidget {
                 },
               ),
               _SettingsCard(
+                icon: Iconsax.notification,
+                title: 'Notifications',
+                subtitle: 'Manage push notifications',
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/profile/notifications');
+                },
+              ),
+              _SettingsCard(
+                icon: Iconsax.lock,
+                title: 'Change Password',
+                subtitle: 'Update your account password',
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/profile/change-password');
+                },
+              ),
+              _SettingsCard(
+                icon: Iconsax.security_user,
+                title: 'Blocked Users',
+                subtitle: 'Manage who you\'ve blocked',
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/profile/blocked-users');
+                },
+              ),
+              _SettingsCard(
                 icon: Iconsax.shield_tick,
                 title: 'Privacy Policy',
                 subtitle: 'Read our policies',
@@ -329,6 +357,15 @@ class ProfileScreen extends ConsumerWidget {
                 onTap: () {
                   HapticFeedback.lightImpact();
                   context.push('/profile/legal');
+                },
+              ),
+              _SettingsCard(
+                icon: Iconsax.message_question,
+                title: 'Help & Support',
+                subtitle: 'Get help or contact us',
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/help-support');
                 },
               ),
               _SettingsCard(

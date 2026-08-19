@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import '../provider/referral_provider.dart';
+import '../service/referral_service.dart';
 import '../../authentication/presentation/providers/auth_provider.dart';
 
 class PointTransferCard extends ConsumerStatefulWidget {
@@ -98,7 +99,18 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
     // Check if user has enough points
     final userPointsAsync = ref.read(userPointsProvider);
     final currentPoints = userPointsAsync.value?.availablePoints ?? 0;
-    
+
+    if (currentPoints < ReferralService.minPointsRequiredForTransfer) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'You need at least ${ReferralService.minPointsRequiredForTransfer} points in your account to transfer points'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     if (points > currentPoints) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -159,6 +171,7 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
   Widget build(BuildContext context) {
     final userPointsAsync = ref.watch(userPointsProvider);
     final currentPoints = userPointsAsync.value?.availablePoints ?? 0;
+    final belowTransferMinimum = currentPoints < ReferralService.minPointsRequiredForTransfer;
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -443,13 +456,36 @@ class _PointTransferCardState extends ConsumerState<PointTransferCard> {
             ],
           ),
 
+          if (belowTransferMinimum) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Iconsax.info_circle, color: Colors.white, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'You need at least ${ReferralService.minPointsRequiredForTransfer} points to transfer (you have $currentPoints).',
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           const SizedBox(height: 24),
 
           // Transfer button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isLoading || _selectedUser == null ? null : _transferPoints,
+              onPressed: _isLoading || _selectedUser == null || belowTransferMinimum ? null : _transferPoints,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.purple[800],

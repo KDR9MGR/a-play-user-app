@@ -101,6 +101,23 @@ class IAPService {
     debugPrint('IAPService: Initialization complete');
   }
 
+  /// Re-queries the store for products without re-running the rest of
+  /// initialize() (purchase stream listener, payment queue delegate). Needed
+  /// because initialize() is a one-shot guarded by _isInitialized: once the
+  /// first product query fails (e.g. a transient "StoreKit: Failed to get
+  /// response from platform" network blip), _isInitialized is still set to
+  /// true, so every subsequent call to initialize() - including from the
+  /// subscription screen's "Retry" button - was a silent no-op that never
+  /// actually re-queried StoreKit. The only way to recover used to be force-
+  /// quitting the whole app. This is what "Retry" should actually call.
+  Future<void> reloadProducts() async {
+    if (!_isAvailable) {
+      debugPrint('IAPService: Cannot reload products, store not available');
+      return;
+    }
+    await _loadProducts();
+  }
+
   /// Load subscription products from the store
   Future<void> _loadProducts() async {
     debugPrint('IAPService: Loading products...');

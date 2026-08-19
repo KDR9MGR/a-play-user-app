@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -42,6 +43,18 @@ class IAPLogger {
       final userId = client.auth.currentUser?.id;
       if (userId == null) return; // RLS requires auth.uid() = user_id; nothing to log yet.
 
+      // Auto-attached to every event (not just the caller's own detail) so we
+      // never have to guess after the fact whether a failed run was Debug/
+      // TestFlight/Release, or whether "StoreKit: Failed to get response
+      // from platform" happened with a dead network or a live one - both
+      // were previously indistinguishable from the log alone.
+      final connectivity = await _connectivitySummary();
+      final enrichedDetail = <String, dynamic>{
+        'buildMode': kReleaseMode ? 'release' : (kProfileMode ? 'profile' : 'debug'),
+        'connectivity': connectivity,
+        if (detail != null) ...detail,
+      };
+
       await client.from('iap_events').insert({
         'user_id': userId,
         'source': 'client',
@@ -52,10 +65,20 @@ class IAPLogger {
         'platform': kIsWeb ? 'web' : (Platform.isIOS ? 'ios' : (Platform.isAndroid ? 'android' : 'other')),
         'app_version': _appVersion,
         'message': message,
-        'detail': detail,
+        'detail': enrichedDetail,
       });
     } catch (e) {
       debugPrint('IAPLogger: failed to persist "$event": $e');
+    }
+  }
+
+  static Future<String> _connectivitySummary() async {
+    try {
+      final results = await Connectivity().checkConnectivity();
+      final result = results.isNotEmpty ? results.first : ConnectivityResult.none;
+      return result.name;
+    } catch (_) {
+      return 'unknown';
     }
   }
 }

@@ -2,6 +2,28 @@ import 'package:flutter/material.dart';
 
 import '../model/referral_model.dart';
 
+/// membership_tiers.benefits is a plain text column, and most rows hold
+/// ordinary readable text ("Basic discounts", "Free event upgrades, early
+/// access") - but at least one row (Black tier) has the literal Postgres
+/// array syntax stored as text instead (`{"Unlimited access","25% booking
+/// discount",...}`), so it rendered as raw braces/quotes to users. This
+/// normalizes either shape into a clean, comma-separated display string
+/// without needing a data migration to fix the inconsistent existing rows.
+String _formatBenefits(String raw) {
+  final trimmed = raw.trim();
+  if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) {
+    return trimmed;
+  }
+  final inner = trimmed.substring(1, trimmed.length - 1);
+  final items = inner
+      .split(RegExp(r',(?=(?:[^"]*"[^"]*")*[^"]*$)')) // split on commas outside quotes
+      .map((s) => s.trim())
+      .map((s) => s.startsWith('"') && s.endsWith('"') ? s.substring(1, s.length - 1) : s)
+      .where((s) => s.isNotEmpty)
+      .toList();
+  return items.join(' • ');
+}
+
 class MembershipTierCard extends StatelessWidget {
   final List<MembershipTier> tiers;
   final String? currentTierName;
@@ -198,7 +220,7 @@ class MembershipTierCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      tier.benefits!,
+                      _formatBenefits(tier.benefits!),
                       style: const TextStyle(
                         fontSize: 14,
                       ),

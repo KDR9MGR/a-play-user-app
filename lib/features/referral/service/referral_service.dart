@@ -6,6 +6,10 @@ import 'package:uuid/uuid.dart';
 class ReferralService {
   final SupabaseClient _client = Supabase.instance.client;
 
+  /// Minimum balance an account must hold before it's allowed to transfer
+  /// points to another user at all.
+  static const int minPointsRequiredForTransfer = 1000;
+
   // Get the current user ID
   String? get _userId => _client.auth.currentUser?.id;
 
@@ -734,7 +738,14 @@ class ReferralService {
       if (userPoints == null || userPoints.availablePoints < points) {
         throw Exception('Insufficient points for transfer');
       }
-      
+
+      // Anti-abuse minimum: transferring is only available once an account
+      // has built up a real balance, not for brand-new/near-empty accounts.
+      if (userPoints.availablePoints < minPointsRequiredForTransfer) {
+        throw Exception(
+            'You need at least $minPointsRequiredForTransfer points in your account to transfer points');
+      }
+
       // Get sender's name
       final senderProfile = await _client
           .from('profiles')
