@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:a_play/core/theme/app_theme.dart';
@@ -363,17 +364,35 @@ class _SubscriptionFailureScreenState extends State<SubscriptionFailureScreen>
     });
   }
 
-  void _contactSupport() {
-    // TODO: Implement contact support functionality
-    // This could open email, chat, or support screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Support feature coming soon',
-          style: GoogleFonts.poppins(),
-        ),
-        backgroundColor: AppTheme.primary,
-      ),
+  Future<void> _contactSupport() async {
+    // Someone who was charged but not activated must be able to reach us.
+    final subject = Uri.encodeComponent(
+      'Subscription problem${widget.planName != null ? ' - ${widget.planName}' : ''}',
     );
+    final body = Uri.encodeComponent(
+      'Hi, I tried to subscribe in the A-Play app and it did not work.\n\n'
+      'Details: ${widget.errorMessage}',
+    );
+    final mail = Uri.parse('mailto:support@aplayworld.com?subject=$subject&body=$body');
+    final page = Uri.parse('https://www.aplayworld.com/contact');
+
+    var opened = false;
+    try {
+      opened = await launchUrl(mail, mode: LaunchMode.externalApplication);
+      if (!opened) opened = await launchUrl(page, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      opened = false;
+    }
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please email support@aplayworld.com',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: AppTheme.primary,
+        ),
+      );
+    }
   }
 }

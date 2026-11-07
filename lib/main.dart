@@ -18,6 +18,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:a_play/core/services/realtime_sync_service.dart';
 import 'package:a_play/core/services/notification_service.dart';
 import 'package:a_play/core/services/iap_service.dart';
+import 'package:a_play/features/subscription/provider/subscription_provider.dart';
 // import 'package:a_play/firebase_options.dart';
 
 // Initialize app state provider
@@ -180,7 +181,9 @@ Future<void> _bootstrapApp({
 
   // Initialize IAP service for subscription sync (the only IAP stack in the app)
   if (!kIsWeb) {
-    await IAPService.instance.initialize();
+    // Don't hold up launch on the (network) product query - the subscription
+    // screen loads products itself. Listening for purchases is what must start now.
+    await IAPService.instance.initialize(awaitProducts: false);
   }
 
   final realtimeService = RealtimeSyncService();
@@ -200,6 +203,7 @@ class APlayApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
+    ref.watch(iapVerifiedListenerProvider);
     
     return MaterialApp.router(
       title: 'A Play',

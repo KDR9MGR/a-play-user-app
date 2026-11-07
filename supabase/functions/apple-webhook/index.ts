@@ -304,7 +304,20 @@ Deno.serve(async (req: Request) => {
         break;
       }
       case 'DID_FAIL_TO_RENEW': {
-        updatePayload.status = subtype === 'GRACE_PERIOD' ? 'grace_period' : 'billing_retry';
+        if (subtype === 'GRACE_PERIOD' && renewal?.gracePeriodExpiresDate) {
+          // Apple's billing grace period: the charge failed but the user is
+          // supposed to KEEP access until gracePeriodExpiresDate while Apple
+          // retries. The profile-sync trigger only treats status='active' as
+          // subscribed, so a distinct 'grace_period' status would lock the
+          // user out immediately. Stay 'active' and run end_date out to the
+          // end of the grace period; GRACE_PERIOD_EXPIRED / EXPIRED (or a
+          // later DID_RENEW) then settles it.
+          updatePayload.status = 'active';
+          updatePayload.end_date = new Date(renewal.gracePeriodExpiresDate).toISOString();
+        } else {
+          // Failed renewal with no grace period: access has lapsed.
+          updatePayload.status = 'billing_retry';
+        }
         break;
       }
       case 'GRACE_PERIOD_EXPIRED': {

@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../model/subscription_model.dart';
 import '../../../core/config/paystack_config.dart';
+import 'apple_verification_exception.dart';
 
 class SubscriptionService {
   late final SupabaseClient _client;
@@ -613,19 +614,37 @@ class SubscriptionService {
     final planId = _appleProductToPlanId[productId];
 
     debugPrint('SubscriptionService: Verifying Apple receipt (transaction: ${transactionId ?? "latest"})...');
-    final response = await _client.functions.invoke(
-      'verify-apple-receipt',
-      body: {
-        'userId': userId,
-        'planId': planId,
-        if (transactionId != null) 'transactionId': transactionId,
-        'receiptData': receiptData,
-      },
-    );
 
-    final data = response.data;
+    final dynamic data;
+    try {
+      final response = await _client.functions.invoke(
+        'verify-apple-receipt',
+        body: {
+          'userId': userId,
+          'planId': planId,
+          if (transactionId != null) 'transactionId': transactionId,
+          'receiptData': receiptData,
+        },
+      );
+      data = response.data;
+    } on FunctionException catch (e) {
+      // invoke() throws on any non-2xx; the function's JSON body (with its
+      // machine-readable `code` for permanent failures) is in `details`.
+      final details = e.details;
+      final body = details is Map ? details : const <String, dynamic>{};
+      throw AppleVerificationException(
+        (body['error'] ?? 'Apple receipt verification failed (HTTP ${e.status})').toString(),
+        code: body['code']?.toString(),
+        status: e.status,
+      );
+    }
+
     if (data is! Map || data['valid'] != true || data['subscription'] == null) {
-      throw Exception('Apple receipt verification failed: ${data is Map ? data['error'] : response.data}');
+      // A 200 that still wrote nothing: expired/revoked/unmappable receipt.
+      throw AppleVerificationException(
+        (data is Map ? (data['error'] ?? 'No active subscription in receipt') : 'Unexpected response').toString(),
+        code: data is Map ? data['code']?.toString() : null,
+      );
     }
 
     debugPrint('SubscriptionService: Verified and activated subscription for product: $productId');
