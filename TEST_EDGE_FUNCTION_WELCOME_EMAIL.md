@@ -29,7 +29,7 @@ Run this in your Mac terminal:
 ```bash
 curl -X POST \
   'https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/send-welcome-email' \
-  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2bmZoc2lweWZ4ZG11bGFqYmdsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzY0NTA1OCwiZXhwIjoyMDYzMjIxMDU4fQ.Uz2o1vLeWQy7JJ4dDEa1uJ4BSZyWhYoItmBfOmGhSoQ' \
+  -H 'Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>' \
   -H 'Content-Type: application/json' \
   -d '{"email":"godofwar.2rs@gmail.com","userName":"Abdul Razak"}'
 ```
@@ -51,7 +51,7 @@ curl -X POST \
 ```bash
 curl -X POST \
   'https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/send-welcome-email' \
-  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2bmZoc2lweWZ4ZG11bGFqYmdsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzY0NTA1OCwiZXhwIjoyMDYzMjIxMDU4fQ.Uz2o1vLeWQy7JJ4dDEa1uJ4BSZyWhYoItmBfOmGhSoQ' \
+  -H 'Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>' \
   -H 'Content-Type: application/json' \
   -d '{"email":"test@example.com","userName":"Test User"}'
 ```
@@ -143,7 +143,7 @@ Currently, the app sends emails directly via Resend API in `EmailService` class.
 
 **Test Command (Copy-Paste Ready):**
 ```bash
-curl -X POST 'https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/send-welcome-email' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2bmZoc2lweWZ4ZG11bGFqYmdsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzY0NTA1OCwiZXhwIjoyMDYzMjIxMDU4fQ.Uz2o1vLeWQy7JJ4dDEa1uJ4BSZyWhYoItmBfOmGhSoQ' -H 'Content-Type: application/json' -d '{"email":"godofwar.2rs@gmail.com","userName":"Abdul Razak"}'
+curl -X POST 'https://yvnfhsipyfxdmulajbgl.supabase.co/functions/v1/send-welcome-email' -H 'Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>' -H 'Content-Type: application/json' -d '{"email":"godofwar.2rs@gmail.com","userName":"Abdul Razak"}'
 ```
 
 ---
