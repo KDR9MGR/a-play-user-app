@@ -36,10 +36,23 @@ const PLAN_ID_TO_TIER: Record<string, string> = {
   annual_plan: 'Black',
 }
 
+// The OPTIONS preflight below has always answered with
+// Access-Control-Allow-Origin - but browsers enforce CORS on the actual
+// response too, not just the preflight. jsonResponse (used for every real
+// response this function sends) was missing that header entirely, so the
+// browser accepted the preflight, made the real POST, got a real 200/4xx/5xx
+// back from the server, and then discarded it client-side before the page
+// ever saw the body - surfacing as an opaque "failed to fetch"/CORS error on
+// web callers (the mobile app was never affected; native HTTP clients don't
+// enforce CORS).
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    },
   })
 }
 

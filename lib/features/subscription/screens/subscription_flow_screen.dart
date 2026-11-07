@@ -1,6 +1,9 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:a_play/core/theme/app_theme.dart';
 import '../provider/subscription_provider.dart';
 import '../model/subscription_model.dart';
@@ -82,20 +85,28 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
           if (trialPlan != null && activeSubscription == null)
             const SizedBox(height: 32),
 
-          // Paid plans section
+          // Paid plans section. iOS never shows pricing or a purchase action
+          // here - Apple Guideline 3.1.1 is only safe to avoid entirely if
+          // the app never initiates or completes a digital-subscription
+          // purchase in-app. Paid plans are purchased on aplayworld.com
+          // instead; this screen only ever reads subscription status on iOS.
           if (paidPlans.isNotEmpty) ...[
-            Text(
-              activeSubscription?.isTrial == true 
-                ? 'Continue with Premium'
-                : 'Premium Plans',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+            if (!kIsWeb && Platform.isIOS)
+              _buildWebSubscribeNotice()
+            else ...[
+              Text(
+                activeSubscription?.isTrial == true
+                  ? 'Continue with Premium'
+                  : 'Premium Plans',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            ...paidPlans.map((plan) => _buildPlanCard(plan, activeSubscription)),
+              const SizedBox(height: 16),
+              ...paidPlans.map((plan) => _buildPlanCard(plan, activeSubscription)),
+            ],
           ],
 
           const SizedBox(height: 32),
@@ -186,30 +197,30 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
         Wrap(
           spacing: 12,
           runSpacing: 8,
-          children: const [
+          children: [
             TextButton(
-              onPressed: null,
-              child: Text('Apple EULA'),
+              onPressed: () => _openLegalLink('https://www.apple.com/legal/internet-services/itunes/dev/stdeula'),
+              child: const Text('Apple EULA'),
             ),
             TextButton(
-              onPressed: null,
-              child: Text('Terms & Conditions'),
+              onPressed: () => _openLegalLink('https://www.aplayworld.com/terms-and-conditions'),
+              child: const Text('Terms & Conditions'),
             ),
             TextButton(
-              onPressed: null,
-              child: Text('Privacy Policy'),
+              onPressed: () => _openLegalLink('https://www.aplayworld.com/privacy-policy'),
+              child: const Text('Privacy Policy'),
             ),
             TextButton(
-              onPressed: null,
-              child: Text('Refund Policy'),
+              onPressed: () => _openLegalLink('https://www.aplayworld.com/refund-policy'),
+              child: const Text('Refund Policy'),
             ),
             TextButton(
-              onPressed: null,
-              child: Text('FAQ'),
+              onPressed: () => _openLegalLink('https://www.aplayworld.com/faq'),
+              child: const Text('FAQ'),
             ),
             TextButton(
-              onPressed: null,
-              child: Text('Contact'),
+              onPressed: () => _openLegalLink('https://www.aplayworld.com/contact'),
+              child: const Text('Contact'),
             ),
           ],
         ),
@@ -474,6 +485,41 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
     );
   }
 
+  Widget _buildWebSubscribeNotice() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundMiddle,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.surfaceLight, width: 1),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Manage Your Subscription',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Premium plans are managed on our website. Visit aplayworld.com '
+            'from a browser to subscribe or update your plan. Once active, '
+            'your premium access unlocks here automatically.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBenefitsSection() {
     const benefits = [
       {
@@ -571,6 +617,16 @@ class _SubscriptionFlowScreenState extends ConsumerState<SubscriptionFlowScreen>
         )),
       ],
     );
+  }
+
+  Future<void> _openLegalLink(String url) async {
+    final uri = Uri.parse(url);
+    final launched = await canLaunchUrl(uri) && await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open $url')),
+      );
+    }
   }
 
   Future<void> _startFreeTrial() async {

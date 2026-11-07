@@ -470,7 +470,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
             id: event.id,
             title: event.title,
             description: event.description,
-            coverImage: event.coverImage,
+            coverImage: event.coverImage ?? '',
             startDate: DateTime.parse(event.startDate),
             endDate: DateTime.parse(event.endDate),
             location: event.location,
@@ -521,7 +521,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    event.coverImage,
+                    event.coverImage ?? '',
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -588,7 +588,12 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                         color: AppColors.textSecondary,
                         fontSize: 12,
                       ),
-                      maxLines: 2,
+                      // A 2-line title + 2-line description + location row
+                      // doesn't reliably fit the height this grid tile gets
+                      // (childAspectRatio: 0.7) - any event whose title also
+                      // wraps to 2 lines overflowed the card vertically.
+                      // One line here is enough margin for the worst case.
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const Spacer(),

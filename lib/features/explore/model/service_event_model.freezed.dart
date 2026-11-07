@@ -27,9 +27,14 @@ mixin _$ServiceEventModel {
   @JsonKey(name: 'start_date')
   String get startDate => throw _privateConstructorUsedError;
   @JsonKey(name: 'end_date')
-  String get endDate => throw _privateConstructorUsedError;
+  String get endDate =>
+      throw _privateConstructorUsedError; // Organiser event creation explicitly marks cover image as optional, so
+// this must tolerate null - the generated fromJson previously did a
+// non-null `as String` cast here, which threw for any event without one
+// and (since the list is mapped eagerly) took down the entire Explore
+// category list for every user, not just that event's card.
   @JsonKey(name: 'cover_image')
-  String get coverImage => throw _privateConstructorUsedError;
+  String? get coverImage => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   String get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'club_id')
@@ -56,7 +61,7 @@ abstract class $ServiceEventModelCopyWith<$Res> {
       String location,
       @JsonKey(name: 'start_date') String startDate,
       @JsonKey(name: 'end_date') String endDate,
-      @JsonKey(name: 'cover_image') String coverImage,
+      @JsonKey(name: 'cover_image') String? coverImage,
       @JsonKey(name: 'created_at') String createdAt,
       @JsonKey(name: 'club_id') String? clubId,
       @JsonKey(name: 'category_name') String? category});
@@ -81,7 +86,7 @@ class _$ServiceEventModelCopyWithImpl<$Res, $Val extends ServiceEventModel>
     Object? location = null,
     Object? startDate = null,
     Object? endDate = null,
-    Object? coverImage = null,
+    Object? coverImage = freezed,
     Object? createdAt = null,
     Object? clubId = freezed,
     Object? category = freezed,
@@ -111,10 +116,10 @@ class _$ServiceEventModelCopyWithImpl<$Res, $Val extends ServiceEventModel>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as String,
-      coverImage: null == coverImage
+      coverImage: freezed == coverImage
           ? _value.coverImage
           : coverImage // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -146,7 +151,7 @@ abstract class _$$ServiceEventModelImplCopyWith<$Res>
       String location,
       @JsonKey(name: 'start_date') String startDate,
       @JsonKey(name: 'end_date') String endDate,
-      @JsonKey(name: 'cover_image') String coverImage,
+      @JsonKey(name: 'cover_image') String? coverImage,
       @JsonKey(name: 'created_at') String createdAt,
       @JsonKey(name: 'club_id') String? clubId,
       @JsonKey(name: 'category_name') String? category});
@@ -169,7 +174,7 @@ class __$$ServiceEventModelImplCopyWithImpl<$Res>
     Object? location = null,
     Object? startDate = null,
     Object? endDate = null,
-    Object? coverImage = null,
+    Object? coverImage = freezed,
     Object? createdAt = null,
     Object? clubId = freezed,
     Object? category = freezed,
@@ -199,10 +204,10 @@ class __$$ServiceEventModelImplCopyWithImpl<$Res>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as String,
-      coverImage: null == coverImage
+      coverImage: freezed == coverImage
           ? _value.coverImage
           : coverImage // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -229,7 +234,7 @@ class _$ServiceEventModelImpl implements _ServiceEventModel {
       required this.location,
       @JsonKey(name: 'start_date') required this.startDate,
       @JsonKey(name: 'end_date') required this.endDate,
-      @JsonKey(name: 'cover_image') required this.coverImage,
+      @JsonKey(name: 'cover_image') this.coverImage,
       @JsonKey(name: 'created_at') required this.createdAt,
       @JsonKey(name: 'club_id') this.clubId,
       @JsonKey(name: 'category_name') this.category});
@@ -251,9 +256,14 @@ class _$ServiceEventModelImpl implements _ServiceEventModel {
   @override
   @JsonKey(name: 'end_date')
   final String endDate;
+// Organiser event creation explicitly marks cover image as optional, so
+// this must tolerate null - the generated fromJson previously did a
+// non-null `as String` cast here, which threw for any event without one
+// and (since the list is mapped eagerly) took down the entire Explore
+// category list for every user, not just that event's card.
   @override
   @JsonKey(name: 'cover_image')
-  final String coverImage;
+  final String? coverImage;
   @override
   @JsonKey(name: 'created_at')
   final String createdAt;
@@ -320,7 +330,7 @@ abstract class _ServiceEventModel implements ServiceEventModel {
           required final String location,
           @JsonKey(name: 'start_date') required final String startDate,
           @JsonKey(name: 'end_date') required final String endDate,
-          @JsonKey(name: 'cover_image') required final String coverImage,
+          @JsonKey(name: 'cover_image') final String? coverImage,
           @JsonKey(name: 'created_at') required final String createdAt,
           @JsonKey(name: 'club_id') final String? clubId,
           @JsonKey(name: 'category_name') final String? category}) =
@@ -343,9 +353,13 @@ abstract class _ServiceEventModel implements ServiceEventModel {
   @override
   @JsonKey(name: 'end_date')
   String get endDate;
-  @override
+  @override // Organiser event creation explicitly marks cover image as optional, so
+// this must tolerate null - the generated fromJson previously did a
+// non-null `as String` cast here, which threw for any event without one
+// and (since the list is mapped eagerly) took down the entire Explore
+// category list for every user, not just that event's card.
   @JsonKey(name: 'cover_image')
-  String get coverImage;
+  String? get coverImage;
   @override
   @JsonKey(name: 'created_at')
   String get createdAt;
