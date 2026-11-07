@@ -17,7 +17,7 @@ if [ ! -f ".env" ]; then
     echo "   ✗ .env not found. Copy .env.example to .env and fill in real (live) values first."
     exit 1
 fi
-python3 tool/gen_dart_defines.py --env-file .env --out .dart-defines.json
+python3 tool/gen_dart_defines.py --env-file .env --out .dart-defines.json || exit 1
 PAYSTACK_KEY=$(grep '"PAYSTACK_PUBLIC_KEY"' .dart-defines.json | sed -E 's/.*: *"([^"]*)".*/\1/')
 if [[ -z "$PAYSTACK_KEY" ]]; then
     echo "   ✗ PAYSTACK_PUBLIC_KEY is not set in .env. A release build cannot ship without it."

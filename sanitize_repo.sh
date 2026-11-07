@@ -166,16 +166,8 @@ PAYSTACK_PUBLIC_KEY=pk_test_your_key_here
 # ===========================================
 ONESIGNAL_APP_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
-# ===========================================
-# RESEND EMAIL SERVICE
-# ===========================================
-RESEND_API_KEY=re_YOUR_RESEND_API_KEY
-
-# For production (use your verified domain):
-RESEND_FROM_EMAIL=YourApp <noreply@yourdomain.com>
-
-# For testing (Resend sandbox - only sends to YOUR email):
-# RESEND_FROM_EMAIL=YourApp <onboarding@resend.dev>
+# NOTE: .env is bundled into the app. Never put secrets here (Resend, Paystack
+# secret, service role...). Those live in Supabase secrets.
 EOF
 
 echo "✅ .env.example created"

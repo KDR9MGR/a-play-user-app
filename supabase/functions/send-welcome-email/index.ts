@@ -1,9 +1,25 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'npm:@supabase/supabase-js@2'
 import { Resend } from 'npm:resend'
 
+// The Resend key exists ONLY here (Supabase secret) - the app bundle must
+// never carry it. The recipient is always the authenticated caller's own
+// address (from their JWT), never a client-supplied value, so this function
+// can't be used to mail arbitrary people.
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const resend = new Resend(RESEND_API_KEY)
+
+const jsonHeaders = { 'Content-Type': 'application/json' }
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
 
 // Beautiful welcome email template
 function buildWelcomeEmailHtml(userName: string): string {
@@ -85,15 +101,33 @@ function buildWelcomeEmailHtml(userName: string): string {
 
 serve(async (req) => {
   try {
-    const { email, userName } = await req.json()
-
-    if (!email) {
-      throw new Error('Email is required')
+    // Resolve the caller from their JWT. The anon key alone has no user, so
+    // it is rejected here even though it passes the platform's JWT check.
+    const jwt = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
+    if (!jwt) {
+      return new Response(JSON.stringify({ error: 'Missing authorization' }), {
+        status: 401,
+        headers: jsonHeaders,
+      })
     }
 
-    const name = userName || email.split('@')[0]
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    )
+    const { data: userData, error: userError } = await admin.auth.getUser(jwt)
+    const email = userData?.user?.email
+    if (userError || !email) {
+      return new Response(JSON.stringify({ error: 'Invalid or expired session' }), {
+        status: 401,
+        headers: jsonHeaders,
+      })
+    }
 
-    console.log(`Sending welcome email to: ${email}`)
+    const { userName } = await req.json().catch(() => ({}))
+    const name = escapeHtml(String(userName || email.split('@')[0]).slice(0, 80))
+
+    console.log(`Sending welcome email to user ${userData.user.id}`)
 
     const result = await resend.emails.send({
       from: 'A-Play <noreply@aplayworld.com>',
@@ -109,7 +143,7 @@ serve(async (req) => {
       id: result.data?.id
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders,
     })
   } catch (error) {
     console.error('Welcome email error:', error)
@@ -117,7 +151,7 @@ serve(async (req) => {
       error: error.message || 'Failed to send welcome email'
     }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders,
     })
   }
 })
