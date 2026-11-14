@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../model/subscription_model.dart';
 import '../service/subscription_service.dart';
 import '../controller/subscription_controller.dart';
+import '../../../core/services/iap_service.dart';
+import 'backend_subscription_provider.dart';
 
 // Service provider
 final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
@@ -44,3 +46,17 @@ final paystackPublicKeyProvider = Provider<String>((ref) {
   final paymentNotifier = ref.watch(paymentProvider.notifier);
   return paymentNotifier.getPaystackPublicKey();
 }); 
+
+/// Refreshes subscription state app-wide whenever the backend verifies an
+/// Apple purchase - including one recovered silently at launch (a paid
+/// transaction StoreKit redelivered after an earlier failure). Without this
+/// the app keeps showing "Free" until something else happens to refresh it.
+/// Watched once from the app root.
+final iapVerifiedListenerProvider = Provider<void>((ref) {
+  final sub = IAPService.instance.verifiedSubscriptions.listen((_) {
+    ref.invalidate(activeSubscriptionProvider);
+    ref.invalidate(hasActiveSubscriptionProvider);
+    ref.invalidate(backendSubscriptionStatusProvider);
+  });
+  ref.onDispose(sub.cancel);
+});

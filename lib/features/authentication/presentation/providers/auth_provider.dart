@@ -282,10 +282,7 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
                           user.email?.split('@')[0] ??
                           'there';
 
-          await EmailService().sendWelcomeEmail(
-            toEmail: user.email!,
-            userName: userName,
-          );
+          await EmailService().sendWelcomeEmail(userName: userName);
           debugPrint('🔵 [AUTH-PROVIDER] ✓ Welcome email sent to ${user.email}');
         } catch (e) {
           debugPrint('🔵 [AUTH-PROVIDER] ⚠ Failed to send welcome email (non-critical): $e');
@@ -440,10 +437,7 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
                           'there';
 
           if (user.email != null) {
-            await EmailService().sendWelcomeEmail(
-              toEmail: user.email!,
-              userName: userName,
-            );
+            await EmailService().sendWelcomeEmail(userName: userName);
             debugPrint('🍎 [AUTH-PROVIDER] ✓ Welcome email sent to ${user.email}');
           }
         } catch (e) {
@@ -534,16 +528,13 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
         // Non-critical: Log but don't block sign-up
       }
 
-      // Send welcome email via Resend
+      // Send welcome email via the send-welcome-email edge function
       try {
         final resolvedName = (displayName != null && displayName.trim().isNotEmpty)
             ? displayName.trim()
             : (user.userMetadata?['display_name'] as String?) ?? email.split('@').first;
 
-        await EmailService().sendWelcomeEmail(
-          toEmail: email,
-          userName: resolvedName,
-        );
+        await EmailService().sendWelcomeEmail(userName: resolvedName);
       } catch (e) {
         // Non-critical: Log but don't block sign-up
         debugPrint('Failed to send welcome email: $e');

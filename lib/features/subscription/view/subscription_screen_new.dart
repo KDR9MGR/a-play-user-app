@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../config/feature_flags.dart';
 import '../../../core/services/iap_service.dart';
 import '../../../services/unified_payment_service.dart';
 import '../model/subscription_model.dart';
@@ -50,14 +51,19 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
       debugPrint('SubscriptionScreen: Current User ID = ${currentUser?.id}');
       debugPrint('SubscriptionScreen: Current User Email = ${currentUser?.email}');
 
-      // CRITICAL: Sync database with StoreKit state FIRST
-      // This detects cancellations and restores
-      debugPrint('SubscriptionScreen: Syncing with StoreKit...');
+      // Listen for purchase results as soon as the screen is up - including
+      // when the user is already subscribed and only uses Restore.
+      _iapService.onPurchaseSuccess = _handlePurchaseSuccess;
+      _iapService.onPurchaseError = _handlePurchaseError;
+      _iapService.onPurchaseCancelled = _handlePurchaseCancelled;
+      _iapService.onPurchasePending = _handlePurchasePending;
+
+      // Retry any purchase that was paid for but couldn't be confirmed with
+      // the backend earlier (e.g. no network at the time).
       try {
-        await _iapService.syncDatabaseWithStoreKit();
+        await _iapService.retryPendingVerifications();
       } catch (e) {
-        debugPrint('SubscriptionScreen: StoreKit sync failed (non-fatal): $e');
-        // Continue anyway - this might fail in simulator or if StoreKit isn't configured
+        debugPrint('SubscriptionScreen: pending-verification retry failed (non-fatal): $e');
       }
 
       // STEP 1: Check for existing subscription AFTER sync
@@ -86,11 +92,6 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
       }
 
       debugPrint('SubscriptionScreen: No active subscription found, loading products...');
-
-      // STEP 2: Set up IAP callbacks
-      _iapService.onPurchaseSuccess = _handlePurchaseSuccess;
-      _iapService.onPurchaseError = _handlePurchaseError;
-      _iapService.onPurchaseCancelled = _handlePurchaseCancelled;
 
       // STEP 3: Initialize IAP (or, if this is a retry after the first
       // attempt already initialized but came up with 0 products - e.g. a
@@ -135,11 +136,11 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
     }
   }
 
-  void _handlePurchaseSuccess(ProductDetails product) async {
+  void _handlePurchaseSuccess(IapPurchaseResult result) async {
     // By the time this fires, IAPService has already verified the receipt with
     // Apple via the backend and activated the subscription - this callback only
-    // needs to update the UI.
-    debugPrint('SubscriptionScreen: Purchase verified and activated: ${product.id}');
+    // needs to update the UI, using what the backend actually wrote.
+    debugPrint('SubscriptionScreen: Purchase verified and activated: ${result.productId}');
 
     // The home app bar's "Premium"/"Go Pro" badge and other screens read
     // subscription status from these Riverpod providers, not this screen's
@@ -157,9 +158,12 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => SubscriptionSuccessScreen(
-            planName: product.title.split('(').first.trim(),
-            transactionId: product.id,
-            expiryDate: DateTime.now().add(const Duration(days: 30)), // Default to 30 days
+            planName: result.product?.title.split('(').first.trim() ??
+                _getPlanName(result.productId),
+            transactionId: result.transactionId,
+            // The real end date from the verified subscription - not a
+            // guess (a weekly plan is not 30 days, an annual one is not).
+            expiryDate: result.subscription.endDate,
           ),
         ),
       );
@@ -182,9 +186,43 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
           builder: (context) => SubscriptionFailureScreen(
             errorMessage: error,
             planName: null,
-            onRetry: null, // Can't automatically retry IAP
+            // Only offered when a paid purchase is waiting to be confirmed
+            // with the backend; retrying re-verifies it - it does not buy again.
+            onRetry: _iapService.hasPendingVerification ? _retryActivation : null,
           ),
         ),
+      );
+    }
+  }
+
+  void _handlePurchasePending() {
+    // Ask to Buy / parental approval / SCA: not charged or active yet. Stop
+    // the spinner instead of hanging; the result arrives later.
+    if (!mounted) return;
+    setState(() {
+      _isPurchasing = false;
+      _errorMessage = null;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Your purchase is waiting for approval. '
+            'It will activate automatically once approved.'),
+        duration: Duration(seconds: 6),
+      ),
+    );
+  }
+
+  Future<void> _retryActivation() async {
+    if (!mounted) return;
+    Navigator.of(context).maybePop(); // close the failure screen
+    setState(() => _isPurchasing = true);
+    final activated = await _iapService.retryPendingVerifications();
+    if (!mounted) return;
+    setState(() => _isPurchasing = false);
+    if (activated == 0 && _iapService.hasPendingVerification) {
+      _handlePurchaseError(
+        'We still couldn\'t activate your purchase. Please check your '
+        'connection and try again.',
       );
     }
   }
@@ -993,11 +1031,9 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
     debugPrint('SubscriptionScreen: Restore Purchases tapped');
     setState(() => _isLoading = true);
 
-    await _iapService.restorePurchases();
-    // Restored purchases arrive asynchronously via the purchase stream and are
-    // synced to the database by IAPService; re-check status shortly after.
-    await Future.delayed(const Duration(seconds: 2));
-    await _iapService.syncDatabaseWithStoreKit();
+    // Completes once every restored transaction has been verified (or failed)
+    // - not after a guessed 2-second wait.
+    final outcome = await _iapService.restorePurchases();
 
     final hasActive = await _syncService.hasActiveSubscription();
     final activeSub = await _syncService.getActiveSubscription();
@@ -1005,29 +1041,35 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
     ref.invalidate(hasActiveSubscriptionProvider);
     ref.invalidate(activeSubscriptionProvider);
 
-    if (mounted) {
-      setState(() {
-        _hasActiveSubscription = hasActive;
-        _activeSubscription = activeSub;
-        _isLoading = false;
-      });
+    if (!mounted) return;
+    setState(() {
+      _hasActiveSubscription = hasActive;
+      _activeSubscription = activeSub;
+      _isLoading = false;
+    });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(hasActive
-              ? 'Purchases restored successfully'
-              : 'No previous purchases found to restore'),
-          backgroundColor: hasActive ? Colors.green : Colors.orange,
-        ),
-      );
+    final String message;
+    final Color color;
+    if (outcome.restored > 0 || hasActive) {
+      message = 'Purchases restored successfully';
+      color = Colors.green;
+    } else if (outcome.failed > 0) {
+      message = outcome.message ?? 'We couldn\'t restore your purchase. Please try again.';
+      color = Colors.red;
+    } else {
+      message = 'No previous purchases found to restore';
+      color = Colors.orange;
     }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: color),
+    );
   }
 
   Future<void> _refreshSubscriptionStatus() async {
     setState(() => _isLoading = true);
 
     debugPrint('SubscriptionScreen: Manual refresh triggered');
-    await _iapService.syncDatabaseWithStoreKit();
+    await _iapService.retryPendingVerifications();
 
     final hasActive = await _syncService.hasActiveSubscription();
     final activeSub = await _syncService.getActiveSubscription();
@@ -1082,56 +1124,25 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
       return _buildAlreadySubscribedView();
     }
 
-    // PRIORITY 2: If no IAP products, fall back to PayStack - but NEVER on
-    // iOS. Apple Guideline 3.1.1 requires digital subscriptions to go
-    // through In-App Purchase exclusively on iOS; offering Paystack there
-    // (even only as a fallback when StoreKit briefly fails to load
-    // products) is a real rejection/removal risk. iOS instead gets a
-    // retry-only error state - no alternate payment path.
+    // PRIORITY 2: iOS gets NO in-app purchase flow at all - neither Apple
+    // IAP nor Paystack. Subscriptions are purchased and managed on
+    // aplayworld.com instead; the app only ever reads subscription status.
+    // This is the "Spotify pattern" - Apple Guideline 3.1.1 is only safe to
+    // avoid entirely if the app never shows pricing or a purchase action for
+    // digital subscription content in-app. Restore Purchases stays available
+    // (Guideline 3.1.2) since it re-attaches an existing entitlement rather
+    // than initiating a new purchase.
     final isIOS = !kIsWeb && Platform.isIOS;
+    if (isIOS && !FeatureFlags.enableIosInAppPurchase) {
+      return _buildWebManagedView();
+    }
+
     if (_products.isEmpty) {
-      if (isIOS) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                const Text(
-                  'Unable to load subscription plans',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Please check your connection and try again.',
-                  style: TextStyle(color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => setState(() {
-                        _isLoading = true;
-                        _initialize();
-                      }),
-                      child: const Text('Retry'),
-                    ),
-                    const SizedBox(width: 16),
-                    OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Go Back'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      }
+      // Never Paystack on iOS: Guideline 3.1.1 requires digital subscriptions
+      // there to go through In-App Purchase. If StoreKit returned no plans
+      // (network blip, products not live in App Store Connect), offer a retry
+      // - not an alternate payment path.
+      if (isIOS) return _buildIosPlansUnavailable();
 
       return FutureBuilder<List<SubscriptionPlan>>(
         future: _loadPayStackPlans(),
@@ -1266,13 +1277,32 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
 
             const SizedBox(height: 24),
 
-            // Terms
+            // Auto-renewal disclosure + legal links (Guideline 3.1.2)
             const Text(
-              'Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period.',
+              'Payment is charged to your Apple ID account at confirmation of '
+              'purchase. Subscriptions automatically renew unless cancelled at '
+              'least 24 hours before the end of the current period. Your account '
+              'is charged for renewal within 24 hours before the end of the '
+              'current period. Manage or cancel in your App Store account '
+              'settings after purchase.',
               style: TextStyle(fontSize: 12, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
+            Wrap(
+              alignment: WrapAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () => _openLegalLink('https://www.apple.com/legal/internet-services/itunes/dev/stdeula'),
+                  child: const Text('Terms of Use (EULA)', style: TextStyle(fontSize: 12)),
+                ),
+                TextButton(
+                  onPressed: () => _openLegalLink('https://www.aplayworld.com/privacy-policy'),
+                  child: const Text('Privacy Policy', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
 
             // Restore Purchases - required by App Store Review Guideline 3.1.2.
             // Restore only ever runs here, on explicit user tap.
@@ -1306,6 +1336,101 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
             ),
           ),
       ],
+    );
+  }
+
+  Future<void> _openLegalLink(String url) async {
+    final uri = Uri.parse(url);
+    final launched = await canLaunchUrl(uri) && await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open $url')),
+      );
+    }
+  }
+
+  Widget _buildIosPlansUnavailable() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text('Unable to load subscription plans', style: TextStyle(fontSize: 18)),
+            const SizedBox(height: 8),
+            const Text(
+              'Please check your connection and try again.',
+              style: TextStyle(color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () => setState(() {
+                    _isLoading = true;
+                    _initialize();
+                  }),
+                  child: const Text('Retry'),
+                ),
+                const SizedBox(width: 16),
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Go Back'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _isPurchasing ? null : _restorePurchases,
+              child: const Text('Restore Purchases'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // iOS purchase surface when FeatureFlags.enableIosInAppPurchase is false:
+  // no price, no "Subscribe" button, no webview -
+  // purely informational, matching the Spotify "Reader"-style pattern so the
+  // app never initiates or completes a digital-subscription purchase itself.
+  // Restore Purchases is the one exception (Guideline 3.1.2 requirement, and
+  // not a new purchase) for anyone who already bought via Apple IAP before
+  // this change.
+  Widget _buildWebManagedView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.language, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'Manage Your Subscription',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Premium plans are managed on our website. Visit aplayworld.com '
+              'from a browser to subscribe or update your plan. Once active, '
+              'your premium access unlocks here automatically.',
+              style: TextStyle(color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            TextButton(
+              onPressed: _isPurchasing ? null : _restorePurchases,
+              child: const Text('Restore Purchases'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1438,6 +1563,7 @@ class _SubscriptionScreenNewState extends ConsumerState<SubscriptionScreenNew> {
     _iapService.onPurchaseSuccess = null;
     _iapService.onPurchaseError = null;
     _iapService.onPurchaseCancelled = null;
+    _iapService.onPurchasePending = null;
     super.dispose();
   }
 }

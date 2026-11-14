@@ -87,6 +87,8 @@ type NormalizedVerification = {
   isExpired: boolean;
   subscriptionStatus: 'active' | 'expired' | 'cancelled' | 'pending';
   autoRenewStatus: boolean;
+  // JWS path only: the appAccountToken Apple signed into the transaction.
+  appAccountToken: string | null;
 };
 
 // Apple product ID -> internal plan ID / tier. Must match App Store Connect
@@ -103,6 +105,16 @@ const APPLE_PRODUCT_TO_TIER: Record<string, string> = {
   '1month': 'Platinum',
   '3SUB': 'Platinum',
   '365day': 'Black',
+};
+// plan_type drives client-side logic (tier-points-per-plan, trial filtering -
+// see SubscriptionPlanType in subscription_model.dart) and previously wasn't
+// set on this insert at all, silently falling back to the column's DEFAULT
+// 'monthly' for every Apple purchase regardless of which plan was bought.
+const APPLE_PRODUCT_TO_PLAN_TYPE: Record<string, string> = {
+  '7day': 'weekly',
+  '1month': 'monthly',
+  '3SUB': 'quarterly',
+  '365day': 'annual',
 };
 
 const APPLE_PRODUCTION_URL = "https://buy.itunes.apple.com/verifyReceipt";
@@ -197,11 +209,22 @@ async function logIapEvent(
   }
 }
 
-function errorResponse(message: string, status = 400): Response {
+// `code` lets the app tell a PERMANENT failure (retrying can never succeed, so
+// it should finish the StoreKit transaction and stop) from a transient one
+// (network, 5xx, Apple unavailable - leave the transaction unfinished so
+// StoreKit redelivers it). Responses without a `code` are treated as transient.
+type FailureCode =
+  | 'invalid_receipt'
+  | 'expired'
+  | 'revoked'
+  | 'owned_by_other_account';
+
+function errorResponse(message: string, status = 400, code?: FailureCode): Response {
   console.error(`Apple Receipt Validation Error: ${message}`);
   return new Response(JSON.stringify({
     valid: false,
     error: message,
+    ...(code ? { code } : {}),
     timestamp: new Date().toISOString()
   }), {
     headers: jsonHeaders,
@@ -225,6 +248,10 @@ type JWSTransactionPayload = {
   environment: 'Sandbox' | 'Production';
   revocationDate?: number;
   revocationReason?: number;
+  // UUID the app passed at purchase time (we set it to the Supabase user id).
+  // Apple signs it into the transaction, so it binds the purchase to one
+  // A-Play account and can't be forged or changed by the client.
+  appAccountToken?: string;
 };
 
 function certFromStdB64(b64: string): X509Certificate {
@@ -344,6 +371,7 @@ function normalizeFromJWS(payload: JWSTransactionPayload): NormalizedVerificatio
     // we already know the transaction is expired/revoked) - informational
     // only, does not gate access.
     autoRenewStatus: !isExpired && !isRevoked,
+    appAccountToken: payload.appAccountToken ?? null,
   };
 }
 
@@ -483,6 +511,7 @@ async function verifyLegacyReceipt(
     isExpired,
     subscriptionStatus,
     autoRenewStatus,
+    appAccountToken: null,
   };
 }
 
@@ -561,7 +590,7 @@ Deno.serve(async (req: Request) => {
           userId, event: 'verify_jws_invalid', level: 'error', transactionId,
           message,
         });
-        return errorResponse(`Invalid StoreKit transaction: ${message}`, 422);
+        return errorResponse(`Invalid StoreKit transaction: ${message}`, 422, 'invalid_receipt');
       }
     } else {
       const sharedSecret =
@@ -597,17 +626,64 @@ Deno.serve(async (req: Request) => {
           message: err.message,
           detail: { appleStatus: err.appleStatus, environment: err.environment },
         });
-        return errorResponse(`Apple receipt validation failed: ${err.message}`, 422);
+        const appleOutage = err.appleStatus === 21005 || err.appleStatus === 21009;
+        return errorResponse(
+          `Apple receipt validation failed: ${err.message}`,
+          appleOutage ? 502 : 422,
+          appleOutage ? undefined : 'invalid_receipt',
+        );
       }
     }
 
     const {
       valid, environment, appleStatus, matched, appleProductId, appleTransactionId,
       originalTransactionId, expiresDateMs, isExpired, subscriptionStatus, autoRenewStatus,
+      appAccountToken,
     } = normalized;
 
     const derivedPlanId = appleProductId ? APPLE_PRODUCT_TO_PLAN_ID[appleProductId] ?? null : null;
     const derivedTier = appleProductId ? APPLE_PRODUCT_TO_TIER[appleProductId] ?? null : null;
+
+    // One Apple purchase must unlock exactly one A-Play account. Without this,
+    // a signed transaction is a bearer token: anyone holding it (a second
+    // account on the same Apple ID, a user who signs out and lets someone else
+    // sign in on the same device, a leaked JWS) could attach it to their own
+    // account and get premium for free.
+    //  1. The app sets appAccountToken = the buyer's user id at purchase time;
+    //     Apple signs it into the transaction, so if it is present it must be
+    //     the caller.
+    //  2. Purchases from before that change carry no token: fall back to
+    //     refusing a transaction chain that is already active on a DIFFERENT
+    //     account.
+    if (valid && !isExpired && appleProductId && appleTransactionId) {
+      let ownedByOther = false;
+      if (appAccountToken) {
+        ownedByOther = appAccountToken.toLowerCase() !== userId.toLowerCase();
+      } else {
+        const chainId = originalTransactionId ?? appleTransactionId;
+        const { data: others } = await admin
+          .from('user_subscriptions')
+          .select('user_id')
+          .eq('original_transaction_id', chainId)
+          .neq('user_id', userId)
+          .eq('status', 'active')
+          .gt('end_date', new Date().toISOString())
+          .limit(1);
+        ownedByOther = !!others && others.length > 0;
+      }
+      if (ownedByOther) {
+        await logIapEvent(admin, {
+          userId, event: 'verify_owned_by_other_account', level: 'warn',
+          transactionId: appleTransactionId, productId: appleProductId,
+          message: appAccountToken ? 'appAccountToken does not match caller' : 'chain active on another account',
+        });
+        return errorResponse(
+          'This App Store purchase belongs to a different A-Play account.',
+          409,
+          'owned_by_other_account',
+        );
+      }
+    }
 
     let subscriptionRow: Record<string, unknown> | null = null;
 
@@ -654,6 +730,7 @@ Deno.serve(async (req: Request) => {
             status: 'active',
             payment_reference: appleTransactionId,
             payment_method: 'apple_iap',
+            plan_type: APPLE_PRODUCT_TO_PLAN_TYPE[appleProductId] ?? 'monthly',
             transaction_id: appleTransactionId,
             original_transaction_id: originalTransactionId ?? appleTransactionId,
             platform: 'ios',
@@ -666,7 +743,23 @@ Deno.serve(async (req: Request) => {
           .select()
           .single();
 
-        if (insertError) {
+        // 23505 = unique violation: a concurrent call for the SAME transaction
+        // (purchase stream + restore + resync all verify the same JWS) won the
+        // race. That is success, not failure - hand back the winner's row.
+        let raceWinner: Record<string, unknown> | null = null;
+        if (insertError?.code === '23505') {
+          const { data: winner } = await admin
+            .from('user_subscriptions')
+            .select()
+            .eq('user_id', userId)
+            .eq('payment_reference', appleTransactionId)
+            .maybeSingle();
+          raceWinner = winner ?? null;
+        }
+
+        if (raceWinner) {
+          subscriptionRow = raceWinner;
+        } else if (insertError) {
           console.error('Failed to write subscription:', insertError);
           await logIapEvent(admin, {
             userId, event: 'verify_db_write_failed', level: 'error',
@@ -676,29 +769,43 @@ Deno.serve(async (req: Request) => {
           });
           return errorResponse(`Verified but failed to activate subscription: ${insertError.message}`, 500);
         }
-        subscriptionRow = inserted;
 
-        await admin.from('subscription_payments').insert({
-          user_id: userId,
-          subscription_id: inserted.id,
-          amount: plan?.price ?? 0,
-          currency: plan?.currency ?? 'GHS',
-          payment_reference: appleTransactionId,
-          payment_method: 'apple_iap',
-          payment_status: 'success',
-          payment_date: now.toISOString(),
-          metadata: {
-            product_id: appleProductId,
-            plan_id: derivedPlanId,
-            verified: true,
-            source: 'app_store',
-            environment,
-          },
-        });
+        // Only the call that actually inserted the row records the payment.
+        if (!raceWinner && inserted) {
+          subscriptionRow = inserted;
+
+          await admin.from('subscription_payments').insert({
+            user_id: userId,
+            subscription_id: inserted.id,
+            amount: plan?.price ?? 0,
+            currency: plan?.currency ?? 'GHS',
+            payment_reference: appleTransactionId,
+            payment_method: 'apple_iap',
+            payment_status: 'success',
+            payment_date: now.toISOString(),
+            metadata: {
+              product_id: appleProductId,
+              plan_id: derivedPlanId,
+              verified: true,
+              source: 'app_store',
+              environment,
+            },
+          });
+        }
       }
     }
 
-    const response: EnhancedResponse = {
+    // Why no subscription row was written, for callers that must decide
+    // between "retry later" and "give up and finish the transaction".
+    let outcomeCode: FailureCode | undefined;
+    if (!subscriptionRow) {
+      if (!valid) outcomeCode = 'revoked';
+      else if (isExpired) outcomeCode = 'expired';
+      else outcomeCode = 'invalid_receipt'; // valid + unexpired but unmappable product
+    }
+
+    const response: EnhancedResponse & { code?: FailureCode } = {
+      ...(outcomeCode ? { code: outcomeCode } : {}),
       valid,
       environment,
       status: appleStatus,

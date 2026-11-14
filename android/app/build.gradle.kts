@@ -44,8 +44,14 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
         targetSdk = 36
-        versionCode = 2000403
-        versionName = "2.0.4"
+        // From pubspec.yaml `version: <name>+<build>` (via flutter.versionName /
+        // flutter.versionCode, or `flutter build --build-name/--build-number`).
+        // These used to be hard-coded (2000403 / "2.0.4"), so every pubspec bump
+        // since 2026-03-30 was silently ignored on Android. Google Play only
+        // accepts a versionCode higher than anything ever uploaded to the app,
+        // so the pubspec build number must stay above the last Play upload.
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     signingConfigs {

@@ -22,6 +22,12 @@ jobs:
           channel: 'stable'
           cache: true
 
+      # pubspec.yaml declares `.env` as an asset, but it is git-ignored, so it
+      # doesn't exist on the runner and `flutter test` fails with "Failed to
+      # build asset bundle". Real values come from --dart-define-from-file.
+      - name: Create empty .env
+        run: touch .env
+
       - name: Install Dependencies
         run: flutter pub get
 

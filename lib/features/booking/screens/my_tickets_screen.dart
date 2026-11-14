@@ -82,7 +82,7 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
                 children: [
                   Icon(Iconsax.ticket, size: 18),
                   SizedBox(width: 8),
-                  Text('Events'),
+                  Flexible(child: Text('Events', overflow: TextOverflow.ellipsis)),
                 ],
               ),
             ),
@@ -94,7 +94,7 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
                   children: [
                     Icon(Icons.restaurant, size: 18),
                     SizedBox(width: 8),
-                    Text('Restaurants'),
+                    Flexible(child: Text('Restaurants', overflow: TextOverflow.ellipsis)),
                   ],
                 ),
               ),
@@ -105,7 +105,7 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> with SingleTi
                   children: [
                     Icon(Iconsax.reserve, size: 18),
                     SizedBox(width: 8),
-                    Text('Clubs'),
+                    Flexible(child: Text('Clubs', overflow: TextOverflow.ellipsis)),
                   ],
                 ),
               ),

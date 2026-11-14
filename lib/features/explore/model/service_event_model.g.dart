@@ -15,7 +15,7 @@ _$ServiceEventModelImpl _$$ServiceEventModelImplFromJson(
       location: json['location'] as String,
       startDate: json['start_date'] as String,
       endDate: json['end_date'] as String,
-      coverImage: json['cover_image'] as String,
+      coverImage: json['cover_image'] as String?,
       createdAt: json['created_at'] as String,
       clubId: json['club_id'] as String?,
       category: json['category_name'] as String?,

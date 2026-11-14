@@ -24,6 +24,17 @@ class FeatureFlags {
   /// Event bookings with PayStack payment
   static const bool enableEventBookings = true;
 
+  /// Sell subscriptions through Apple In-App Purchase inside the iOS app.
+  ///
+  /// true  = iOS shows the StoreKit plans and a Subscribe button (Guideline
+  ///         3.1.1-compliant: digital subscriptions bought in the app go
+  ///         through IAP).
+  /// false = iOS shows no price or purchase action, only a note that plans
+  ///         are managed on aplayworld.com ("web-managed" model; the Hub's
+  ///         /subscribe flow). Restore Purchases stays available either way.
+  /// Android/web are unaffected (Paystack).
+  static const bool enableIosInAppPurchase = true;
+
   /// Subscription purchase (PayStack + Apple IAP)
   static const bool enableSubscriptions = true;
 

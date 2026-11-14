@@ -13,7 +13,12 @@ class ServiceEventModel with _$ServiceEventModel {
     required String location,
     @JsonKey(name: 'start_date') required String startDate,
     @JsonKey(name: 'end_date') required String endDate,
-    @JsonKey(name: 'cover_image') required String coverImage,
+    // Organiser event creation explicitly marks cover image as optional, so
+    // this must tolerate null - the generated fromJson previously did a
+    // non-null `as String` cast here, which threw for any event without one
+    // and (since the list is mapped eagerly) took down the entire Explore
+    // category list for every user, not just that event's card.
+    @JsonKey(name: 'cover_image') String? coverImage,
     @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey(name: 'club_id') String? clubId,
     @JsonKey(name: 'category_name') String? category,

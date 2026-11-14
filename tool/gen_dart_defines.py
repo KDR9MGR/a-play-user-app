@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import sys
 from pathlib import Path
 
 
@@ -50,6 +51,29 @@ def main() -> int:
     out_path = repo_root / args.out
 
     env = read_dotenv(env_path)
+
+    # `.env` is declared as a Flutter asset in pubspec.yaml, so everything in
+    # it ships inside the IPA/APK in plain text. Secrets belong in Supabase
+    # secrets (used by edge functions only), never here.
+    server_only = [
+        "RESEND_API_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "PAYSTACK_SECRET_KEY",
+        "PAYSTACK_TEST_SECRET_KEY",
+        "APPLE_SHARED_SECRET",
+        "IOS_SHARED_SECRET",
+    ]
+    leaked = [k for k in server_only if env.get(k)]
+    if leaked:
+        print(
+            f"ERROR: {env_path.name} contains server-side secrets that would be "
+            f"bundled into the app: {', '.join(leaked)}.\n"
+            "Remove them from .env and keep them in Supabase secrets "
+            "(`supabase secrets set ...`).",
+            file=sys.stderr,
+        )
+        return 1
+
     keys = [
         "SUPABASE_URL",
         "SUPABASE_ANON_KEY",

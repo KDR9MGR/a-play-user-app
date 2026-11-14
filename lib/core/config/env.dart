@@ -34,21 +34,11 @@ class Env {
     return const String.fromEnvironment('ONESIGNAL_APP_ID', defaultValue: '');
   }
 
-  // Resend API Key
-  static String get resendApiKey {
-    final dotenvKey = dotenv.env['RESEND_API_KEY'] ?? '';
-    if (dotenvKey.isNotEmpty) return dotenvKey;
-
-    return const String.fromEnvironment('RESEND_API_KEY', defaultValue: '');
-  }
-
-  // Resend From Email
-  static String get resendFromEmail {
-    final dotenvKey = dotenv.env['RESEND_FROM_EMAIL'] ?? '';
-    if (dotenvKey.isNotEmpty) return dotenvKey;
-
-    return const String.fromEnvironment('RESEND_FROM_EMAIL', defaultValue: 'A-Play <noreply@aplayapp.com>');
-  }
+  // NOTE: `.env` is bundled into the app as a Flutter asset (see pubspec.yaml),
+  // so it must only ever hold public values. Secrets (Resend, Paystack secret,
+  // service role, Apple shared secret) belong in Supabase secrets and are used
+  // by edge functions only - email goes out via `send-email` /
+  // `send-welcome-email`, never straight from the client.
 
   static Future<void> initialize() async {
     // Load environment variables from .env file
